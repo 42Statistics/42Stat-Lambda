@@ -1,8 +1,13 @@
-name: CI
+name: CD
 
 on:
-  release:
-    types: [created]
+  push:
+    branch:
+      - main
+
+# on:
+#   release:
+#     types: [created]
 
 jobs:
   build:
@@ -29,11 +34,13 @@ jobs:
           cp -r ./app/dist/* ./dist/
       - name: Zip file
         run: |
-          zip -r dist.zip dist
+          mkdir lambda
+          zip -r lambda/dist.zip dist/*
+
       - name: Install AWS
         run: |
           sudo apt-get update
           sudo apt-get install awscli
       - name: Upload to S3
         run: |
-          aws s3 sync ./dist.zip s3://$S3_BUCKET --region $S3_REGION
+          aws s3 sync ./lambda s3://$S3_BUCKET --region $S3_REGION

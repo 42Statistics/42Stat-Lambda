@@ -10,7 +10,7 @@ services:
       - type: volume
         source: lambda-app
         target: /app
-    entrypoint: entry.sh
+    entrypoint: sh /tmp/entry.sh
 
 volumes:
   lambda-app:
