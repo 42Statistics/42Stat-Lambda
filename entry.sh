@@ -1,1 +1,1 @@
-pnpm i && pnpm run start:dev
+pnpm i && pnpm run build

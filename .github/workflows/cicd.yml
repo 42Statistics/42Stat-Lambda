@@ -21,16 +21,19 @@ jobs:
 
       - name: Waiting build using Docker Compose
         run: |
-          docker-compose -f docker-compose.prod.yml up -d
-          docker-compose -f docker-compose.prod.yml logs -f
+          docker-compose -f docker-compose.yml up -d
+          docker-compose -f docker-compose.yml logs -f
       - name: Copy built files to ./dist
         run: |
           mkdir -p ./dist
           cp -r ./app/dist/* ./dist/
+      - name: Zip file
+        run: |
+          zip -r dist.zip dist
       - name: Install AWS
         run: |
           sudo apt-get update
           sudo apt-get install awscli
       - name: Upload to S3
         run: |
-          aws s3 sync ./dist s3://$S3_BUCKET --region $S3_REGION
+          aws s3 sync ./dist.zip s3://$S3_BUCKET --region $S3_REGION
