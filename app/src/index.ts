@@ -1,13 +1,22 @@
-import { createMongoClient, createRedisClient } from './connection.js';
+import {
+  createMongoClient,
+  createRedisClient,
+  initSeine,
+} from './connection.js';
+import { updateCursusUser } from './cursusUser/cursusUser.js';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const main = async (): Promise<void> => {
   const mongoClient = await createMongoClient();
   const redisClient = await createRedisClient();
+  await initSeine();
 
-  const cursusUsers = fetchCursusUsers();
+  await updateCursusUser(mongoClient, redisClient);
 
   await mongoClient.close();
-  await redisClient.disconnect();
+  // await redisClient.disconnect();
 };
 
 await main();

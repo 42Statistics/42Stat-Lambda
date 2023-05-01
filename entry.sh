@@ -1,2 +1,2 @@
-# pnpm i && pnpm run build
-tail -f
+pnpm i && pnpm run dev
+# tail -f

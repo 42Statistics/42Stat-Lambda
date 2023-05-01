@@ -10,6 +10,8 @@ services:
       - type: volume
         source: lambda-app
         target: /app
+    env_file:
+      - env/.env
     entrypoint: sh /tmp/entry.sh
 
 volumes:
