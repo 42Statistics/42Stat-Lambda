@@ -6,7 +6,7 @@ import {
 import { updateCursusUser } from './cursusUser/cursusUser.js';
 import dotenv from 'dotenv';
 
-dotenv.config();
+dotenv.config({ path: '../env/.env' });
 
 const main = async (): Promise<void> => {
   const mongoClient = await createMongoClient();

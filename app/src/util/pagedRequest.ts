@@ -20,15 +20,15 @@ const getPagedResults = async (
 export const pagedRequest = async (
   client: MongoClient,
   endpoint: RequestInfo | URL,
-  pageSize: number,
+  pageSize: number = 100,
+  chunkSize: number = 10,
 ): Promise<unknown[]> => {
   const docs: unknown[] = [];
-  const JUMP = 10;
 
-  for (let start = 1; ; start += JUMP) {
+  for (let start = 1; ; start += chunkSize) {
     const currResult = await getPagedResults(
       start,
-      start + JUMP,
+      start + chunkSize,
       endpoint,
       pageSize,
     );

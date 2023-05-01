@@ -1,28 +1,30 @@
 import { MongoClient } from 'mongodb';
 import { RedisClient } from '../connection.js';
+import {
+  getCollectionUpdatedAt,
+  setCollectionUpdatedAt,
+  upsertManyById,
+} from '../mongodb/mongodb.js';
 import { logError } from '../util/logError.js';
 import { pagedRequest } from '../util/pagedRequest.js';
 import { cursusUserSchema, CURSUS_USER_EP } from './api/cursusUser.api.js';
 
-const COLLECTION_NAME = 'cursus_users';
+const CURSUS_USERS_COLLECTION = 'cursus_users';
 
 export const updateCursusUser = async (
   mongoClient: MongoClient,
   redisClient: RedisClient,
 ): Promise<void | never> => {
-  const start = await mongoClient
-    .db()
-    .collection('log')
-    .findOne<{ updatedAt: Date }>({ name: COLLECTION_NAME });
+  const start = await getCollectionUpdatedAt(
+    mongoClient,
+    CURSUS_USERS_COLLECTION,
+  );
 
   const end = new Date();
 
-  console.log(start, end);
-
   const cursusUserDto = await pagedRequest(
     mongoClient,
-    CURSUS_USER_EP(start ? start.updatedAt : new Date(0), end),
-    100,
+    CURSUS_USER_EP(start, end),
   );
 
   const cursusUsers = cursusUserSchema.array().safeParse(cursusUserDto);
@@ -32,25 +34,6 @@ export const updateCursusUser = async (
     throw Error();
   }
 
-  await Promise.all(
-    cursusUsers.data.map((cursusUser) =>
-      mongoClient
-        .db()
-        .collection(COLLECTION_NAME)
-        .updateOne(
-          { id: cursusUser.id },
-          { $set: cursusUser },
-          { upsert: true },
-        ),
-    ),
-  );
-
-  await mongoClient
-    .db()
-    .collection('log')
-    .updateOne(
-      { name: COLLECTION_NAME },
-      { $set: { name: COLLECTION_NAME, updatedAt: end } },
-      { upsert: true },
-    );
+  await upsertManyById(mongoClient, CURSUS_USERS_COLLECTION, cursusUsers.data);
+  await setCollectionUpdatedAt(mongoClient, CURSUS_USERS_COLLECTION, end);
 };
