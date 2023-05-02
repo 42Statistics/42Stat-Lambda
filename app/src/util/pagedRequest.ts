@@ -1,6 +1,5 @@
 import seine, { SeineResult } from 'la-seine';
-import { MongoClient } from 'mongodb';
-import { logError } from './logError.js';
+import { LambdaError } from './error.js';
 
 const getPagedResults = async (
   start: number,
@@ -18,7 +17,6 @@ const getPagedResults = async (
 };
 
 export const pagedRequest = async (
-  client: MongoClient,
   endpoint: RequestInfo | URL,
   pageSize: number = 100,
   chunkSize: number = 10,
@@ -34,12 +32,17 @@ export const pagedRequest = async (
     );
 
     if (currResult.status === 'fail') {
-      await logError(client, currResult.failedRequests);
+      throw new LambdaError(
+        'pagedRequest failed. url: ' + endpoint.toString(),
+        currResult.failedRequests,
+      );
     }
 
     if (currResult.responses) {
       const jsons: unknown[][] = await Promise.all(
-        currResult.responses.map((response) => response.json()),
+        currResult.responses.map(
+          (response): Promise<unknown[]> => response.json(),
+        ),
       );
 
       docs.push(...jsons.flat());
@@ -47,10 +50,6 @@ export const pagedRequest = async (
       if (!jsons[jsons.length - 1].length) {
         break;
       }
-    }
-
-    if (currResult.status === 'fail') {
-      break;
     }
   }
 

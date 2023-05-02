@@ -1,4 +1,5 @@
 import { MongoClient } from 'mongodb';
+import { LambdaError } from '../util/error.js';
 
 export const LOG_COLLECTION = 'logs';
 
@@ -16,16 +17,20 @@ export const getCollectionUpdatedAt = async (
   client: MongoClient,
   collection: string,
 ): Promise<Date> => {
-  const collectionLog = await client
-    .db()
-    .collection(LOG_COLLECTION)
-    .findOne<{ updatedAt: Date }>({ collection });
+  try {
+    const collectionLog = await client
+      .db()
+      .collection(LOG_COLLECTION)
+      .findOne<{ updatedAt: Date }>({ collection });
 
-  if (collectionLog) {
-    return collectionLog.updatedAt;
+    if (collectionLog) {
+      return collectionLog.updatedAt;
+    }
+
+    return new Date(0);
+  } catch (e) {
+    throw new LambdaError('mongodb read error at: ' + collection);
   }
-
-  return new Date(0);
 };
 
 export const setCollectionUpdatedAt = async (
@@ -33,14 +38,18 @@ export const setCollectionUpdatedAt = async (
   collection: string,
   updatedAt: Date,
 ): Promise<void> => {
-  await client
-    .db()
-    .collection(LOG_COLLECTION)
-    .updateOne(
-      { collection },
-      { $set: { collection, updatedAt } },
-      { upsert: true },
-    );
+  try {
+    await client
+      .db()
+      .collection(LOG_COLLECTION)
+      .updateOne(
+        { collection },
+        { $set: { collection, updatedAt } },
+        { upsert: true },
+      );
+  } catch {
+    throw new LambdaError('mongodb write error at: ' + collection);
+  }
 };
 
 export const upsertManyById = async <T extends { id: number }>(
@@ -48,12 +57,16 @@ export const upsertManyById = async <T extends { id: number }>(
   collection: string,
   datas: T[],
 ): Promise<void> => {
-  await Promise.all(
-    datas.map((data) =>
-      client
-        .db()
-        .collection(collection)
-        .updateOne({ id: data.id }, { $set: data }, { upsert: true }),
-    ),
-  );
+  try {
+    await Promise.all(
+      datas.map((data) =>
+        client
+          .db()
+          .collection(collection)
+          .updateOne({ id: data.id }, { $set: data }, { upsert: true }),
+      ),
+    );
+  } catch {
+    throw new LambdaError('mongodb upsert error at: ' + collection);
+  }
 };
