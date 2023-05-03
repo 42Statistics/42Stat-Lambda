@@ -1,20 +1,25 @@
 import { MongoClient } from 'mongodb';
-import { RedisClient } from '../connection.js';
 import {
   getCollectionUpdatedAt,
   setCollectionUpdatedAt,
   upsertManyById,
 } from '../mongodb/mongodb.js';
+import { hsetCacheManyById, RedisClient } from '../redis/redis.js';
 import { assertParseSuccess, LambdaError, logError } from '../util/error.js';
 import { pagedRequest } from '../util/pagedRequest.js';
-import { CURSUS_USER_EP, parseDto } from './api/cursusUser.api.js';
+import {
+  CURSUS_USER_EP,
+  isStudent,
+  parseFromDto,
+} from './api/cursusUser.api.js';
+import { CURSUS_USERS_CACHE_KEY } from './dto/cursusUser.redis.js';
 
 const CURSUS_USERS_COLLECTION = 'cursus_users';
 
 /**
  *
  * @description
- * U: 새로 인과하거나 블랙홀 간 유저 수
+ * U: 새로 입과하거나 블랙홀 간 유저 수
  * A: 현재 활성화 된 유저 수
  *
  * 2023-05 기준
@@ -33,7 +38,7 @@ export const updateCursusUser = async (
 ): Promise<void> => {
   try {
     try {
-      await updateCursusChanged(mongoClient);
+      await updateCursusChanged(mongoClient, redisClient);
     } catch (e) {
       if (e instanceof LambdaError) {
         await logError(mongoClient, e);
@@ -41,7 +46,7 @@ export const updateCursusUser = async (
     }
 
     try {
-      await updateActivated(mongoClient);
+      await updateActivated(mongoClient, redisClient);
     } catch (e) {
       if (e instanceof LambdaError) {
         await logError(mongoClient, e);
@@ -57,7 +62,10 @@ export const updateCursusUser = async (
  * @description
  * 새로 입과하거나 블랙홀 간 사람, 과정 중단을 신청한 사람들을 업데이트 하는 로직
  */
-const updateCursusChanged = async (mongoClient: MongoClient) => {
+const updateCursusChanged = async (
+  mongoClient: MongoClient,
+  redisClient: RedisClient,
+): Promise<void> => {
   const start = await getCollectionUpdatedAt(
     mongoClient,
     CURSUS_USERS_COLLECTION,
@@ -71,10 +79,8 @@ const updateCursusChanged = async (mongoClient: MongoClient) => {
     4,
   );
 
-  const cursusUsersParsed = parseDto(cursusUserDto);
+  const cursusUsersParsed = parseFromDto(cursusUserDto);
   assertParseSuccess(cursusUsersParsed);
-
-  console.debug(cursusUsersParsed.data.length);
 
   await upsertManyById(
     mongoClient,
@@ -83,23 +89,35 @@ const updateCursusChanged = async (mongoClient: MongoClient) => {
   );
 
   await setCollectionUpdatedAt(mongoClient, CURSUS_USERS_COLLECTION, end);
+  await hsetCacheManyById(
+    redisClient,
+    CURSUS_USERS_CACHE_KEY.USER_HASH,
+    cursusUsersParsed.data.filter(isStudent),
+  );
 };
 
 /**
  *
  * @description 실제로 정보가 바뀔 가능성이 있는 사람들을 업데이트 하는 로직
  */
-const updateActivated = async (mongoClient: MongoClient) => {
+const updateActivated = async (
+  mongoClient: MongoClient,
+  redisClient: RedisClient,
+): Promise<void> => {
   const cursusUserDto = await pagedRequest(CURSUS_USER_EP.ACTIVATED(), 100, 6);
 
-  const cursusUsersParsed = parseDto(cursusUserDto);
+  const cursusUsersParsed = parseFromDto(cursusUserDto);
   assertParseSuccess(cursusUsersParsed);
-
-  console.debug(cursusUsersParsed.data.length);
 
   await upsertManyById(
     mongoClient,
     CURSUS_USERS_COLLECTION,
     cursusUsersParsed.data,
+  );
+
+  await hsetCacheManyById(
+    redisClient,
+    CURSUS_USERS_CACHE_KEY.USER_HASH,
+    cursusUsersParsed.data.filter(isStudent),
   );
 };

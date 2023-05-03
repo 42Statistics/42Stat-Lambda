@@ -18,10 +18,10 @@ const getPagedResults = async (
 
 export const pagedRequest = async (
   endpoint: RequestInfo | URL,
-  pageSize: number = 100,
-  chunkSize: number = 10,
-): Promise<unknown[]> => {
-  const docs: unknown[] = [];
+  pageSize = 100,
+  chunkSize = 10,
+): Promise<object[]> => {
+  const docs: object[] = [];
 
   for (let start = 1; ; start += chunkSize) {
     const currResult = await getPagedResults(
@@ -38,18 +38,16 @@ export const pagedRequest = async (
       );
     }
 
-    if (currResult.responses) {
-      const jsons: unknown[][] = await Promise.all(
-        currResult.responses.map(
-          (response): Promise<unknown[]> => response.json(),
-        ),
-      );
+    const jsons: object[][] = await Promise.all(
+      currResult.responses.map(
+        (response) => response.json() as Promise<object[]>,
+      ),
+    );
 
-      docs.push(...jsons.flat());
+    docs.push(...jsons.flat());
 
-      if (!jsons[jsons.length - 1].length) {
-        break;
-      }
+    if (!jsons[jsons.length - 1].length) {
+      break;
     }
   }
 
