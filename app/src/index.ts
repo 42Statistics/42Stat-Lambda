@@ -1,26 +1,26 @@
 import dotenv from 'dotenv';
 import { initSeine } from './connection.js';
-import { updateCursusUser } from './cursusUser/cursusUser.js';
 import { createMongoClient } from './mongodb/mongodb.js';
-import { createRedisClient } from './redis/redis.js';
-
+import fs from 'fs/promises';
+import { LambdaRedis } from './redis/LambdaRedis.js';
+import { assertEnvExist } from './util/envCheck.js';
+import { CursusUserUpdator } from './cursusUser/cursusUser.js';
+import { CursusUser, isStudent } from './cursusUser/api/cursusUser.api.js';
 dotenv.config();
 
 const main = async (): Promise<void> => {
   const mongoClient = await createMongoClient();
-  const redisClient = await createRedisClient();
   await initSeine();
 
-  const curr = new Date();
+  const url = process.env.REDIS_URL;
+  assertEnvExist(url);
+  const redis = await LambdaRedis.createInstance({ url });
 
-  console.log('connected');
-  // await updateCursusUser(mongoClient, redisClient);
-
-  const end = new Date();
-  console.log(end.getTime() - curr.getTime());
+  await CursusUserUpdator.update(mongoClient, redis);
 
   await mongoClient.close();
-  // await redisClient.disconnect();
+  await redis.closeConnection();
+  console.log('success');
 };
 
 export const handler = main;
