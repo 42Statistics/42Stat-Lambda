@@ -8,5 +8,5 @@ export const initSeine = async (): Promise<void> => {
   assertEnvExist(clientId);
   assertEnvExist(clientSecret);
 
-  await seine.addApiClient({ clientId, clientSecret });
+  await seine.updateApiClient({ clientId, clientSecret });
 };
