@@ -4,9 +4,14 @@ import {
   setCollectionUpdatedAt,
   upsertManyById,
 } from '../mongodb/mongodb.js';
-import { assertParseSuccess, LambdaError, logError } from '../util/error.js';
+import { LambdaRedis } from '../redis/LambdaRedis.js';
+import {
+  FetchApiAction,
+  LogAsyncEstimatedTime,
+  UpdateAction,
+} from '../util/decorator.js';
+import { assertParseSuccess } from '../util/error.js';
 import { pagedRequest } from '../util/pagedRequest.js';
-import { sleepMs } from '../util/sleepMs.js';
 import {
   CURSUS_USER_EP,
   CursusUser,
@@ -14,13 +19,6 @@ import {
   parseFromDto,
 } from './api/cursusUser.api.js';
 import { CURSUS_USERS_CACHE_KEY } from './dto/cursusUser.redis.js';
-import { LambdaRedis } from '../redis/LambdaRedis.js';
-import {
-  Bound,
-  FetchApiAction,
-  LogAsyncEstimatedTime,
-  UpdateAction,
-} from '../util/decorator.js';
 
 const CURSUS_USERS_COLLECTION = 'cursus_users';
 

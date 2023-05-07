@@ -1,7 +1,6 @@
 import { MongoClient } from 'mongodb';
 import { LambdaError, logError } from './error.js';
 import { sleepMs } from './sleepMs.js';
-import { LambdaRedis } from '../redis/LambdaRedis.js';
 
 /**
  *
@@ -103,7 +102,7 @@ export function FetchApiAction<This, Args extends any[], Return>(
   >,
 ): typeof target {
   async function replacementMethod(this: This, ...args: Args): Promise<Return> {
-    const result = target.call(this, ...args);
+    const result = await target.call(this, ...args);
     await sleepMs(1000);
     return result;
   }

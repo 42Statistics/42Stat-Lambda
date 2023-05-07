@@ -1,11 +1,9 @@
 import dotenv from 'dotenv';
 import { initSeine } from './connection.js';
+import { CursusUserUpdator } from './cursusUser/cursusUser.js';
 import { createMongoClient } from './mongodb/mongodb.js';
-import fs from 'fs/promises';
 import { LambdaRedis } from './redis/LambdaRedis.js';
 import { assertEnvExist } from './util/envCheck.js';
-import { CursusUserUpdator } from './cursusUser/cursusUser.js';
-import { CursusUser, isStudent } from './cursusUser/api/cursusUser.api.js';
 dotenv.config();
 
 const main = async (): Promise<void> => {
