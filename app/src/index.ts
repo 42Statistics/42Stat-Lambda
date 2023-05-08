@@ -4,6 +4,7 @@ import { CursusUserUpdator } from './cursusUser/cursusUser.js';
 import { createMongoClient } from './mongodb/mongodb.js';
 import { LambdaRedis } from './redis/LambdaRedis.js';
 import { assertEnvExist } from './util/envCheck.js';
+import { ExamUpdator } from './exam/exam.js';
 dotenv.config();
 
 const main = async (): Promise<void> => {
@@ -15,6 +16,7 @@ const main = async (): Promise<void> => {
   const redis = await LambdaRedis.createInstance({ url });
 
   await CursusUserUpdator.update(mongoClient, redis);
+  await ExamUpdator.update(mongoClient);
 
   await mongoClient.close();
   await redis.closeConnection();
