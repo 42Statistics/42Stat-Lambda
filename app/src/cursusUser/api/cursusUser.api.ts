@@ -1,5 +1,5 @@
-import camelcaseKeys from 'camelcase-keys';
 import { z } from 'zod';
+import { parseFromDto } from '../../util/parseFromDto.js';
 import type { CursusUserCache } from '../dto/cursusUser.redis.js';
 import { cursusUserSchema } from './cursusUser.schema.js';
 
@@ -16,16 +16,10 @@ export const CURSUS_USER_EP = {
   ACTIVATED,
 } as const;
 
-export const parseFromDto = (
+export const parseCursusUsers = (
   dtos: object[],
-): z.SafeParseReturnType<
-  object[],
-  z.infer<ReturnType<typeof cursusUserSchema.passthrough>>[]
-> =>
-  cursusUserSchema
-    .passthrough()
-    .array()
-    .safeParse(dtos.map((dto) => camelcaseKeys(dto, { deep: true })));
+): z.infer<typeof cursusUserSchema>[] =>
+  parseFromDto(dtos, cursusUserSchema, 'cursusUsers');
 
 // 무조건 제외해야하지만 포함된 user. 잘못된 api 데이터 생성으로 인해 발생.
 const weirdUserIds = [
@@ -36,6 +30,7 @@ const weirdUserIds = [
 ] as const;
 
 // 무조건 포함해야하지만 제외된 user.
+// eslint-disable-next-line
 const wildcardUserIds = [
   68891, // 1기 중 버그 있어보이지만 피신 평가 내역은 존재함.
   68857, // 파리로 transfer, login: sucho

@@ -10,18 +10,18 @@ import {
   LogAsyncEstimatedTime,
   UpdateAction,
 } from '../util/decorator.js';
-import { assertParseSuccess } from '../util/error.js';
 import { pagedRequest } from '../util/pagedRequest.js';
 import {
   CURSUS_USER_EP,
   CursusUser,
   isStudent,
-  parseFromDto,
+  parseCursusUsers,
 } from './api/cursusUser.api.js';
 import { CURSUS_USERS_CACHE_KEY } from './dto/cursusUser.redis.js';
 
 const CURSUS_USERS_COLLECTION = 'cursus_users';
 
+// eslint-disable-next-line
 export class CursusUserUpdator {
   /**
    *
@@ -82,10 +82,7 @@ export class CursusUserUpdator {
       4,
     );
 
-    const cursusUsersParsed = parseFromDto(cursusUserDto);
-    assertParseSuccess(cursusUsersParsed);
-
-    return cursusUsersParsed.data.filter(isStudent);
+    return parseCursusUsers(cursusUserDto).filter(isStudent);
   }
 
   @UpdateAction
@@ -110,10 +107,7 @@ export class CursusUserUpdator {
       6,
     );
 
-    const cursusUsersParsed = parseFromDto(cursusUserDto);
-    assertParseSuccess(cursusUsersParsed);
-
-    return cursusUsersParsed.data.filter(isStudent);
+    return parseCursusUsers(cursusUserDto).filter(isStudent);
   }
 
   @UpdateAction

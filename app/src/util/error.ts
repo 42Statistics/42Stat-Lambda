@@ -1,5 +1,4 @@
 import { MongoClient, ObjectId } from 'mongodb';
-import { z } from 'zod';
 
 const ERROR_COLLECTION = 'errors';
 
@@ -34,11 +33,3 @@ export const logError = async (
     console.error('log failed');
   }
 };
-
-export function assertParseSuccess<T>(
-  parsedData: z.SafeParseReturnType<unknown[], T>,
-): asserts parsedData is z.SafeParseSuccess<T> {
-  if (!parsedData.success) {
-    throw new LambdaError('zod parse failed.', parsedData.error.errors);
-  }
-}

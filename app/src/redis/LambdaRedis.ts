@@ -44,8 +44,8 @@ export class LambdaRedis {
     key: RedisCommandArgument,
     datas: T[],
   ): Promise<void> {
-    await this.hsetCacheManyById('temp' + key, datas);
-    await this.client.rename('temp' + key, key);
+    await this.hsetCacheManyById(`temp${key.toString()}`, datas);
+    await this.client.rename(`temp${key.toString()}`, key);
   }
 
   @Bound
@@ -76,7 +76,7 @@ export class LambdaRedis {
 
   @Bound
   @RedisAction
-  async closeConnection() {
+  async closeConnection(): Promise<void> {
     await this.client.disconnect();
   }
 }
@@ -94,7 +94,7 @@ function RedisAction<This, Args extends any[], Return>(
     This,
     (this: This, ...args: Args) => Return
   >,
-) {
+): typeof target {
   function replacementMethod(this: This, ...args: Args): Return {
     try {
       const result = target.call(this, ...args);
