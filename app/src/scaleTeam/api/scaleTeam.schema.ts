@@ -10,11 +10,21 @@ const flagSchema = z.object({
   updatedAt: z.coerce.date(),
 });
 
+const flagSchema_ = flagSchema.passthrough();
+
 const scaleTeamUserSchema = userSchema.pick({
   id: true,
   login: true,
   url: true,
 });
+
+const scaleTeamUserSchema_ = scaleTeamUserSchema.passthrough();
+
+const correctedsSchema = z.union([scaleTeamUserSchema.array(), z.string()]);
+const correctedsSchema_ = z.union([scaleTeamUserSchema_.array(), z.string()]);
+
+const correctorSchema = z.union([scaleTeamUserSchema, z.string()]);
+const correctorSchema_ = z.union([scaleTeamUserSchema_, z.string()]);
 
 export const scaleTeamBaseSchema = z.object({
   id: z.number(),
@@ -23,11 +33,11 @@ export const scaleTeamBaseSchema = z.object({
   createdAt: z.coerce.date(),
   updatedAt: z.coerce.date(),
   feedback: z.string().nullable(),
-  final_mark: z.number().nullable(),
-  flag: flagSchema, // todo: nullable?
+  finalMark: z.number().nullable(),
+  flag: flagSchema,
   beginAt: z.coerce.date(),
-  correcteds: z.union([scaleTeamUserSchema.array(), z.string()]),
-  corrector: z.union([scaleTeamUserSchema, z.string()]),
+  correcteds: correctedsSchema,
+  corrector: correctorSchema,
   truant: z.union([scaleTeamUserSchema, z.object({})]),
   filledAt: z.coerce.date().nullable(),
   // questionsWithAnswers: [],
@@ -40,8 +50,8 @@ export const scaleTeamBaseSchema_ = scaleTeamBaseSchema
     corrector: true,
   })
   .extend({
-    flag: flagSchema.passthrough(),
-    correcteds: z.union([scaleTeamUserSchema.passthrough(), z.string()]),
-    corrector: z.union([scaleTeamUserSchema.passthrough(), z.string()]),
+    flag: flagSchema_,
+    correcteds: correctedsSchema_,
+    corrector: correctorSchema_,
   })
   .passthrough();

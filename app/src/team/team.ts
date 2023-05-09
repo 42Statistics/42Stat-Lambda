@@ -15,7 +15,7 @@ import {
   UpdateAction,
 } from '../util/decorator.js';
 import { pagedRequest } from '../util/pagedRequest.js';
-import { TEAM_EP, Team_, parseTeams } from './api/team.api.js';
+import { TEAM_EP, Team, parseTeams } from './api/team.api.js';
 
 const TEAM_COLLECTION = 'teams';
 
@@ -52,7 +52,7 @@ export class TeamUpdator {
   }
 
   @FetchApiAction
-  private static async fetchUpdated(start: Date, end: Date): Promise<Team_[]> {
+  private static async fetchUpdated(start: Date, end: Date): Promise<Team[]> {
     const teamDtos = await pagedRequest(TEAM_EP.UPDATED(start, end), 100, 10);
 
     return parseTeams(teamDtos);

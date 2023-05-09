@@ -1,7 +1,7 @@
 import { z } from 'zod';
-import { parseFromDto } from '../../util/parseFromDto.js';
+import { parseFromDtoMany } from '../../util/parseFromDto.js';
 import type { CursusUserCache } from '../dto/cursusUser.redis.js';
-import { cursusUserSchema } from './cursusUser.schema.js';
+import { cursusUserSchema, cursusUserSchema_ } from './cursusUser.schema.js';
 
 export type CursusUser = z.infer<typeof cursusUserSchema>;
 
@@ -18,8 +18,8 @@ export const CURSUS_USER_EP = {
 
 export const parseCursusUsers = (
   dtos: object[],
-): z.infer<typeof cursusUserSchema>[] =>
-  parseFromDto(dtos, cursusUserSchema, 'cursusUsers');
+): z.infer<typeof cursusUserSchema_>[] =>
+  parseFromDtoMany(dtos, cursusUserSchema_, 'cursusUsers');
 
 // 무조건 제외해야하지만 포함된 user. 잘못된 api 데이터 생성으로 인해 발생.
 const weirdUserIds = [

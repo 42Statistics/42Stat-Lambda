@@ -34,12 +34,12 @@ export class ExamUpdator {
 
   @FetchApiAction
   private static async fetchCreated(start: Date, end: Date): Promise<Exam[]> {
-    const examDto = await pagedRequest(
+    const examDtos = await pagedRequest(
       EXAM_EP.EXAM_CREATED(start, end),
       100,
       10,
     );
 
-    return parseExams(examDto);
+    return parseExams(examDtos);
   }
 }

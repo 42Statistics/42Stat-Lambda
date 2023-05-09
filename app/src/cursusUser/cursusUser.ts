@@ -101,13 +101,13 @@ export class CursusUserUpdator {
    */
   @FetchApiAction
   private static async fetchActivated(): Promise<CursusUser[]> {
-    const cursusUserDto = await pagedRequest(
+    const cursusUserDtos = await pagedRequest(
       CURSUS_USER_EP.ACTIVATED(),
       100,
       6,
     );
 
-    return parseCursusUsers(cursusUserDto).filter(isStudent);
+    return parseCursusUsers(cursusUserDtos).filter(isStudent);
   }
 
   @UpdateAction

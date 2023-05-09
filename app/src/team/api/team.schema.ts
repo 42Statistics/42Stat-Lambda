@@ -18,6 +18,8 @@ const teamUserSchema = userSchema
     projectsUserId: z.number(),
   });
 
+const teamUserSchema_ = teamUserSchema.passthrough();
+
 export const teamBaseSchema = z.object({
   id: z.number(),
   name: z.string(),
@@ -42,18 +44,14 @@ export const teamBaseSchema = z.object({
 });
 
 export const teamBaseSchema_ = teamBaseSchema
-  .omit({
-    users: true,
-  })
-  .extend({
-    users: teamUserSchema.passthrough().array(),
-  })
+  .omit({ users: true })
+  .extend({ users: teamUserSchema_.array() })
   .passthrough();
 
 export const teamSchema = teamBaseSchema.extend({
   scaleTeams: scaleTeamBaseSchema.array(),
 });
 
-export const teamSchema_ = teamBaseSchema_.extend({
-  scaleTeams: scaleTeamBaseSchema_.array(),
-});
+export const teamSchema_ = teamBaseSchema_
+  .extend({ scaleTeams: scaleTeamBaseSchema_.array() })
+  .passthrough();

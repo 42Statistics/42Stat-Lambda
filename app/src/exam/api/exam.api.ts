@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import { parseFromDto } from '../../util/parseFromDto.js';
-import { examSchema } from './exam.schema.js';
+import { parseFromDtoMany } from '../../util/parseFromDto.js';
+import { examSchema, examSchema_ } from './exam.schema.js';
 
 export type Exam = z.infer<typeof examSchema>;
 
@@ -11,6 +11,5 @@ export const EXAM_EP = {
   EXAM_CREATED: CREATED,
 } as const;
 
-export const parseExams = (dtos: object[]): z.infer<typeof examSchema>[] => {
-  return parseFromDto(dtos, examSchema, 'exams');
-};
+export const parseExams = (dtos: object[]): z.infer<typeof examSchema_>[] =>
+  parseFromDtoMany(dtos, examSchema_, 'exams');
