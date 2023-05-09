@@ -33,12 +33,13 @@ export class TeamUpdator {
 
     const updated = await this.fetchUpdated(start, end);
 
+    // todo: id 목록이 자주 필요하게 되면 이 부분 추상화
     const studentIds = await mongoClient
       .db()
       .collection<CursusUser>(CURSUS_USERS_COLLECTION)
       .find()
-      .project<{ id: number }>({ _id: 0, id: 1 })
-      .map((doc) => doc.id)
+      .project<{ uid: number }>({ _id: 0, uid: '$user.id' })
+      .map((doc) => doc.uid)
       .toArray();
 
     studentIds.push(...wildcardUserIds);

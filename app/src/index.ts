@@ -16,8 +16,8 @@ const main = async (): Promise<void> => {
   assertEnvExist(url);
   const redis = await LambdaRedis.createInstance({ url });
 
-  // await CursusUserUpdator.update(mongoClient, redis);
-  // await ExamUpdator.update(mongoClient);
+  await CursusUserUpdator.update(mongoClient, redis);
+  await ExamUpdator.update(mongoClient);
   await TeamUpdator.update(mongoClient);
 
   await mongoClient.close();
