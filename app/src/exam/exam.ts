@@ -28,7 +28,17 @@ export class ExamUpdator {
 
     const created = await this.fetchCreated(start, end);
 
-    await upsertManyById(mongoClient, EXAMS_COLLECTION, created);
+    // bug resolving start
+
+    const createdMap = new Map<number, Exam>();
+
+    created.forEach((exam) => createdMap.set(exam.id, exam));
+
+    const createdFixed = [...createdMap.values()];
+
+    // bug resolving end
+
+    await upsertManyById(mongoClient, EXAMS_COLLECTION, createdFixed);
     await setCollectionUpdatedAt(mongoClient, EXAMS_COLLECTION, end);
   }
 

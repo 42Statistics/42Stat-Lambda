@@ -1,11 +1,11 @@
 import dotenv from 'dotenv';
 import { initSeine } from './connection.js';
 import { CursusUserUpdator } from './cursusUser/cursusUser.js';
+import { ExamUpdator } from './exam/exam.js';
 import { createMongoClient } from './mongodb/mongodb.js';
 import { LambdaRedis } from './redis/LambdaRedis.js';
-import { assertEnvExist } from './util/envCheck.js';
-import { ExamUpdator } from './exam/exam.js';
 import { TeamUpdator } from './team/team.js';
+import { assertEnvExist } from './util/envCheck.js';
 dotenv.config();
 
 const main = async (): Promise<void> => {
