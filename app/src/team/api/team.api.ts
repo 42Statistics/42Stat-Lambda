@@ -5,7 +5,7 @@ import { parseFromDtoMany } from '../../util/parseFromDto.js';
 export type Team = z.infer<typeof teamSchema>;
 
 const UPDATED = (start: Date, end: Date): string =>
-  `https://api.intra.42.fr/v2/cursus/21/teams?filter[campus]=29&range[updated_at]=${start.toISOString()},${end.toISOString()}`;
+  `https://api.intra.42.fr/v2/cursus/21/teams?filter[campus]=29&range[updated_at]=${start.toISOString()},${end.toISOString()}&sort=created_at`;
 
 export const TEAM_EP = {
   UPDATED,

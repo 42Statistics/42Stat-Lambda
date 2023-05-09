@@ -37,7 +37,7 @@ export const userSchema = z.object({
   'active?': z.boolean(),
 });
 
-export const useSchema_ = userSchema
+export const userSchema_ = userSchema
   .omit({ image: true })
   .extend({ image: userImageSchema_.nullable() })
   .passthrough();

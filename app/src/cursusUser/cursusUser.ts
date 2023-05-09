@@ -16,10 +16,11 @@ import {
   CursusUser,
   isStudent,
   parseCursusUsers,
+  wildcardUserIds,
 } from './api/cursusUser.api.js';
 import { CURSUS_USERS_CACHE_KEY } from './dto/cursusUser.redis.js';
 
-export const CURSUS_USERS_COLLECTION = 'cursus_users';
+const CURSUS_USERS_COLLECTION = 'cursus_users';
 
 // eslint-disable-next-line
 export class CursusUserUpdator {
@@ -128,3 +129,19 @@ export class CursusUserUpdator {
     );
   }
 }
+
+export const getStudentIds = async (
+  mongoClient: MongoClient,
+): Promise<number[]> => {
+  const ids = await mongoClient
+    .db()
+    .collection<CursusUser>(CURSUS_USERS_COLLECTION)
+    .find()
+    .project<{ id: number }>({ _id: 0, id: '$user.id' })
+    .map((docs) => docs.id)
+    .toArray();
+
+  ids.push(...wildcardUserIds);
+
+  return ids;
+};
