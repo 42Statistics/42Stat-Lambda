@@ -30,8 +30,7 @@ const weirdUserIds = [
 ] as const;
 
 // 무조건 포함해야하지만 제외된 user.
-// eslint-disable-next-line
-const wildcardUserIds = [
+export const wildcardUserIds = [
   68891, // 1기 중 버그 있어보이지만 피신 평가 내역은 존재함.
   68857, // 파리로 transfer, login: sucho
   69000, // hyulim

@@ -12,7 +12,7 @@ const userImageSchema = z.object({
     .passthrough(),
 });
 
-const userSchema = z
+export const userSchema = z
   .object({
     id: z.number(),
     email: z.string(),

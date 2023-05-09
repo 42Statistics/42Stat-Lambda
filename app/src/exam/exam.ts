@@ -24,7 +24,6 @@ export class ExamUpdator {
   @LogAsyncEstimatedTime
   private static async updateCreated(mongoClient: MongoClient): Promise<void> {
     const start = await getCollectionUpdatedAt(mongoClient, EXAMS_COLLECTION);
-
     const end = new Date();
 
     const created = await this.fetchCreated(start, end);

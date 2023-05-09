@@ -19,7 +19,7 @@ import {
 } from './api/cursusUser.api.js';
 import { CURSUS_USERS_CACHE_KEY } from './dto/cursusUser.redis.js';
 
-const CURSUS_USERS_COLLECTION = 'cursus_users';
+export const CURSUS_USERS_COLLECTION = 'cursus_users';
 
 // eslint-disable-next-line
 export class CursusUserUpdator {
