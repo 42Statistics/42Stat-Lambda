@@ -3,6 +3,10 @@ import {
   cursusSchema,
   cursusSchema_,
 } from '../../cursusUser/api/cursusUser.schema.js';
+import {
+  projectSchema,
+  projectSchema_,
+} from '../../project/api/project.schema.js';
 
 const languageSchema = z.object({
   id: z.number(),
@@ -38,23 +42,6 @@ const campusSchema_ = campusSchema
   .omit({ language: true })
   .extend({ language: languageSchema_ })
   .passthrough();
-
-const projectSchema = z.object({
-  id: z.number(),
-  name: z.string(),
-  slug: z.string(),
-  difficulty: z.number(),
-  // parent: z.string,
-  // children: [],
-  // attachments: [],
-  createdAt: z.coerce.date(),
-  updatedAt: z.coerce.date(),
-  exam: z.boolean(),
-  // gitId: z.,
-  // repository: null,
-});
-
-const projectSchema_ = projectSchema.passthrough();
 
 export const examSchema = z.object({
   id: z.number(),
