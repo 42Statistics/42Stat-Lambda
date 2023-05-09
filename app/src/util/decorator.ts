@@ -41,7 +41,7 @@ export function LogAsyncEstimatedTime<This, Args extends any[], Return>(
     const result = await target.call(this, ...args);
     const end = new Date();
 
-    console.log(end.getTime() - start.getTime() + 'ms');
+    console.log(String(context.name), end.getTime() - start.getTime() + 'ms');
 
     return result;
   }

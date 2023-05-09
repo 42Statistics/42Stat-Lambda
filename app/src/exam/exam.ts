@@ -16,13 +16,24 @@ const EXAMS_COLLECTION = 'exams';
 
 // eslint-disable-next-line
 export class ExamUpdator {
+  /**
+   *
+   * @description
+   * @see updateUpdated   U: 갱신 된 exam
+   *
+   * 2023-05 기준
+   * 필요 요청 수: U (1)
+   * 예상 소요 시간: 5초
+   *
+   * 버그가 있는 것을 제외하면 그다지 변수는 없음.
+   */
   static async update(mongoClient: MongoClient): Promise<void> {
-    await this.updateCreated(mongoClient);
+    await this.updateUpdated(mongoClient);
   }
 
   @UpdateAction
   @LogAsyncEstimatedTime
-  private static async updateCreated(mongoClient: MongoClient): Promise<void> {
+  private static async updateUpdated(mongoClient: MongoClient): Promise<void> {
     const start = await getCollectionUpdatedAt(mongoClient, EXAMS_COLLECTION);
     const end = new Date();
 
@@ -44,11 +55,7 @@ export class ExamUpdator {
 
   @FetchApiAction
   private static async fetchCreated(start: Date, end: Date): Promise<Exam[]> {
-    const examDtos = await pagedRequest(
-      EXAM_EP.EXAM_CREATED(start, end),
-      100,
-      10,
-    );
+    const examDtos = await pagedRequest(EXAM_EP.UPDATED(start, end), 100, 1);
 
     return parseExams(examDtos);
   }

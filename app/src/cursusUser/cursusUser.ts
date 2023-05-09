@@ -26,11 +26,11 @@ export class CursusUserUpdator {
   /**
    *
    * @description
-   * @see updateCursusChanged   U: 새로 입과하거나 블랙홀 간 유저 수
-   * @see updateActivated       A: 현재 활성화 된 유저 수
+   * @see updateCursusChanged   U: 새로 입과하거나 블랙홀 간 유저
+   * @see updateActivated       A: 현재 활성화 된 유저
    *
    * 2023-05 기준
-   * 필요 요청 수: U(4) + A(18)
+   * 필요 요청 수: U(4) + A(20)
    * 예상 소요 시간: 30초 ~ 40초
    *
    * U 의 경우, 한번에 들어온 유저 수와 업데이트 간격 사이에 블랙홀 간 사람 수의 합이 400을 넘지 않으면
@@ -104,7 +104,7 @@ export class CursusUserUpdator {
     const cursusUserDtos = await pagedRequest(
       CURSUS_USER_EP.ACTIVATED(),
       100,
-      6,
+      10,
     );
 
     return parseCursusUsers(cursusUserDtos).filter(isStudent);

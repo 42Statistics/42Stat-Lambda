@@ -68,7 +68,7 @@ export const examSchema = z.object({
   createdAt: z.coerce.date(),
   updatedAt: z.coerce.date(),
   campus: campusSchema,
-  cursus: cursusSchema,
+  cursus: cursusSchema.array(),
   projects: projectSchema.array(),
 });
 
@@ -80,7 +80,7 @@ export const examSchema_ = examSchema
   })
   .extend({
     campus: campusSchema_,
-    cursus: cursusSchema_,
+    cursus: cursusSchema_.array(),
     projects: projectSchema_.array(),
   })
   .passthrough();
