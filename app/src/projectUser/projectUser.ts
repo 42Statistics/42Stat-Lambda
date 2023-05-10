@@ -1,4 +1,5 @@
 import { MongoClient } from 'mongodb';
+import { FT_CURSUS_ID } from '../cursusUser/api/cursusUser.api.js';
 import { getStudentIds } from '../cursusUser/cursusUser.js';
 import {
   getCollectionUpdatedAt,
@@ -40,7 +41,7 @@ export class ProjectsUserUpdator {
     const updatedProjectsUsers = updated.filter(
       (projectsUser) =>
         studentIds.find((id) => id === projectsUser.user.id) &&
-        projectsUser.cursusIds[0] === 21,
+        projectsUser.cursusIds[0] === FT_CURSUS_ID,
     );
 
     await upsertManyById(
