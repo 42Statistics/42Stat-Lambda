@@ -87,6 +87,11 @@
 
 - range 를 걸어서 요청을 보내면 중복된 exam 이 나오는 현상이 있음. 인트라에 버그 고쳐주기 전까진 수동으로 해결해야함
 
+## events
+
+- event nbr subscription이랑 실제 구독 인원이랑 다른 경우가 있음
+- events_users campus filter 안먹힘
+
 ## etc
 
 - 42 api 가끔 db query 에러문 그대로 나옵니다... 가슴이 웅장해진다...
