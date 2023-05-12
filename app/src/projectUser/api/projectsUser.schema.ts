@@ -9,7 +9,7 @@ import {
 } from '../../project/api/project.schema.js';
 import { teamBaseSchema, teamBaseSchema_ } from '../../team/api/team.schema.js';
 
-export const projectUserSchema = z.object({
+export const projectsUserSchema = z.object({
   id: z.number(),
   occurrence: z.number(),
   finalMark: z.number().nullable(),
@@ -27,7 +27,7 @@ export const projectUserSchema = z.object({
   teams: teamBaseSchema.array(),
 });
 
-export const projectUserSchema_ = projectUserSchema
+export const projectsUserSchema_ = projectsUserSchema
   .omit({
     project: true,
     user: true,

@@ -16,9 +16,9 @@ import {
   PROJECTS_USER_EP,
   ProjectsUser,
   parseProjectsUsers,
-} from './api/projectUser.api.js';
+} from './api/projectsUser.api.js';
 
-const PROJECTS_USER_COLLECTION = 'projects_users';
+export const PROJECTS_USER_COLLECTION = 'projects_users';
 
 export class ProjectsUserUpdator {
   static async update(mongoClient: MongoClient): Promise<void> {

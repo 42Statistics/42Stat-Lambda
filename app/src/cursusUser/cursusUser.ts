@@ -20,7 +20,7 @@ import {
 } from './api/cursusUser.api.js';
 import { CURSUS_USERS_CACHE_KEY } from './dto/cursusUser.redis.js';
 
-const CURSUS_USERS_COLLECTION = 'cursus_users';
+const CURSUS_USER_COLLECTION = 'cursus_users';
 
 // eslint-disable-next-line
 export class CursusUserUpdator {
@@ -61,15 +61,15 @@ export class CursusUserUpdator {
   ): Promise<void> {
     const start = await getCollectionUpdatedAt(
       mongoClient,
-      CURSUS_USERS_COLLECTION,
+      CURSUS_USER_COLLECTION,
     );
 
     const end = new Date();
 
     const cursusChanged = await this.fetchCursusChanged(start, end);
 
-    await upsertManyById(mongoClient, CURSUS_USERS_COLLECTION, cursusChanged);
-    await setCollectionUpdatedAt(mongoClient, CURSUS_USERS_COLLECTION, end);
+    await upsertManyById(mongoClient, CURSUS_USER_COLLECTION, cursusChanged);
+    await setCollectionUpdatedAt(mongoClient, CURSUS_USER_COLLECTION, end);
   }
 
   @FetchApiAction
@@ -93,7 +93,7 @@ export class CursusUserUpdator {
   ): Promise<void> {
     const activated = await this.fetchActivated();
 
-    await upsertManyById(mongoClient, CURSUS_USERS_COLLECTION, activated);
+    await upsertManyById(mongoClient, CURSUS_USER_COLLECTION, activated);
   }
 
   /**
@@ -119,7 +119,7 @@ export class CursusUserUpdator {
   ): Promise<void> {
     const cursusUsers = await mongoClient
       .db()
-      .collection<CursusUser>(CURSUS_USERS_COLLECTION)
+      .collection<CursusUser>(CURSUS_USER_COLLECTION)
       .find()
       .toArray();
 
@@ -135,7 +135,7 @@ export const getStudentIds = async (
 ): Promise<number[]> => {
   const ids = await mongoClient
     .db()
-    .collection<CursusUser>(CURSUS_USERS_COLLECTION)
+    .collection<CursusUser>(CURSUS_USER_COLLECTION)
     .find()
     .project<{ id: number }>({ _id: 0, id: '$user.id' })
     .map((docs) => docs.id)
