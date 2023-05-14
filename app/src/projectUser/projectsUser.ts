@@ -20,6 +20,7 @@ import {
 
 export const PROJECTS_USER_COLLECTION = 'projects_users';
 
+// eslint-disable-next-line
 export class ProjectsUserUpdator {
   static async update(mongoClient: MongoClient): Promise<void> {
     await this.updateUpdated(mongoClient);
