@@ -10,6 +10,7 @@
     "dev": "pnpm build && pnpm start",
     "compile": "rm -rf ./dist && pnpm ncc build src/index.ts -o dist && cp ../env/.env ./",
     "prepare": "pnpm compile && rm -rf deploy && mkdir -p deploy && zip -rjD deploy/index.zip dist/* .env",
+    "start:dev": "cp ../.env ./ && pnpm start",
     "lint:peek": "eslint \"{src,apps,libs,test}/**/*.ts\" --cache",
     "test": "echo \"Error: no test specified\" && exit 0"
   },
