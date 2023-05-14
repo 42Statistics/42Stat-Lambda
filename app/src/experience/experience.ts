@@ -13,7 +13,7 @@ import { LogAsyncEstimatedTime, UpdateAction } from '../util/decorator.js';
 import { Experience } from './api/experience.api.js';
 import { LambdaError } from '../util/error.js';
 
-const EXPERIANCE_COLLECTION = 'experiences';
+export const EXPERIENCE_COLLECTION = 'experiences';
 
 type LevelTableElem = {
   lvl: number;
@@ -49,7 +49,7 @@ export class ExperienceUpdator {
   ): Promise<void> {
     const start = await getCollectionUpdatedAt(
       mongoClient,
-      EXPERIANCE_COLLECTION,
+      EXPERIENCE_COLLECTION,
     );
 
     const projectsUsersUpdated = await mongoClient
@@ -186,7 +186,7 @@ export class ExperienceUpdator {
     );
 
     await mongoClient.db().collection('experiences').insertMany(newExperiences);
-    await setCollectionUpdatedAt(mongoClient, EXPERIANCE_COLLECTION, end);
+    await setCollectionUpdatedAt(mongoClient, EXPERIENCE_COLLECTION, end);
   }
 }
 

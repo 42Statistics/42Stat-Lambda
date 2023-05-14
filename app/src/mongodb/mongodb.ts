@@ -1,5 +1,10 @@
 import { MongoClient } from 'mongodb';
 import { LambdaError } from '../util/error.js';
+import type { CURSUS_USER_COLLECTION } from '../cursusUser/cursusUser.js';
+import type { EXAMS_COLLECTION } from '../exam/exam.js';
+import type { EXPERIENCE_COLLECTION } from '../experience/experience.js';
+import type { PROJECTS_USER_COLLECTION } from '../projectUser/projectsUser.js';
+import type { TEAM_COLLECTION } from '../team/team.js';
 
 export const LOG_COLLECTION = 'logs';
 
@@ -13,9 +18,16 @@ export const createMongoClient = async (): Promise<MongoClient> => {
   return client;
 };
 
+type LogUpdatedAt =
+  | typeof CURSUS_USER_COLLECTION
+  | typeof EXAMS_COLLECTION
+  | typeof EXPERIENCE_COLLECTION
+  | typeof PROJECTS_USER_COLLECTION
+  | typeof TEAM_COLLECTION;
+
 export const getCollectionUpdatedAt = async (
   client: MongoClient,
-  collection: string,
+  collection: LogUpdatedAt,
 ): Promise<Date> => {
   try {
     const collectionLog = await client

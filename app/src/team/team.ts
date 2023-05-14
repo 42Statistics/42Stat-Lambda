@@ -13,7 +13,7 @@ import {
 import { pagedRequest } from '../util/pagedRequest.js';
 import { TEAM_EP, Team, parseTeams } from './api/team.api.js';
 
-const TEAM_COLLECTION = 'teams';
+export const TEAM_COLLECTION = 'teams';
 
 // eslint-disable-next-line
 export class TeamUpdator {

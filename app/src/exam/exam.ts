@@ -12,7 +12,7 @@ import {
 import { pagedRequest } from '../util/pagedRequest.js';
 import { EXAM_EP, Exam, parseExams } from './api/exam.api.js';
 
-const EXAMS_COLLECTION = 'exams';
+export const EXAMS_COLLECTION = 'exams';
 
 // eslint-disable-next-line
 export class ExamUpdator {
