@@ -5,6 +5,7 @@ import type { EXAMS_COLLECTION } from '../exam/exam.js';
 import type { EXPERIENCE_COLLECTION } from '../experience/experience.js';
 import type { PROJECTS_USER_COLLECTION } from '../projectUser/projectsUser.js';
 import type { TEAM_COLLECTION } from '../team/team.js';
+import type { TITLES_USER_COLLECTION } from '../titlesUser/titlesUser.js';
 
 export const LOG_COLLECTION = 'logs';
 
@@ -47,7 +48,7 @@ export const getCollectionUpdatedAt = async (
 
 export const setCollectionUpdatedAt = async (
   client: MongoClient,
-  collection: string,
+  collection: LogUpdatedAt,
   updatedAt: Date,
 ): Promise<void> => {
   try {
@@ -57,6 +58,47 @@ export const setCollectionUpdatedAt = async (
       .updateOne(
         { collection },
         { $set: { collection, updatedAt } },
+        { upsert: true },
+      );
+  } catch {
+    throw new LambdaError('mongodb write error at: ' + collection);
+  }
+};
+
+type LogLastPage = typeof TITLES_USER_COLLECTION;
+
+export const getCollectionLastPage = async (
+  client: MongoClient,
+  collection: LogLastPage,
+): Promise<number> => {
+  try {
+    const collectionLog = await client
+      .db()
+      .collection(LOG_COLLECTION)
+      .findOne<{ lastPage: number }>({ collection });
+
+    if (collectionLog) {
+      return collectionLog.lastPage;
+    }
+
+    return 1;
+  } catch (e) {
+    throw new LambdaError('mongodb read error at: ' + collection);
+  }
+};
+
+export const setCollectionLastPage = async (
+  client: MongoClient,
+  collection: LogLastPage,
+  lastPage: number,
+): Promise<void> => {
+  try {
+    await client
+      .db()
+      .collection(LOG_COLLECTION)
+      .updateOne(
+        { collection },
+        { $set: { collection, lastPage } },
         { upsert: true },
       );
   } catch {
