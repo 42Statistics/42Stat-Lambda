@@ -2,7 +2,6 @@ import dotenv from 'dotenv';
 import { initSeine } from './connection.js';
 import { CursusUserUpdator } from './cursusUser/cursusUser.js';
 import { ExamUpdator } from './exam/exam.js';
-import { ExperienceUpdator } from './experience/experience.js';
 import { createMongoClient } from './mongodb/mongodb.js';
 import { ProjectsUserUpdator } from './projectUser/projectsUser.js';
 import { LambdaRedis } from './redis/LambdaRedis.js';
@@ -25,11 +24,9 @@ const main = async (): Promise<void> => {
   await CursusUserUpdator.update(mongoClient, redis);
   await ExamUpdator.update(mongoClient);
   await TeamUpdator.update(mongoClient);
-  await ExperienceUpdator.update(mongoClient);
 
   await mongoClient.close();
   await redis.closeConnection();
-  console.log('success');
 };
 
 export const handler = main;

@@ -19,6 +19,7 @@ import {
   wildcardUserIds,
 } from './api/cursusUser.api.js';
 import { CURSUS_USERS_CACHE_KEY } from './dto/cursusUser.redis.js';
+import { ExperienceUpdator } from '../experience/experience.js';
 
 export const CURSUS_USER_COLLECTION = 'cursus_users';
 
@@ -94,6 +95,9 @@ export class CursusUserUpdator {
     const activated = await this.fetchActivated();
 
     await upsertManyById(mongoClient, CURSUS_USER_COLLECTION, activated);
+    // todo: 적당한 위치 찾아주기. 현재 시점에선 cursus user의 업데이트 성공을 알려주고 있지 않기
+    // 때문에, 이런 조치가 필요합니다.
+    ExperienceUpdator.update(mongoClient);
   }
 
   /**

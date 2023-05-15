@@ -10,8 +10,9 @@ import { PROJECTS_USER_COLLECTION } from '../projectUser/projectsUser.js';
 import type { PassedTeam } from '../team/api/team.api.js';
 import { isPassedTeam } from '../team/api/team.api.js';
 import { LogAsyncEstimatedTime, UpdateAction } from '../util/decorator.js';
-import { Experience } from './api/experience.api.js';
 import { LambdaError } from '../util/error.js';
+import { Experience } from './api/experience.api.js';
+import { join } from 'path';
 
 export const EXPERIENCE_COLLECTION = 'experiences';
 
@@ -63,69 +64,73 @@ export class ExperienceUpdator {
           currTeam: PassedTeam;
           experiencesBefore: number;
         }
-      >([
-        {
-          $match: {
-            updatedAt: { $gt: start },
-            'project.name': { $not: { $regex: 'Exam' } },
-            'validated?': true,
+      >(
+        //#region aggregation pipeline
+        [
+          {
+            $match: {
+              markedAt: { $gt: start },
+              'project.name': { $not: { $regex: 'Exam' } },
+              'validated?': true,
+            },
           },
-        },
-        {
-          $addFields: {
-            currTeam: { $last: '$teams' },
+          {
+            $addFields: {
+              currTeam: { $last: '$teams' },
+            },
           },
-        },
-        {
-          $match: {
-            'currTeam.validated?': true,
+          {
+            $match: {
+              'currTeam.validated?': true,
+            },
           },
-        },
-        {
-          $lookup: {
-            from: 'projects',
-            localField: 'project.id',
-            foreignField: 'id',
-            as: 'project',
+          {
+            $lookup: {
+              from: 'projects',
+              localField: 'project.id',
+              foreignField: 'id',
+              as: 'project',
+            },
           },
-        },
-        {
-          $addFields: {
-            project: { $first: '$project' },
+          {
+            $addFields: {
+              project: { $first: '$project' },
+            },
           },
-        },
-        {
-          $match: {
-            'project.difficulty': { $ne: 0 },
+          {
+            $match: {
+              'project.difficulty': { $ne: 0 },
+            },
           },
-        },
-        {
-          $lookup: {
-            from: 'cursus_users',
-            localField: 'user.id',
-            foreignField: 'user.id',
-            as: 'cursusUser',
+          {
+            $lookup: {
+              from: 'cursus_users',
+              localField: 'user.id',
+              foreignField: 'user.id',
+              as: 'cursusUser',
+            },
           },
-        },
-        {
-          $addFields: {
-            cursusUser: { $first: '$cursusUser' },
+          {
+            $addFields: {
+              cursusUser: { $first: '$cursusUser' },
+            },
           },
-        },
-        {
-          $lookup: {
-            from: 'experiences',
-            localField: 'user.id',
-            foreignField: 'userId',
-            as: 'experiencesBefore',
+          {
+            $lookup: {
+              from: 'experiences',
+              localField: 'user.id',
+              foreignField: 'userId',
+              as: 'experiencesBefore',
+            },
           },
-        },
-        {
-          $addFields: {
-            experiencesBefore: { $sum: '$experiencesBefore.experience' },
+          {
+            $addFields: {
+              experiencesBefore: { $sum: '$experiencesBefore.experience' },
+            },
           },
-        },
-      ])
+        ],
+        //#endregion
+      )
       .toArray();
 
     if (projectsUsersUpdated.length === 0) {
@@ -175,7 +180,6 @@ export class ExperienceUpdator {
       });
     }
 
-    console.log(newExperiences.length);
     if (newExperiences.length === 0) {
       return;
     }
@@ -187,6 +191,8 @@ export class ExperienceUpdator {
 
     await mongoClient.db().collection('experiences').insertMany(newExperiences);
     await setCollectionUpdatedAt(mongoClient, EXPERIENCE_COLLECTION, end);
+
+    await testLevelCalculation(mongoClient);
   }
 }
 
@@ -263,3 +269,64 @@ function assertsLevelFound(
     throw new LambdaError('wrong calc logic');
   }
 }
+
+// 테스트 함수 입니다.
+const testLevelCalculation = async (
+  mongoClient: MongoClient,
+): Promise<void> => {
+  const info = await mongoClient
+    .db()
+    .collection('cursus_users')
+    .aggregate([
+      {
+        $lookup: {
+          from: 'experiences',
+          localField: 'user.id',
+          foreignField: 'userId',
+          as: 'experiences',
+        },
+      },
+      {
+        $addFields: {
+          experiences: { $sum: '$experiences.experience' },
+        },
+      },
+    ])
+    .toArray();
+
+  const levelTable = await mongoClient
+    .db()
+    .collection('levels')
+    .find()
+    .sort({ lvl: 1 })
+    .toArray();
+
+  const calcexp = (experiences: number, levelTable: any[]): number => {
+    const upper = levelTable.find(({ xp }) => xp > experiences);
+
+    const { lvl: upperLevel, xp: upperNeed } = upper;
+    const { lvl: lowerLevel, xp: lowerNeed } = levelTable[upperLevel - 1];
+
+    const levelFloat =
+      Math.floor(
+        (1 + (experiences - upperNeed) / (1.0 * (upperNeed - lowerNeed))) *
+          100 +
+          Number.EPSILON,
+      ) / 100;
+
+    return lowerLevel + levelFloat;
+  };
+
+  let i = 0;
+  info.forEach((curr) => {
+    const calcLevel = calcexp(curr.experiences, levelTable);
+
+    if (Math.abs(calcLevel - curr.level) >= 0.01) {
+      console.error(calcLevel, curr.level, curr.user.login);
+    } else {
+      i++;
+    }
+  });
+
+  console.log(info.length, i);
+};
