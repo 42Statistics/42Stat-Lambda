@@ -95,3 +95,6 @@
 ## etc
 
 - 42 api 가끔 db query 에러문 그대로 나옵니다... 가슴이 웅장해진다...
+- response header 를 보면, page 에 관련된 정보가 있다.
+- response header 를 보면, rate limit 에 관련된 정보들이 있는데, 이로 미루어보아 인트라에서는 응답할때 secondly limit 을 측정하는 것으로 보임.<br/>
+  때문에 보내는 쪽에서 rate limit 에 안걸리게 보내는 것은 사실상 불가능하고, 요청 실패에 대한 재시도 로직을 만드는게 맞다는 결론이 나옴.
