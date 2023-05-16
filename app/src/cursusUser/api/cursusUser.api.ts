@@ -7,11 +7,15 @@ export type CursusUser = z.infer<typeof cursusUserSchema>;
 
 export const FT_CURSUS_ID = 21;
 
-const CURSUS_CHANGED = (start: Date, end: Date): string =>
-  `https://api.intra.42.fr/v2/cursus/${FT_CURSUS_ID}/cursus_users?filter[campus_id]=29&filter[has_coalition]=true&range[updated_at]=${start.toISOString()},${end.toISOString()}&sort=created_at`;
+const CURSUS_CHANGED = (start: Date, end: Date): URL =>
+  new URL(
+    `https://api.intra.42.fr/v2/cursus/${FT_CURSUS_ID}/cursus_users?filter[campus_id]=29&filter[has_coalition]=true&range[updated_at]=${start.toISOString()},${end.toISOString()}&sort=created_at`,
+  );
 
-const ACTIVATED = (): string =>
-  `https://api.intra.42.fr/v2/cursus/${FT_CURSUS_ID}/cursus_users?filter[campus_id]=29&filter[has_coalition]=true&filter[end]=false&sort=created_at`;
+const ACTIVATED = (): URL =>
+  new URL(
+    `https://api.intra.42.fr/v2/cursus/${FT_CURSUS_ID}/cursus_users?filter[campus_id]=29&filter[has_coalition]=true&filter[end]=false&sort=created_at`,
+  );
 
 export const CURSUS_USER_EP = {
   CURSUS_CHANGED,

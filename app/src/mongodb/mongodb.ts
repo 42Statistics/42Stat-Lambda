@@ -65,46 +65,11 @@ export const setCollectionUpdatedAt = async (
   }
 };
 
-type LogLastPage = typeof TITLES_USER_COLLECTION;
-
-export const getCollectionLastPage = async (
-  client: MongoClient,
-  collection: LogLastPage,
-): Promise<number> => {
-  try {
-    const collectionLog = await client
-      .db()
-      .collection(LOG_COLLECTION)
-      .findOne<{ lastPage: number }>({ collection });
-
-    if (collectionLog) {
-      return collectionLog.lastPage;
-    }
-
-    return 1;
-  } catch (e) {
-    throw new LambdaError('mongodb read error at: ' + collection);
-  }
-};
-
-export const setCollectionLastPage = async (
-  client: MongoClient,
-  collection: LogLastPage,
-  lastPage: number,
-): Promise<void> => {
-  try {
-    await client
-      .db()
-      .collection(LOG_COLLECTION)
-      .updateOne(
-        { collection },
-        { $set: { collection, lastPage } },
-        { upsert: true },
-      );
-  } catch {
-    throw new LambdaError('mongodb write error at: ' + collection);
-  }
-};
+export const getDocuemntCount = async (
+  mongoClient: MongoClient,
+  collection: string,
+): Promise<number> =>
+  await mongoClient.db().collection(collection).estimatedDocumentCount();
 
 export const upsertManyById = async <T extends { id: number }>(
   client: MongoClient,

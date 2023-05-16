@@ -8,8 +8,10 @@ import {
 
 export type ProjectsUser = z.infer<typeof projectsUserSchema>;
 
-const UPDATED = (start: Date, end: Date): string =>
-  `https://api.intra.42.fr/v2/projects_users?filter[campus]=29&filter[cursus]=${FT_CURSUS_ID}&range[updated_at]=${start.toISOString()},${end.toISOString()}`;
+const UPDATED = (start: Date, end: Date): URL =>
+  new URL(
+    `https://api.intra.42.fr/v2/projects_users?filter[campus]=29&filter[cursus]=${FT_CURSUS_ID}&range[updated_at]=${start.toISOString()},${end.toISOString()}`,
+  );
 
 export const PROJECTS_USER_EP = {
   UPDATED,

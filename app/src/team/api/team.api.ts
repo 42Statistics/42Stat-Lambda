@@ -25,8 +25,10 @@ export type PassedTeam = Omit<
   lockedAt: Date;
 };
 
-const UPDATED = (start: Date, end: Date): string =>
-  `https://api.intra.42.fr/v2/cursus/${FT_CURSUS_ID}/teams?filter[campus]=29&range[updated_at]=${start.toISOString()},${end.toISOString()}&sort=created_at`;
+const UPDATED = (start: Date, end: Date): URL =>
+  new URL(
+    `https://api.intra.42.fr/v2/cursus/${FT_CURSUS_ID}/teams?filter[campus]=29&range[updated_at]=${start.toISOString()},${end.toISOString()}&sort=created_at`,
+  );
 
 export const TEAM_EP = {
   UPDATED,

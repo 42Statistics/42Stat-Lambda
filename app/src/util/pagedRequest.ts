@@ -1,23 +1,8 @@
 import seine, { SeineResult } from 'la-seine';
 import { LambdaError } from './error.js';
 
-const getPagedResults = async (
-  start: number,
-  count: number,
-  endpoint: RequestInfo | URL,
-  pageSize: number,
-): Promise<SeineResult> => {
-  for (let i = start; i < count; i++) {
-    seine.addRequest(
-      `${endpoint.toString()}&page[size]=${pageSize}&page[number]=${i}`,
-    );
-  }
-
-  return await seine.getResult();
-};
-
 export const pagedRequest = async (
-  endpoint: RequestInfo | URL,
+  endpoint: URL,
   pageSize = 100,
   chunkSize = 10,
 ): Promise<object[]> => {
@@ -52,4 +37,23 @@ export const pagedRequest = async (
   }
 
   return docs;
+};
+
+export const getPagedResults = async (
+  start: number,
+  end: number,
+  endpoint: URL,
+  pageSize: number,
+): Promise<SeineResult> => {
+  const hasParams = endpoint.searchParams.size !== 0;
+
+  for (let i = start; i < end; i++) {
+    seine.addRequest(
+      `${endpoint.toString()}${
+        hasParams ? '&' : '?'
+      }page[size]=${pageSize}&page[number]=${i}`,
+    );
+  }
+
+  return await seine.getResult();
 };
