@@ -31,7 +31,7 @@ export const pagedRequest = async (
 
     docs.push(...jsons.flat());
 
-    if (!jsons[jsons.length - 1].length) {
+    if (jsons[jsons.length - 1].length < pageSize) {
       break;
     }
   }
