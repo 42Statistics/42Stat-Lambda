@@ -52,6 +52,41 @@ export function LogAsyncEstimatedTime<This, Args extends any[], Return>(
 /**
  *
  * @description
+ * document count 기반으로 작동하는 함수들의 업데이트 정보를 콘솔에 출력해주는 데코레이터 입니다.
+ */
+export function LogAsyncDocumentCount<
+  This,
+  Args extends any[],
+  Return extends object[],
+>(
+  target: (this: This, documentCount: number, ...args: Args) => Promise<Return>,
+  context: ClassMethodDecoratorContext<
+    This,
+    (this: This, documentCount: number, ...args: Args) => Promise<Return>
+  >,
+): typeof target {
+  async function replacementMethod(
+    this: This,
+    documentCount: number,
+    ...args: Args
+  ): Promise<Return> {
+    const result = await target.call(this, documentCount, ...args);
+
+    console.log(
+      String(context.name),
+      'originalCount: ' + documentCount,
+      'fetchedCount: ' + result.length,
+    );
+
+    return result;
+  }
+
+  return replacementMethod;
+}
+
+/**
+ *
+ * @description
  * 실행 중 exception 이 발생해도 다른 함수들에 영향을 주지 않아야 하는 함수들을 위한 데코레이터 입니다.
  * exception 발생 시, mongodb 에 로그를 작성하고, exception 을 밖으로 보내지 않습니다.
  */
