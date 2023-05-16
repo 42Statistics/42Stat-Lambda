@@ -17,7 +17,5 @@ export const PROJECTS_USER_EP = {
   UPDATED,
 } as const;
 
-export const parseProjectsUsers = (
-  dtos: object[],
-): z.infer<typeof projectsUserSchema_>[] =>
+export const parseProjectsUsers = (dtos: object[]): ProjectsUser[] =>
   parseFromDtoMany(dtos, projectsUserSchema_, 'projects_users');

@@ -34,7 +34,7 @@ export const TEAM_EP = {
   UPDATED,
 } as const;
 
-export const parseTeams = (dtos: object[]): z.infer<typeof teamSchema_>[] =>
+export const parseTeams = (dtos: object[]): Team[] =>
   parseFromDtoMany(dtos, teamSchema_, 'teams');
 
 export const isValidatedTeam = (team: TeamBase): team is ValidatedTeam => {

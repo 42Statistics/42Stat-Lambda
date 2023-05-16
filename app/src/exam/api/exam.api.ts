@@ -14,5 +14,5 @@ export const EXAM_EP = {
   UPDATED,
 } as const;
 
-export const parseExams = (dtos: object[]): z.infer<typeof examSchema_>[] =>
+export const parseExams = (dtos: object[]): Exam[] =>
   parseFromDtoMany(dtos, examSchema_, 'exams');

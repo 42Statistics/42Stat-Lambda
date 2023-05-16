@@ -22,9 +22,7 @@ export const CURSUS_USER_EP = {
   ACTIVATED,
 } as const;
 
-export const parseCursusUsers = (
-  dtos: object[],
-): z.infer<typeof cursusUserSchema_>[] =>
+export const parseCursusUsers = (dtos: object[]): CursusUser[] =>
   parseFromDtoMany(dtos, cursusUserSchema_, 'cursusUsers');
 
 // 무조건 제외해야하지만 포함된 user. 잘못된 api 데이터 생성으로 인해 발생.
