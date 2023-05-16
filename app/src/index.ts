@@ -7,6 +7,8 @@ import { ProjectsUserUpdator } from './projectUser/projectsUser.js';
 import { LambdaRedis } from './redis/LambdaRedis.js';
 import { TeamUpdator } from './team/team.js';
 import { assertEnvExist } from './util/envCheck.js';
+import { TitleUpdator } from './title/title.js';
+import { TitlesUserUpdator } from './titlesUser/titlesUser.js';
 
 dotenv.config();
 
@@ -24,6 +26,8 @@ const main = async (): Promise<void> => {
   await CursusUserUpdator.update(mongoClient, redis);
   await ExamUpdator.update(mongoClient);
   await TeamUpdator.update(mongoClient);
+  await TitleUpdator.update(mongoClient);
+  await TitlesUserUpdator.update(mongoClient);
 
   await mongoClient.close();
   await redis.closeConnection();

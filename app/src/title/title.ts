@@ -1,22 +1,18 @@
 import { MongoClient } from 'mongodb';
-import { getDocuemntCount, upsertManyById } from '../mongodb/mongodb.js';
 import {
   FetchApiAction,
   LogAsyncDocumentCount,
   LogAsyncEstimatedTime,
   UpdateAction,
 } from '../util/decorator.js';
+import { getDocuemntCount, upsertManyById } from '../mongodb/mongodb.js';
+import { TITLE_EP, Title, parseTitles } from './api/title.api.js';
 import { pagedRequestByCount } from '../util/pagedRequestByCount.js';
-import {
-  TITLES_USER_EP,
-  TitlesUser,
-  parseTitlesUsers,
-} from './api/titlesUser.api.js';
 
-export const TITLES_USER_COLLECTION = 'titles_users';
+export const TITLE_COLLECTION = 'titles';
 
 // eslint-disable-next-line
-export class TitlesUserUpdator {
+export class TitleUpdator {
   static async update(mongoClient: MongoClient): Promise<void> {
     await this.updateFromLastPage(mongoClient);
   }
@@ -26,27 +22,24 @@ export class TitlesUserUpdator {
   private static async updateFromLastPage(
     mongoClient: MongoClient,
   ): Promise<void> {
-    const docCount = await getDocuemntCount(
-      mongoClient,
-      TITLES_USER_COLLECTION,
-    );
+    const documentCount = await getDocuemntCount(mongoClient, TITLE_COLLECTION);
 
-    const titlesUsers = await this.fetchFromLastPage(docCount);
+    const titles = await this.fetchFromLastPage(documentCount);
 
-    await upsertManyById(mongoClient, TITLES_USER_COLLECTION, titlesUsers);
+    await upsertManyById(mongoClient, TITLE_COLLECTION, titles);
   }
 
   @FetchApiAction
   @LogAsyncDocumentCount
   private static async fetchFromLastPage(
-    docCount: number,
-  ): Promise<TitlesUser[]> {
+    documentCount: number,
+  ): Promise<Title[]> {
     const titlesUserDtos = await pagedRequestByCount(
-      TITLES_USER_EP.FROM_LAST_PAGE(),
-      docCount,
+      TITLE_EP.FROM_LAST_PAGE(),
+      documentCount,
       100,
     );
 
-    return parseTitlesUsers(titlesUserDtos);
+    return parseTitles(titlesUserDtos);
   }
 }
