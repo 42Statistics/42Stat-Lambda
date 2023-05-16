@@ -1,11 +1,10 @@
 import { MongoClient } from 'mongodb';
-import { LambdaError } from '../util/error.js';
 import type { CURSUS_USER_COLLECTION } from '../cursusUser/cursusUser.js';
 import type { EXAMS_COLLECTION } from '../exam/exam.js';
 import type { EXPERIENCE_COLLECTION } from '../experience/experience.js';
 import type { PROJECTS_USER_COLLECTION } from '../projectUser/projectsUser.js';
 import type { TEAM_COLLECTION } from '../team/team.js';
-import type { TITLES_USER_COLLECTION } from '../titlesUser/titlesUser.js';
+import { LambdaError } from '../util/error.js';
 
 export const LOG_COLLECTION = 'logs';
 

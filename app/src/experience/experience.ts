@@ -12,7 +12,6 @@ import { isPassedTeam } from '../team/api/team.api.js';
 import { LogAsyncEstimatedTime, UpdateAction } from '../util/decorator.js';
 import { LambdaError } from '../util/error.js';
 import { Experience } from './api/experience.api.js';
-import { join } from 'path';
 
 export const EXPERIENCE_COLLECTION = 'experiences';
 
@@ -277,7 +276,13 @@ const testLevelCalculation = async (
   const info = await mongoClient
     .db()
     .collection('cursus_users')
-    .aggregate([
+    .aggregate<{
+      user: {
+        login: string;
+      };
+      level: number;
+      experiences: number;
+    }>([
       {
         $lookup: {
           from: 'experiences',
@@ -296,13 +301,17 @@ const testLevelCalculation = async (
 
   const levelTable = await mongoClient
     .db()
-    .collection('levels')
+    .collection<LevelTableElem>('levels')
     .find()
     .sort({ lvl: 1 })
     .toArray();
 
-  const calcexp = (experiences: number, levelTable: any[]): number => {
+  const calcexp = (
+    experiences: number,
+    levelTable: LevelTableElem[],
+  ): number => {
     const upper = levelTable.find(({ xp }) => xp > experiences);
+    assertsLevelFound(upper);
 
     const { lvl: upperLevel, xp: upperNeed } = upper;
     const { lvl: lowerLevel, xp: lowerNeed } = levelTable[upperLevel - 1];
