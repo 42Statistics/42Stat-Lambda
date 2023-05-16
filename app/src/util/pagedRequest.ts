@@ -45,7 +45,7 @@ export const getPagedResults = async (
   endpoint: URL,
   pageSize: number,
 ): Promise<SeineResult> => {
-  const hasParams = endpoint.searchParams.size !== 0;
+  const hasParams = endpoint.searchParams.keys().next().done !== true;
 
   for (let i = start; i < end; i++) {
     seine.addRequest(
