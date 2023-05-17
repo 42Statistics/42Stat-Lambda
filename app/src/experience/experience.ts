@@ -40,6 +40,7 @@ type LevelTableElem = {
 export class ExperienceUpdator {
   static async update(mongoClient: MongoClient): Promise<void> {
     await this.updateProjectsUserUpdated(mongoClient);
+    await testLevelCalculation(mongoClient);
   }
 
   @UpdateAction
@@ -71,6 +72,13 @@ export class ExperienceUpdator {
               markedAt: { $gt: start },
               'project.name': { $not: { $regex: 'Exam' } },
               'validated?': true,
+            },
+          },
+          {
+            $addFields: {
+              teams: {
+                $sortArray: { input: '$teams', sortBy: { createdAt: 1 } },
+              },
             },
           },
           {
@@ -132,10 +140,6 @@ export class ExperienceUpdator {
       )
       .toArray();
 
-    if (projectsUsersUpdated.length === 0) {
-      return;
-    }
-
     const newExperiences: Experience[] = [];
 
     for (const projectsUser of projectsUsersUpdated) {
@@ -190,8 +194,6 @@ export class ExperienceUpdator {
 
     await mongoClient.db().collection('experiences').insertMany(newExperiences);
     await setCollectionUpdatedAt(mongoClient, EXPERIENCE_COLLECTION, end);
-
-    await testLevelCalculation(mongoClient);
   }
 }
 
@@ -200,7 +202,7 @@ export class ExperienceUpdator {
  * @description
  * 지난 기록보다 더 높은 점수를 기록했는지 판별하고, 높다면 그 차이를 반환하는 함수입니다.
  *
- * projects user 에는 team 이 순서대로 추가되기 때문에, 마지막 team 이 현재 판단해야 하는 team
+ * team을 정렬해서 가져왔기 때문에, 마지막 team 이 현재 판단해야 하는 team
  * 이라고 생각할 수 있습니다.
  *
  * @returns 점수가 더 높아졌다면 높아진 양을, 그렇지 않다면 null 이 반환됩니다.
@@ -269,7 +271,7 @@ function assertsLevelFound(
   }
 }
 
-// 테스트 함수 입니다.
+//#region 테스트 함수 입니다.
 const testLevelCalculation = async (
   mongoClient: MongoClient,
 ): Promise<void> => {
@@ -337,5 +339,6 @@ const testLevelCalculation = async (
     }
   });
 
-  console.log(info.length, i);
+  console.log(`total: ${info.length} correct: ${i}`);
 };
+//#endregion
