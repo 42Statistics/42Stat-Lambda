@@ -41,7 +41,12 @@ export function LogAsyncEstimatedTime<This, Args extends any[], Return>(
     const result = await target.call(this, ...args);
     const end = new Date();
 
-    console.log(String(context.name), end.getTime() - start.getTime() + 'ms');
+    console.log(
+      // todo: 진짜 모르겠네요...
+      String((this as any).name),
+      String(context.name),
+      end.getTime() - start.getTime() + 'ms',
+    );
 
     return result;
   }
@@ -115,7 +120,7 @@ export function UpdateAction<This, Args extends any[], Return>(
         }
       } catch {
       } finally {
-        console.error(JSON.stringify(e));
+        console.error(e);
       }
     }
   }
