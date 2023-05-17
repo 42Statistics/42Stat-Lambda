@@ -38,12 +38,25 @@
 
 ---
 
+## projects_users
+
+- filter 에 cursus id 걸어도 작동 안함.
+- 어째서인지 campus filter도 cursus_users 와 다른 방식
+
+---
+
 ## scores
 
 - 4월 17일 23:59분 기준
 - range 기능이 없다... api 보낼 때 직접 filter로 잘라야할듯.
 - 생각해보면 validate 해야하는게 날짜밖에 없음
 - coalition 자체에 들어가는 점수 예외를 잘 처리해야함
+
+---
+
+## cursus_users
+
+- campus filter 는 transfer 한 사람들을까지 걸러냄.
 
 ---
 

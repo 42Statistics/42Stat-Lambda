@@ -17,6 +17,19 @@ export const TITLES_USER_COLLECTION = 'titles_users';
 
 // eslint-disable-next-line
 export class TitlesUserUpdator {
+  /**
+   *
+   * @description
+   * @see updateFromLastPage   L: 전체 titlesUser
+   *
+   * 2023-05 기준
+   * 필요 요청 수: L(1)
+   * 예상 소요 시간: 2초
+   *
+   * 아무런 인자를 넘길 수 없기 때문에, 테스트 요청을 하나 보내어 받아와야 함.
+   * 요청 수 자체는 불변할 것으로 예상되나, writer's soul 처럼 나중에 생긴 칭호를 일괄 지급하는 경우,
+   * 증가할 가능성이 있음.
+   */
   static async update(mongoClient: MongoClient): Promise<void> {
     await this.updateFromLastPage(mongoClient);
   }

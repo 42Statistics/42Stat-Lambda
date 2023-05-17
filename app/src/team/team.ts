@@ -40,7 +40,6 @@ export class TeamUpdator {
     const end = new Date();
 
     const updated = await this.fetchUpdated(start, end);
-
     const studentIds = await getStudentIds(mongoClient);
 
     const updatedStudentTeams = updated.filter((team) =>
