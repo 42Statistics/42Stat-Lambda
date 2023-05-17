@@ -17,9 +17,17 @@ const ACTIVATED = (): URL =>
     `https://api.intra.42.fr/v2/cursus/${FT_CURSUS_ID}/cursus_users?filter[campus_id]=29&filter[has_coalition]=true&filter[end]=false&sort=created_at`,
   );
 
+const WILDCARD = (): URL =>
+  new URL(
+    `https://api.intra.42.fr/v2/cursus/${FT_CURSUS_ID}/cursus_users?filter[user_id]=${wildcardUserIds.join(
+      ',',
+    )}`,
+  );
+
 export const CURSUS_USER_EP = {
   CURSUS_CHANGED,
   ACTIVATED,
+  WILDCARD,
 } as const;
 
 export const parseCursusUsers = (dtos: object[]): CursusUser[] =>
@@ -35,9 +43,9 @@ const weirdUserIds = [
 
 // 무조건 포함해야하지만 제외된 user.
 export const wildcardUserIds = [
-  68891, // 1기 중 버그 있어보이지만 피신 평가 내역은 존재함.
+  // 68891, // 1기 중 버그 있어보이지만 피신 평가 내역은 존재함.
   68857, // 파리로 transfer, login: sucho
-  69000, // hyulim
+  // 69000, // hyulim
 ] as const;
 
 const isWeirdUserId = (userId: number): boolean => {

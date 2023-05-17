@@ -47,6 +47,7 @@ export class CursusUserUpdator {
   ): Promise<void> {
     await this.updateCursusChanged(mongoClient);
     await this.updateActivated(mongoClient);
+    await this.updateWildcard(mongoClient);
     await this.updateCache(mongoClient, redis);
   }
 
@@ -113,6 +114,23 @@ export class CursusUserUpdator {
     );
 
     return parseCursusUsers(cursusUserDtos).filter(isStudent);
+  }
+
+  @UpdateAction
+  @LogAsyncEstimatedTime
+  private static async updateWildcard(mongoClient: MongoClient): Promise<void> {
+    const wildcards = await this.fetchWildcard();
+
+    await upsertManyById(mongoClient, CURSUS_USER_COLLECTION, wildcards);
+  }
+
+  @FetchApiAction
+  private static async fetchWildcard(): Promise<CursusUser[]> {
+    const dtos = await fetch(CURSUS_USER_EP.WILDCARD()).then(
+      (response) => response.json() as Promise<object[]>,
+    );
+
+    return parseCursusUsers(dtos);
   }
 
   @UpdateAction
