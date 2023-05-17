@@ -1,34 +1,22 @@
-import { MongoClient, ObjectId } from 'mongodb';
+import { MongoClient } from 'mongodb';
 
 const ERROR_COLLECTION = 'errors';
 
 export class LambdaError extends Error {
-  readonly udatas?: object[];
+  readonly udata?: unknown;
 
-  constructor(message: string, udatas?: object[]) {
+  constructor(message: string, udata?: unknown) {
     super(message);
-    this.udatas = udatas;
+    this.udata = udata;
   }
 }
 
 export const logError = async (
   client: MongoClient,
-  { message, udatas }: LambdaError,
+  error: LambdaError,
 ): Promise<void> => {
   try {
-    const errorId = new ObjectId();
-
-    await client
-      .db()
-      .collection(ERROR_COLLECTION)
-      .insertOne({ _id: errorId, message });
-
-    if (udatas) {
-      await client
-        .db()
-        .collection(ERROR_COLLECTION)
-        .insertMany(udatas.map((udata) => ({ errorId, udata })));
-    }
+    await client.db().collection(ERROR_COLLECTION).insertOne(error);
   } catch {
     console.error('log failed');
   }
