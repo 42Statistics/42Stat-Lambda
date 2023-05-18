@@ -101,10 +101,30 @@
 
 - range 를 걸어서 요청을 보내면 중복된 exam 이 나오는 현상이 있음. 인트라에 버그 고쳐주기 전까진 수동으로 해결해야함
 
+---
+
 ## events
 
 - event nbr subscription이랑 실제 구독 인원이랑 다른 경우가 있음
 - events_users campus filter 안먹힘
+
+---
+
+## experiences
+
+- 간혹 경험치가 들어올 상황이 전혀 아닌 사람들에게 경험치가 부여되는 문제가 있음
+- 간혹 경험치가 들어와야 하는 양 보다 더 많이 들어오는 경우가 있음
+- experiencable_id 는 projects_user 당 하나임
+
+---
+
+## locations
+
+- dohykim 이 이상한 자리에 앉은 기록이 몇번 있음 ("C02ZM0AUJV3Y", locationId: 12117624)
+  - 유사한 경우가 두명 더 있음 (총합 22개의 location)
+- location은 숫자가 매우 많기 때문에, upsert 를 무분별하게 (데이터를 한꺼번에 많이 받아오는 경우) 사용하면 지나치게 느리다.
+
+---
 
 ## etc
 

@@ -280,7 +280,7 @@ const testLevelCalculation = async (
     .collection('cursus_users')
     .aggregate<{
       user: {
-        login: string;
+        id: string;
       };
       level: number;
       experiences: number;
@@ -333,7 +333,7 @@ const testLevelCalculation = async (
     const calcLevel = calcexp(curr.experiences, levelTable);
 
     if (Math.abs(calcLevel - curr.level) >= 0.01) {
-      console.error(calcLevel, curr.level, curr.user.login);
+      console.error(calcLevel, curr.level, curr.user.id);
     } else {
       i++;
     }
