@@ -2,13 +2,14 @@ import dotenv from 'dotenv';
 import { initSeine } from './connection.js';
 import { CursusUserUpdator } from './cursusUser/cursusUser.js';
 import { ExamUpdator } from './exam/exam.js';
+import { LocationUpdator } from './location/location.js';
 import { createMongoClient } from './mongodb/mongodb.js';
 import { ProjectsUserUpdator } from './projectUser/projectsUser.js';
 import { LambdaRedis } from './redis/LambdaRedis.js';
 import { TeamUpdator } from './team/team.js';
-import { assertEnvExist } from './util/envCheck.js';
 import { TitleUpdator } from './title/title.js';
 import { TitlesUserUpdator } from './titlesUser/titlesUser.js';
+import { assertEnvExist } from './util/envCheck.js';
 
 dotenv.config();
 
@@ -28,6 +29,7 @@ const main = async (): Promise<void> => {
   await TeamUpdator.update(mongoClient);
   await TitleUpdator.update(mongoClient);
   await TitlesUserUpdator.update(mongoClient);
+  await LocationUpdator.update(mongoClient);
 
   await mongoClient.close();
   await redis.closeConnection();

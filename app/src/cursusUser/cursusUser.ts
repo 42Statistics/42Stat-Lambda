@@ -20,6 +20,8 @@ import {
   wildcardUserIds,
 } from './api/cursusUser.api.js';
 import { CURSUS_USERS_CACHE_KEY } from './dto/cursusUser.redis.js';
+import seine from 'la-seine';
+import { singleRequest } from '../util/requestSingle.js';
 
 export const CURSUS_USER_COLLECTION = 'cursus_users';
 
@@ -126,9 +128,7 @@ export class CursusUserUpdator {
 
   @FetchApiAction
   private static async fetchWildcard(): Promise<CursusUser[]> {
-    const dtos = await fetch(CURSUS_USER_EP.WILDCARD()).then(
-      (response) => response.json() as Promise<object[]>,
-    );
+    const dtos = await singleRequest<object[]>(CURSUS_USER_EP.WILDCARD());
 
     return parseCursusUsers(dtos);
   }
