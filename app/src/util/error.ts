@@ -13,10 +13,13 @@ export class LambdaError extends Error {
 
 export const logError = async (
   client: MongoClient,
-  error: LambdaError,
+  { name, message, udata }: LambdaError,
 ): Promise<void> => {
   try {
-    await client.db().collection(ERROR_COLLECTION).insertOne(error);
+    await client
+      .db()
+      .collection(ERROR_COLLECTION)
+      .insertOne({ name, message, udata });
   } catch {
     console.error('log failed');
   }
