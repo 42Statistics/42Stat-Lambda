@@ -43,7 +43,7 @@ export function LogAsyncEstimatedTime<This, Args extends any[], Return>(
 
     console.log(
       // todo: 진짜 모르겠네요...
-      String((this as any).name),
+      String((this as any)?.name),
       String(context.name),
       end.getTime() - start.getTime() + 'ms',
     );
