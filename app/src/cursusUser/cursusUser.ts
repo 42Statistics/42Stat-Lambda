@@ -49,7 +49,6 @@ export class CursusUserUpdator {
   ): Promise<void> {
     await this.updateCursusChanged(mongoClient);
     await this.updateActivated(mongoClient);
-    await this.updateWildcard(mongoClient);
     await this.updateCache(mongoClient, redis);
   }
 
@@ -96,8 +95,10 @@ export class CursusUserUpdator {
     mongoClient: MongoClient,
   ): Promise<void> {
     const activated = await this.fetchActivated();
+    const wildcard = await this.fetchWildcard();
 
     await upsertManyById(mongoClient, CURSUS_USER_COLLECTION, activated);
+    await upsertManyById(mongoClient, CURSUS_USER_COLLECTION, wildcard);
     // todo: 적당한 위치 찾아주기. 현재 시점에선 cursus user의 업데이트 성공을 알려주고 있지 않기
     // 때문에, 이런 조치가 필요합니다.
     await ExperienceUpdator.update(mongoClient);
@@ -116,14 +117,6 @@ export class CursusUserUpdator {
     );
 
     return parseCursusUsers(cursusUserDtos).filter(isStudent);
-  }
-
-  @UpdateAction
-  @LogAsyncEstimatedTime
-  private static async updateWildcard(mongoClient: MongoClient): Promise<void> {
-    const wildcards = await this.fetchWildcard();
-
-    await upsertManyById(mongoClient, CURSUS_USER_COLLECTION, wildcards);
   }
 
   @FetchApiAction
