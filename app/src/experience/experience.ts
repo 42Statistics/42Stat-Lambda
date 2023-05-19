@@ -13,7 +13,8 @@ import { LogAsyncEstimatedTime, UpdateAction } from '../util/decorator.js';
 import { LambdaError } from '../util/error.js';
 import { Experience } from './api/experience.api.js';
 
-export const EXPERIENCE_COLLECTION = 'experiences';
+export const EXPERIENCE_COLLECTION = 'experience_users';
+const LEVEL_COLLECTION = 'levels';
 
 type LevelTableElem = {
   lvl: number;
@@ -43,6 +44,15 @@ export class ExperienceUpdator {
     await testLevelCalculation(mongoClient);
   }
 
+  /**
+   *
+   * @description
+   * 쿼리문을 통해 업데이트 해야할 projects user 들을 불러오고, 이를 통해 experience 를 계산합니다.
+   * 쿼리문에서 걸러주지 못하는 경우는 직접 코드로 걸러내야 합니다.
+   *
+   * 쿼리문에서 걸러주지 못하는 경우
+   * - 이전 team 이 현재 team 보다 점수가 높음
+   */
   @UpdateAction
   @LogAsyncEstimatedTime
   private static async updateProjectsUserUpdated(
@@ -62,7 +72,7 @@ export class ExperienceUpdator {
           markedAt: Date;
           cursusUser: CursusUser;
           currTeam: PassedTeam;
-          experiencesBefore: number;
+          experienceUsers: Experience[];
         }
       >(
         //#region aggregation pipeline
@@ -124,15 +134,10 @@ export class ExperienceUpdator {
           },
           {
             $lookup: {
-              from: 'experiences',
+              from: EXPERIENCE_COLLECTION,
               localField: 'user.id',
               foreignField: 'userId',
-              as: 'experiencesBefore',
-            },
-          },
-          {
-            $addFields: {
-              experiencesBefore: { $sum: '$experiencesBefore.experience' },
+              as: 'experienceUsers',
             },
           },
         ],
@@ -140,48 +145,72 @@ export class ExperienceUpdator {
       )
       .toArray();
 
-    const newExperiences: Experience[] = [];
+    if (!projectsUsersUpdated.length) {
+      return;
+    }
 
-    for (const projectsUser of projectsUsersUpdated) {
-      const updatedMark = getUpdatedMark(projectsUser);
-      if (!updatedMark) {
-        continue;
-      }
+    const levelTable = await mongoClient
+      .db()
+      .collection<LevelTableElem>(LEVEL_COLLECTION)
+      .find()
+      .sort({ lvl: 1 })
+      .toArray();
 
-      const [expWithoutBonus, expWithBonus] = calculateExperienceByMark(
-        updatedMark,
-        projectsUser.project,
-      );
+    const newExperiences = projectsUsersUpdated.reduce(
+      (acc: Experience[], projectsUser) => {
+        const currMark = projectsUser.currTeam.finalMark;
+        const projectPrevExperience =
+          projectsUser.experienceUsers.find(
+            (experience) => experience.project.id === projectsUser.project.id,
+          )?.experience ?? 0;
+        const totalPrevExpereince = projectsUser.experienceUsers.reduce(
+          (experienceSum, { experience }) => experienceSum + experience,
+          0,
+        );
 
-      const levelTable = await mongoClient
-        .db()
-        .collection<LevelTableElem>('levels')
-        .find()
-        .sort({ lvl: 1 })
-        .toArray();
+        const [expWithoutBonus, expWithBonus] = calculateExperienceByMark(
+          currMark,
+          projectsUser.project,
+          projectPrevExperience,
+        );
 
-      const levelWithoutBonus = calculateLevel(
-        projectsUser.experiencesBefore + expWithoutBonus,
-        levelTable,
-      );
+        const levelWithoutBonus = calculateLevel(
+          totalPrevExpereince + expWithoutBonus,
+          levelTable,
+        );
 
-      const levelWithBonus = calculateLevel(
-        projectsUser.experiencesBefore + expWithBonus,
-        levelTable,
-      );
+        const levelWithBonus = calculateLevel(
+          totalPrevExpereince + expWithBonus,
+          levelTable,
+        );
 
-      newExperiences.push({
-        userId: projectsUser.user.id,
-        cursusId: projectsUser.cursusIds[0],
-        createdAt: projectsUser.markedAt,
-        experience:
+        // cursus user update
+        if (!projectsUser.cursusUser) {
+          throw new LambdaError('data consistency', projectsUser);
+        }
+
+        const experience =
           Math.abs(levelWithBonus - projectsUser.cursusUser.level) <
           Math.abs(levelWithoutBonus - projectsUser.cursusUser.level)
             ? expWithBonus
-            : expWithoutBonus,
-        project: projectsUser.project,
-      });
-    }
+            : expWithoutBonus;
+
+        if (!experience) {
+          return acc;
+        }
+
+        acc.push({
+          userId: projectsUser.user.id,
+          cursusId: projectsUser.cursusIds[0],
+          createdAt: projectsUser.markedAt,
+          experience,
+          project: projectsUser.project,
+        });
+
+        return acc;
+      },
+      [],
+    );
 
     if (newExperiences.length === 0) {
       return;
@@ -192,7 +221,11 @@ export class ExperienceUpdator {
       new Date(0),
     );
 
-    await mongoClient.db().collection('experiences').insertMany(newExperiences);
+    await mongoClient
+      .db()
+      .collection(EXPERIENCE_COLLECTION)
+      .insertMany(newExperiences);
+
     await setCollectionUpdatedAt(mongoClient, EXPERIENCE_COLLECTION, end);
   }
 }
@@ -237,10 +270,18 @@ const getUpdatedMark = ({ teams }: ProjectsUser): number | null => {
 const calculateExperienceByMark = (
   mark: number,
   project: Project,
+  projectPrevExperience: number,
 ): [number, number] => {
   return [
-    Math.floor(project.difficulty * (mark / 100.0)),
-    Math.floor(project.difficulty * (mark / 100.0) * 1.042),
+    Math.max(
+      Math.floor(project.difficulty * (mark / 100.0)) - projectPrevExperience,
+      0,
+    ),
+    Math.max(
+      Math.floor(project.difficulty * (mark / 100.0) * 1.042) -
+        projectPrevExperience,
+      0,
+    ),
   ];
 };
 
@@ -287,7 +328,7 @@ const testLevelCalculation = async (
     }>([
       {
         $lookup: {
-          from: 'experiences',
+          from: EXPERIENCE_COLLECTION,
           localField: 'user.id',
           foreignField: 'userId',
           as: 'experiences',
