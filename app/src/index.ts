@@ -10,6 +10,7 @@ import { TeamUpdator } from './team/team.js';
 import { TitleUpdator } from './title/title.js';
 import { TitlesUserUpdator } from './titlesUser/titlesUser.js';
 import { assertEnvExist } from './util/envCheck.js';
+import { ScoreUpdator } from './score/score.js';
 
 dotenv.config();
 
@@ -30,6 +31,7 @@ const main = async (): Promise<void> => {
   await TitleUpdator.update(mongoClient);
   await TitlesUserUpdator.update(mongoClient);
   await LocationUpdator.update(mongoClient);
+  await ScoreUpdator.update(mongoClient);
 
   await mongoClient.close();
   await redis.closeConnection();
