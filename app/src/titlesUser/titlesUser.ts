@@ -5,13 +5,12 @@ import {
   LogAsyncEstimatedTime,
   UpdateAction,
 } from '../util/decorator.js';
-import { pagedRequest } from '../util/pagedRequest.js';
+import { pagedRequestByCount } from '../util/pagedRequestByCount.js';
 import {
   TITLES_USER_EP,
   TitlesUser,
   parseTitlesUsers,
 } from './api/titlesUser.api.js';
-import { pagedRequestByCount } from '../util/pagedRequestByCount.js';
 export const TITLES_USER_COLLECTION = 'titles_users';
 
 // eslint-disable-next-line

@@ -8,7 +8,6 @@ import type { Project } from '../project/api/project.api.js';
 import { ProjectsUser } from '../projectUser/api/projectsUser.api.js';
 import { PROJECTS_USER_COLLECTION } from '../projectUser/projectsUser.js';
 import type { PassedTeam } from '../team/api/team.api.js';
-import { isPassedTeam } from '../team/api/team.api.js';
 import { LogAsyncEstimatedTime, UpdateAction } from '../util/decorator.js';
 import { LambdaError } from '../util/error.js';
 import { Experience } from './api/experience.api.js';
@@ -70,7 +69,7 @@ export class ExperienceUpdator {
         Omit<ProjectsUser, 'project' | 'markedAt'> & {
           project: Project;
           markedAt: Date;
-          cursusUser: CursusUser;
+          cursusUser?: CursusUser;
           currTeam: PassedTeam;
           experienceUsers: Experience[];
         }
@@ -229,35 +228,6 @@ export class ExperienceUpdator {
     await setCollectionUpdatedAt(mongoClient, EXPERIENCE_COLLECTION, end);
   }
 }
-
-/**
- *
- * @description
- * 지난 기록보다 더 높은 점수를 기록했는지 판별하고, 높다면 그 차이를 반환하는 함수입니다.
- *
- * team을 정렬해서 가져왔기 때문에, 마지막 team 이 현재 판단해야 하는 team
- * 이라고 생각할 수 있습니다.
- *
- * @returns 점수가 더 높아졌다면 높아진 양을, 그렇지 않다면 null 이 반환됩니다.
- */
-const getUpdatedMark = ({ teams }: ProjectsUser): number | null => {
-  const currTeam = teams[teams.length - 1];
-  if (!isPassedTeam(currTeam)) {
-    return null;
-  }
-
-  const bestMarkBefore = teams
-    .slice(0, teams.length - 1)
-    .filter(isPassedTeam)
-    .map((team) => team.finalMark)
-    .reduce((prev, finalMark) => Math.max(prev, finalMark), 0);
-
-  if (bestMarkBefore >= currTeam.finalMark) {
-    return null;
-  }
-
-  return currTeam.finalMark - bestMarkBefore;
-};
 
 /**
  *

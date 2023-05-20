@@ -12,6 +12,7 @@ import {
   UpdateAction,
 } from '../util/decorator.js';
 import { pagedRequest } from '../util/pagedRequest.js';
+import { singleRequest } from '../util/requestSingle.js';
 import {
   CURSUS_USER_EP,
   CursusUser,
@@ -20,8 +21,6 @@ import {
   wildcardUserIds,
 } from './api/cursusUser.api.js';
 import { CURSUS_USERS_CACHE_KEY } from './dto/cursusUser.redis.js';
-import seine from 'la-seine';
-import { singleRequest } from '../util/requestSingle.js';
 
 export const CURSUS_USER_COLLECTION = 'cursus_users';
 

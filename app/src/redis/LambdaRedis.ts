@@ -88,6 +88,7 @@ export class LambdaRedis {
  * redis 와 상호작용할 때 발생할 수 있는 exception 을 ```LambdaErorr``` 로 바꿔주는 데코레이터
  * 입니다.
  */
+// eslint-disable-next-line
 function RedisAction<This, Args extends any[], Return>(
   target: (this: This, ...args: Args) => Return,
   context: ClassMethodDecoratorContext<
