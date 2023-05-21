@@ -22,6 +22,21 @@ type CountByCoalitionId = {
 
 // eslint-disable-next-line
 export class ScoreUpdator {
+  /**
+   *
+   * @description
+   * @see updateByCoalition   C: 코알리숑 별 얻은 score
+   *
+   * 2023-05 기준
+   * 필요 요청 수: C(4 ~ 8)
+   * 예상 소요 시간: 5 ~ 10초
+   *
+   * coalition 별로 한번씩 요청을 보내보아야 하지만, 체육대회 등의 행사가 있어 모든 coalition user
+   * 에게 score 가 지급되는게 아니면, 확인용 요청 (1) + 받아오는 요청 (1) 으로 불변함.
+   *
+   * 추후 ```pagedRequestByCount``` 가 확인용 요청과 받아오는 요청을 구분하지
+   * 않게 로직이 개선되면 절반으로 줄일 수 있음.
+   */
   static async update(mongoClient: MongoClient): Promise<void> {
     await this.updateByCoalition(mongoClient);
   }

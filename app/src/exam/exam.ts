@@ -22,8 +22,8 @@ export class ExamUpdator {
    * @see updateUpdated   U: 갱신 된 exam
    *
    * 2023-05 기준
-   * 필요 요청 수: U (1)
-   * 예상 소요 시간: 5초
+   * 필요 요청 수: U(1)
+   * 예상 소요 시간: 3초
    *
    * 버그가 있는 것을 제외하면 그다지 변수는 없음.
    */

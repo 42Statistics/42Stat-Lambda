@@ -18,10 +18,10 @@ export class TitlesUserUpdator {
   /**
    *
    * @description
-   * @see updateAll   L: 전체 titlesUser
+   * @see updateAll   A: 전체 titlesUser
    *
    * 2023-05 기준
-   * 필요 요청 수: L(150 ~ 200)
+   * 필요 요청 수: A(150 ~ )
    * 예상 소요 시간: 3분 이상
    *
    * 아무런 인자를 넘길 수 없기 때문에, 테스트 요청을 하나 보내어 받아와야 함.
@@ -43,7 +43,7 @@ export class TitlesUserUpdator {
   @FetchApiAction
   private static async fetchAll(): Promise<TitlesUser[]> {
     const titlesUserDtos = await pagedRequestByCount(
-      TITLES_USER_EP.FROM_LAST_PAGE(),
+      TITLES_USER_EP.ALL(),
       0,
       100,
     );
