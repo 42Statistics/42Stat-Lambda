@@ -10,8 +10,6 @@ const userImageSchema = z.object({
   }),
 });
 
-const userImageSchema_ = userImageSchema.passthrough();
-
 export const userSchema = z.object({
   id: z.number(),
   email: z.string(),
@@ -36,11 +34,6 @@ export const userSchema = z.object({
   'alumni?': z.boolean(),
   'active?': z.boolean(),
 });
-
-export const userSchema_ = userSchema
-  .omit({ image: true })
-  .extend({ image: userImageSchema_.nullable() })
-  .passthrough();
 
 export const cursusSchema = z.object({
   id: z.number(),

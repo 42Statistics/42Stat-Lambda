@@ -1,57 +1,44 @@
 import { z } from 'zod';
+import { languageSchema } from '../../language/api/language.schema.js';
+import { flagSchema, scaleTeamBaseSchema } from './scaleTeam.schema.base.js';
+import { teamBaseSchema, teamBaseSchema_ } from '../../team/api/team.schema.js';
 import { userSchema } from '../../cursusUser/api/cursusUser.schema.js';
 
-const flagSchema = z.object({
+const scaleSchema = z.object({
   id: z.number(),
+  evaluationId: z.number(),
   name: z.string(),
-  positive: z.boolean(),
-  // icon: z.string().nullable(),
+  isPrimary: z.boolean(),
+  comment: z.string(),
+  introductionMd: z.string(),
+  disclaimerMd: z.string(),
+  guidelinesMd: z.string(),
   createdAt: z.coerce.date(),
-  updatedAt: z.coerce.date(),
+  correctionNumber: z.number(),
+  duration: z.number(),
+  manualSubscription: z.boolean(),
+  languages: languageSchema.array(),
+  flags: flagSchema.array(),
+  free: z.boolean(),
 });
 
-const flagSchema_ = flagSchema.passthrough();
-
-const scaleTeamUserSchema = userSchema.pick({
-  id: true,
-  login: true,
-  url: true,
-});
-
-const scaleTeamUserSchema_ = scaleTeamUserSchema.passthrough();
-
-const correctedsSchema = z.union([scaleTeamUserSchema.array(), z.string()]);
-const correctedsSchema_ = z.union([scaleTeamUserSchema_.array(), z.string()]);
-
-const correctorSchema = z.union([scaleTeamUserSchema, z.string()]);
-const correctorSchema_ = z.union([scaleTeamUserSchema_, z.string()]);
-
-export const scaleTeamBaseSchema = z.object({
+const feedbackSchema = z.object({
   id: z.number(),
-  scaleId: z.number(),
-  comment: z.string().nullable(),
+  user: userSchema.pick({ id: true, login: true, url: true }),
+  feedbackable_type: z.string(),
+  feedbackableId: z.number(),
+  comment: z.string(),
+  rating: z.number(),
   createdAt: z.coerce.date(),
-  updatedAt: z.coerce.date(),
-  feedback: z.string().nullable(),
-  finalMark: z.number().nullable(),
-  flag: flagSchema,
-  beginAt: z.coerce.date(),
-  correcteds: correctedsSchema,
-  corrector: correctorSchema,
-  truant: z.union([scaleTeamUserSchema, z.object({})]),
-  filledAt: z.coerce.date().nullable(),
-  // questionsWithAnswers: [],
 });
 
-export const scaleTeamBaseSchema_ = scaleTeamBaseSchema
-  .omit({
-    flag: true,
-    correcteds: true,
-    corrector: true,
-  })
-  .extend({
-    flag: flagSchema_,
-    correcteds: correctedsSchema_,
-    corrector: correctorSchema_,
-  })
+export const scaleTeamSchema = scaleTeamBaseSchema.extend({
+  scale: scaleSchema,
+  team: teamBaseSchema,
+  feedbacks: feedbackSchema.array(),
+});
+
+export const scaleTeamSchema_ = scaleTeamSchema
+  .omit({ team: true })
+  .extend({ team: teamBaseSchema_ })
   .passthrough();

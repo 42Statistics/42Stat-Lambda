@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { campusSchema, campusSchema_ } from '../../campus/api/campus.schema.js';
 import {
   cursusSchema,
   cursusSchema_,
@@ -7,41 +8,6 @@ import {
   projectSchema,
   projectSchema_,
 } from '../../project/api/project.schema.js';
-
-const languageSchema = z.object({
-  id: z.number(),
-  name: z.string(),
-  identifier: z.string(),
-  createdAt: z.coerce.date(),
-  updatedAt: z.coerce.date(),
-});
-
-const languageSchema_ = languageSchema.passthrough();
-
-const campusSchema = z.object({
-  id: z.number(),
-  name: z.string(),
-  timeZone: z.string(),
-  language: languageSchema,
-  usersCount: z.number(),
-  // vogsphereId: z.number(),
-  // country: z.string(),
-  // address: 'Gaepo Digital Innovation Park, 416, Gaepo-ro, Gangnam-gu,',
-  // zip: '06324',
-  // city: 'Seoul',
-  // website: 'https://www.42seoul.kr',
-  // facebook: 'https://www.facebook.com/inno.aca/  ',
-  // twitter: '',
-  // active: true,
-  // public: true,
-  // emailExtension: '42seoul.kr',
-  // defaultHiddenPhone: false,
-});
-
-const campusSchema_ = campusSchema
-  .omit({ language: true })
-  .extend({ language: languageSchema_ })
-  .passthrough();
 
 export const examSchema = z.object({
   id: z.number(),

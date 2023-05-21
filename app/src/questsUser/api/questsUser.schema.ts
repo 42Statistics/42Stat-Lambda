@@ -1,6 +1,5 @@
 import { z } from 'zod';
 import { userSchema } from '../../cursusUser/api/cursusUser.schema.js';
-import { userSchema_ } from '../../cursusUser/api/cursusUser.schema.js';
 
 const questSchema = z.object({
   id: z.number(),
@@ -33,6 +32,6 @@ export const questsUserSchema = z.object({
 });
 
 export const questsUserSchema_ = questsUserSchema
-  .omit({ quest: true, user: true })
-  .extend({ quest: questSchema_, user: userSchema_ })
+  .omit({ quest: true })
+  .extend({ quest: questSchema_ })
   .passthrough();

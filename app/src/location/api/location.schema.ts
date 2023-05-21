@@ -1,8 +1,5 @@
 import { z } from 'zod';
-import {
-  userSchema,
-  userSchema_,
-} from '../../cursusUser/api/cursusUser.schema.js';
+import { userSchema } from '../../cursusUser/api/cursusUser.schema.js';
 
 export const locationSchema = z.object({
   endAt: z.coerce.date().nullable(),
@@ -13,8 +10,3 @@ export const locationSchema = z.object({
   campusId: z.number(),
   user: userSchema,
 });
-
-export const locationSchema_ = locationSchema
-  .omit({ user: true })
-  .extend({ user: userSchema_ })
-  .passthrough();

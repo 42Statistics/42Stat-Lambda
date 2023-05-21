@@ -1,8 +1,5 @@
 import { z } from 'zod';
-import {
-  userSchema,
-  userSchema_,
-} from '../../cursusUser/api/cursusUser.schema.js';
+import { userSchema } from '../../cursusUser/api/cursusUser.schema.js';
 import {
   projectBaseSchema,
   projectBaseSchema_,
@@ -30,11 +27,9 @@ export const projectsUserSchema = z.object({
 export const projectsUserSchema_ = projectsUserSchema
   .omit({
     project: true,
-    user: true,
     teams: true,
   })
   .extend({
     project: projectBaseSchema_,
-    user: userSchema_,
     teams: teamBaseSchema_.array(),
   });

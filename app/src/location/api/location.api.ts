@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { parseFromDtoMany } from '../../util/parseFromDto.js';
-import { locationSchema, locationSchema_ } from './location.schema.js';
+import { locationSchema } from './location.schema.js';
+import { SEOUL_CAMPUS_ID } from '../../campus/api/campus.api.js';
 
 export type Location = z.infer<typeof locationSchema>;
 
@@ -11,13 +12,13 @@ export type Location = z.infer<typeof locationSchema>;
  */
 const ONGOING = (): URL =>
   new URL(
-    `https://api.intra.42.fr/v2/campus/29/locations?filter[campus_id]=29&filter[end]=false`,
+    `https://api.intra.42.fr/v2/campus/${SEOUL_CAMPUS_ID}/locations?filter[campus_id]=29&filter[end]=false`,
   );
 
 const ENDED = (start: Date, end: Date): URL =>
   new URL(
     // todo: campus id 분리
-    `https://api.intra.42.fr/v2/campus/29/locations?filter[campus_id]=29&filter[end]=true&range[end_at]=${start.toISOString()},${end.toISOString()}&sort=begin_at`,
+    `https://api.intra.42.fr/v2/campus/${SEOUL_CAMPUS_ID}/locations?filter[campus_id]=29&filter[end]=true&range[end_at]=${start.toISOString()},${end.toISOString()}&sort=begin_at`,
   );
 
 export const LOCATION_EP = {
@@ -26,7 +27,7 @@ export const LOCATION_EP = {
 } as const;
 
 export const parseLocations = (dtos: object[]): Location[] =>
-  parseFromDtoMany(dtos, locationSchema_, 'locations');
+  parseFromDtoMany(dtos, locationSchema, 'locations');
 
 export const isCluster = (location: Location): boolean =>
   location.host.includes('c') &&

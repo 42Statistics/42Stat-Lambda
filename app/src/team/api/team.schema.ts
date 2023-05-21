@@ -3,7 +3,7 @@ import { userSchema } from '../../cursusUser/api/cursusUser.schema.js';
 import {
   scaleTeamBaseSchema,
   scaleTeamBaseSchema_,
-} from '../../scaleTeam/api/scaleTeam.schema.js';
+} from '../../scaleTeam/api/scaleTeam.schema.base.js';
 
 const teamUserSchema = userSchema
   .pick({
@@ -17,8 +17,6 @@ const teamUserSchema = userSchema
     validated: z.boolean(),
     projectsUserId: z.number(),
   });
-
-const teamUserSchema_ = teamUserSchema.passthrough();
 
 export const teamBaseSchema = z.object({
   id: z.number(),
@@ -43,10 +41,7 @@ export const teamBaseSchema = z.object({
   users: teamUserSchema.array(),
 });
 
-export const teamBaseSchema_ = teamBaseSchema
-  .omit({ users: true })
-  .extend({ users: teamUserSchema_.array() })
-  .passthrough();
+export const teamBaseSchema_ = teamBaseSchema.passthrough();
 
 export const teamSchema = teamBaseSchema.extend({
   scaleTeams: scaleTeamBaseSchema.array(),
