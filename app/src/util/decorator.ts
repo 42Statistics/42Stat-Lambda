@@ -29,7 +29,11 @@ export function Bound(
  * @description
  * 비동기 함수들의 실행 시간을 콘솔에 출력해주는 데코레이터 입니다.
  */
-export function LogAsyncEstimatedTime<This, Args extends any[], Return>(
+export function LogAsyncEstimatedTime<
+  This extends { name: string },
+  Args extends any[],
+  Return,
+>(
   target: (this: This, ...args: Args) => Promise<Return>,
   context: ClassMethodDecoratorContext<
     This,
@@ -42,8 +46,7 @@ export function LogAsyncEstimatedTime<This, Args extends any[], Return>(
     const end = new Date();
 
     console.log(
-      // todo: 진짜 모르겠네요...
-      String((this as any)?.name),
+      String(this.name),
       String(context.name),
       end.getTime() - start.getTime() + 'ms',
     );
