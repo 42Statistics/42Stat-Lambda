@@ -5,16 +5,15 @@ import { ExamUpdator } from './exam/exam.js';
 import { LocationUpdator } from './location/location.js';
 import { createMongoClient } from './mongodb/mongodb.js';
 import { ProjectsUserUpdator } from './projectUser/projectsUser.js';
+import { QuestsUserUpdator } from './questsUser/questsUser.js';
 import { LambdaRedis } from './redis/LambdaRedis.js';
+import { ScoreUpdator } from './score/score.js';
 import { TeamUpdator } from './team/team.js';
 import { TitleUpdator } from './title/title.js';
 import { TitlesUserUpdator } from './titlesUser/titlesUser.js';
 import { assertEnvExist } from './util/envCheck.js';
-import { ScoreUpdator } from './score/score.js';
 
 dotenv.config();
-
-// todo:  cache, updator interface 만들어서 배열 형태로 관리
 
 const main = async (): Promise<void> => {
   const mongoClient = await createMongoClient();
@@ -32,6 +31,7 @@ const main = async (): Promise<void> => {
   await TitlesUserUpdator.update(mongoClient);
   await LocationUpdator.update(mongoClient);
   await ScoreUpdator.update(mongoClient);
+  await QuestsUserUpdator.update(mongoClient);
 
   await mongoClient.close();
   await redis.closeConnection();
