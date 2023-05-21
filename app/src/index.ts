@@ -1,10 +1,12 @@
 import dotenv from 'dotenv';
 import { initSeine } from './connection.js';
 import { CursusUserUpdator } from './cursusUser/cursusUser.js';
+import { EventUpdator } from './event/event.js';
+import { EventsUserUpdator } from './eventsUser/eventsUser.js';
 import { ExamUpdator } from './exam/exam.js';
 import { LocationUpdator } from './location/location.js';
 import { createMongoClient } from './mongodb/mongodb.js';
-import { ProjectsUserUpdator } from './projectUser/projectsUser.js';
+import { ProjectsUserUpdator } from './projectsUser/projectsUser.js';
 import { QuestsUserUpdator } from './questsUser/questsUser.js';
 import { LambdaRedis } from './redis/LambdaRedis.js';
 import { ScoreUpdator } from './score/score.js';
@@ -32,6 +34,8 @@ const main = async (): Promise<void> => {
   await LocationUpdator.update(mongoClient);
   await ScoreUpdator.update(mongoClient);
   await QuestsUserUpdator.update(mongoClient);
+  await EventUpdator.update(mongoClient);
+  await EventsUserUpdator.update(mongoClient);
 
   await mongoClient.close();
   await redis.closeConnection();
