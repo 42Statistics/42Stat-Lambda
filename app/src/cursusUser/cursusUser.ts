@@ -109,13 +109,9 @@ export class CursusUserUpdator {
    */
   @FetchApiAction
   private static async fetchActivated(): Promise<CursusUser[]> {
-    const cursusUserDtos = await pagedRequest(
-      CURSUS_USER_EP.ACTIVATED(),
-      100,
-      10,
-    );
+    const activated = await pagedRequest(CURSUS_USER_EP.ACTIVATED(), 100, 10);
 
-    return parseCursusUsers(cursusUserDtos).filter(isStudent);
+    return parseCursusUsers(activated).filter(isStudent);
   }
 
   @FetchApiAction

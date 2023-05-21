@@ -5,7 +5,7 @@ export const scoreSchema = z.object({
   coalitionId: z.number(),
   // scoreable_id: z.nullable(z.coerce.string()),
   // scoreable_type: z.nullable(z.string()),
-  coalitionsUserId: z.nullable(z.number()),
+  coalitionsUserId: z.number().nullable(),
   // calculation_id: z.nullable(z.coerce.string()),
   value: z.number(),
   // reason: z.string(),
