@@ -77,7 +77,7 @@ export class ScoreUpdator {
   private static async fetchScoreByCoalition(
     coalitionScoreCounts: CountByCoalitionId[],
   ): Promise<Score[]> {
-    const dtos: object[] = [];
+    const scoreDtos: object[] = [];
 
     for (const { coalitionId, count } of coalitionScoreCounts) {
       const currDtos = await pagedRequestByCount(
@@ -85,9 +85,9 @@ export class ScoreUpdator {
         count,
       );
 
-      dtos.push(...currDtos);
+      scoreDtos.push(...currDtos);
     }
 
-    return parseScores(dtos);
+    return parseScores(scoreDtos);
   }
 }

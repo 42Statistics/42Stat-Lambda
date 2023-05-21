@@ -1,7 +1,7 @@
 import { z } from 'zod';
-// eslint-disable-next-line
-import type { ProjectsUserUpdator } from '../../projectUser/projectsUser.js';
 import { projectBaseSchema } from '../../project/api/project.schema.js';
+// eslint-disable-next-line
+import type { ProjectsUserUpdator } from '../../projectsUser/projectsUser.js';
 
 /**
  *

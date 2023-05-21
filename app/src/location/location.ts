@@ -50,9 +50,9 @@ export class LocationUpdator {
 
   @FetchApiAction
   private static async fetchOngoing(): Promise<Location[]> {
-    const locationsDto = await pagedRequest(LOCATION_EP.ONGOING(), 100, 4);
+    const locationDtos = await pagedRequest(LOCATION_EP.ONGOING(), 100, 4);
 
-    return parseLocations(locationsDto);
+    return parseLocations(locationDtos);
   }
 
   @UpdateAction
@@ -74,12 +74,12 @@ export class LocationUpdator {
 
   @FetchApiAction
   private static async fetchEnded(start: Date, end: Date): Promise<Location[]> {
-    const locationsDto = await pagedRequest(
+    const locationDtos = await pagedRequest(
       LOCATION_EP.ENDED(start, end),
       100,
       4,
     );
 
-    return parseLocations(locationsDto);
+    return parseLocations(locationDtos);
   }
 }

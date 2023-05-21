@@ -24,6 +24,7 @@ src
 - endpoint 가 filter 등 인자를 받는 경우 => 해당 endpoint 에서 처리하고자 하는 상황
 - endpoint 가 아무 인자도 받지 않는 경우 => 해당 endpoint 에서 반환하는 데이터 타입 이름
 - 42 intra 에서 받아온 데이터들 => 타입이름 + Dtos
+  - 사실 dtos 로 충분히 의미를 나타낼 수 있음...
 
 ### api 마다 정의해야 하는 함수
 

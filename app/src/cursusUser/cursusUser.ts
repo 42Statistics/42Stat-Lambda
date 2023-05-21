@@ -79,13 +79,13 @@ export class CursusUserUpdator {
     start: Date,
     end: Date,
   ): Promise<CursusUser[]> {
-    const cursusUserDto = await pagedRequest(
+    const cursusUserDtos = await pagedRequest(
       CURSUS_USER_EP.CURSUS_CHANGED(start, end),
       100,
       4,
     );
 
-    return parseCursusUsers(cursusUserDto).filter(isStudent);
+    return parseCursusUsers(cursusUserDtos).filter(isStudent);
   }
 
   @UpdateAction
@@ -109,16 +109,22 @@ export class CursusUserUpdator {
    */
   @FetchApiAction
   private static async fetchActivated(): Promise<CursusUser[]> {
-    const activated = await pagedRequest(CURSUS_USER_EP.ACTIVATED(), 100, 10);
+    const cursusUserDtos = await pagedRequest(
+      CURSUS_USER_EP.ACTIVATED(),
+      100,
+      10,
+    );
 
-    return parseCursusUsers(activated).filter(isStudent);
+    return parseCursusUsers(cursusUserDtos).filter(isStudent);
   }
 
   @FetchApiAction
   private static async fetchWildcard(): Promise<CursusUser[]> {
-    const dtos = await singleRequest<object[]>(CURSUS_USER_EP.WILDCARD());
+    const cursusUserDtos = await singleRequest<object[]>(
+      CURSUS_USER_EP.WILDCARD(),
+    );
 
-    return parseCursusUsers(dtos);
+    return parseCursusUsers(cursusUserDtos);
   }
 
   @UpdateAction

@@ -61,13 +61,13 @@ export class QuestsUserUpdator {
     start: Date,
     end: Date,
   ): Promise<QuestsUser[]> {
-    const updated = await pagedRequest(
+    const questsUserDtos = await pagedRequest(
       QUESTS_USER_EP.UPDATED(start, end),
       100,
       1,
     );
 
-    return parseQuestsUsers(updated);
+    return parseQuestsUsers(questsUserDtos);
   }
 
   @FetchApiAction
@@ -75,12 +75,12 @@ export class QuestsUserUpdator {
     start: Date,
     end: Date,
   ): Promise<QuestsUser[]> {
-    const wildcard = await pagedRequest(
+    const questsUserDtos = await pagedRequest(
       QUESTS_USER_EP.WILDCARD(start, end),
       100,
       1,
     );
 
-    return parseQuestsUsers(wildcard);
+    return parseQuestsUsers(questsUserDtos);
   }
 }

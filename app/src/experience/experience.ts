@@ -5,8 +5,8 @@ import {
   setCollectionUpdatedAt,
 } from '../mongodb/mongodb.js';
 import type { Project } from '../project/api/project.api.js';
-import { ProjectsUser } from '../projectUser/api/projectsUser.api.js';
-import { PROJECTS_USER_COLLECTION } from '../projectUser/projectsUser.js';
+import { ProjectsUser } from '../projectsUser/api/projectsUser.api.js';
+import { PROJECTS_USER_COLLECTION } from '../projectsUser/projectsUser.js';
 import type { PassedTeam } from '../team/api/team.api.js';
 import { LogAsyncEstimatedTime, UpdateAction } from '../util/decorator.js';
 import { LambdaError } from '../util/error.js';
