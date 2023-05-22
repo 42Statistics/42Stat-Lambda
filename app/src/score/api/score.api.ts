@@ -4,13 +4,6 @@ import { parseFromDtoMany } from '../../util/parseFromDto.js';
 
 export type Score = z.infer<typeof scoreSchema>;
 
-/**
- *
- * @description
- * gun, gon, gam, lee
- */
-export const targetCoalitionIds = [85, 86, 87, 88] as const;
-
 const BY_COALITION = (coalitionId: number): string =>
   `https://api.intra.42.fr/v2/coalitions/${coalitionId}/scores?sort=updated_at`;
 

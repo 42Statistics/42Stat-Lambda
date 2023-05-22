@@ -1,4 +1,5 @@
 import { MongoClient } from 'mongodb';
+import type { COALITIONS_USER_COLLECTION } from '../coalitionsUser/coalitionsUser.js';
 import type { CURSUS_USER_COLLECTION } from '../cursusUser/cursusUser.js';
 import type { EVENT_COLLECTION } from '../event/event.js';
 import type { EVENTS_USER_COLLECTION } from '../eventsUser/eventsUser.js';
@@ -35,7 +36,8 @@ type LogUpdatedAt =
   | typeof EVENT_COLLECTION
   | typeof EVENTS_USER_COLLECTION
   | typeof SCALE_TEAM_COLLECTION
-  | typeof PROJECT_COLLECTION;
+  | typeof PROJECT_COLLECTION
+  | typeof COALITIONS_USER_COLLECTION;
 
 export const getCollectionUpdatedAt = async (
   client: MongoClient,

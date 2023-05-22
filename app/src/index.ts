@@ -1,4 +1,5 @@
 import dotenv from 'dotenv';
+import { CoalitionsUserUpdator } from './coalitionsUser/coalitionsUser.js';
 import { initSeine } from './connection.js';
 import { CursusUserUpdator } from './cursusUser/cursusUser.js';
 import { EventUpdator } from './event/event.js';
@@ -40,6 +41,7 @@ const main = async (): Promise<void> => {
   await EventsUserUpdator.update(mongoClient);
   await ScaleTeamUpdator.update(mongoClient);
   await ProjectUpdator.update(mongoClient);
+  await CoalitionsUserUpdator.update(mongoClient);
 
   await mongoClient.close();
   await redis.closeConnection();

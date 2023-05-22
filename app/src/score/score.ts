@@ -6,12 +6,8 @@ import {
   UpdateAction,
 } from '../util/decorator.js';
 import { pagedRequestByCount } from '../util/pagedRequestByCount.js';
-import {
-  SCORE_EP,
-  Score,
-  parseScores,
-  targetCoalitionIds,
-} from './api/score.api.js';
+import { SCORE_EP, Score, parseScores } from './api/score.api.js';
+import { SEOUL_COALITION_ID } from '../coalition/api/coalition.api.js';
 
 export const SCORE_COLLECTION = 'scores';
 
@@ -52,7 +48,7 @@ export class ScoreUpdator {
       .aggregate<CountByCoalitionId>([
         {
           $match: {
-            coalitionId: { $in: targetCoalitionIds },
+            coalitionId: { $in: SEOUL_COALITION_ID },
           },
         },
         {
@@ -75,7 +71,7 @@ export class ScoreUpdator {
       .toArray();
 
     const byCoalition = await ScoreUpdator.fetchScoreByCoalition(
-      targetCoalitionIds.map((coalitionId) => ({
+      SEOUL_COALITION_ID.map((coalitionId) => ({
         coalitionId: coalitionId,
         count:
           coalitionScoreCounts.find(
