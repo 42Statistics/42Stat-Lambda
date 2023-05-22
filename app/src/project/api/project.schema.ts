@@ -10,7 +10,7 @@ export const projectBaseSchema = z.object({
 export const projectBaseSchema_ = projectBaseSchema.passthrough();
 
 export const projectSchema = projectBaseSchema.extend({
-  difficulty: z.number(),
+  difficulty: z.number().nullable(),
   // children: [],
   // attachments: [],
   createdAt: z.coerce.date(),

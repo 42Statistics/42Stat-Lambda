@@ -244,11 +244,12 @@ const calculateExperienceByMark = (
 ): [number, number] => {
   return [
     Math.max(
-      Math.floor(project.difficulty * (mark / 100.0)) - projectPrevExperience,
+      Math.floor((project.difficulty ?? 0) * (mark / 100.0)) -
+        projectPrevExperience,
       0,
     ),
     Math.max(
-      Math.floor(project.difficulty * (mark / 100.0) * 1.042) -
+      Math.floor((project.difficulty ?? 0) * (mark / 100.0) * 1.042) -
         projectPrevExperience,
       0,
     ),

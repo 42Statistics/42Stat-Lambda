@@ -6,6 +6,7 @@ import { EventsUserUpdator } from './eventsUser/eventsUser.js';
 import { ExamUpdator } from './exam/exam.js';
 import { LocationUpdator } from './location/location.js';
 import { createMongoClient } from './mongodb/mongodb.js';
+import { ProjectUpdator } from './project/project.js';
 import { ProjectsUserUpdator } from './projectsUser/projectsUser.js';
 import { QuestsUserUpdator } from './questsUser/questsUser.js';
 import { LambdaRedis } from './redis/LambdaRedis.js';
@@ -38,6 +39,7 @@ const main = async (): Promise<void> => {
   await EventUpdator.update(mongoClient);
   await EventsUserUpdator.update(mongoClient);
   await ScaleTeamUpdator.update(mongoClient);
+  await ProjectUpdator.update(mongoClient);
 
   await mongoClient.close();
   await redis.closeConnection();
