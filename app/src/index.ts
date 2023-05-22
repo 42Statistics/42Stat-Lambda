@@ -1,4 +1,5 @@
 import dotenv from 'dotenv';
+import { MongoClient } from 'mongodb';
 import { initSeine } from './connection.js';
 import { CursusUserUpdator } from './cursusUser/cursusUser.js';
 import { EventUpdator } from './event/event.js';
@@ -9,17 +10,17 @@ import { createMongoClient } from './mongodb/mongodb.js';
 import { ProjectsUserUpdator } from './projectsUser/projectsUser.js';
 import { QuestsUserUpdator } from './questsUser/questsUser.js';
 import { LambdaRedis } from './redis/LambdaRedis.js';
+import { ScaleTeamUpdator } from './scaleTeam/scaleTeam.js';
 import { ScoreUpdator } from './score/score.js';
 import { TeamUpdator } from './team/team.js';
 import { TitleUpdator } from './title/title.js';
 import { TitlesUserUpdator } from './titlesUser/titlesUser.js';
 import { assertEnvExist } from './util/envCheck.js';
-import { MongoClient } from 'mongodb';
 
 dotenv.config();
 
 type Updator = {
-  update: (mongoClient: MongoClient, ...args: any[]) => Promise<void>;
+  update: (mongoClient: MongoClient, lambdaRedis: LambdaRedis) => Promise<void>;
 };
 
 const main = async (): Promise<void> => {
@@ -42,6 +43,7 @@ const main = async (): Promise<void> => {
     QuestsUserUpdator,
     EventUpdator,
     EventsUserUpdator,
+    ScaleTeamUpdator,
   ];
 
   for (const updator of updators) {

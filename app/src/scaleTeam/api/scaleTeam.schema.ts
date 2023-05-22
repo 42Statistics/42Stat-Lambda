@@ -24,11 +24,11 @@ const scaleSchema = z.object({
 
 const feedbackSchema = z.object({
   id: z.number(),
-  user: userSchema.pick({ id: true, login: true, url: true }),
-  feedbackable_type: z.string(),
+  user: userSchema.pick({ id: true, login: true, url: true }).nullable(),
+  feedbackableType: z.string(),
   feedbackableId: z.number(),
   comment: z.string(),
-  rating: z.number(),
+  rating: z.number().nullable(),
   createdAt: z.coerce.date(),
 });
 

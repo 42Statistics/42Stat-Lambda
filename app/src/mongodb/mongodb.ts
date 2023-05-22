@@ -7,6 +7,7 @@ import type { EXPERIENCE_COLLECTION } from '../experience/experience.js';
 import type { LOCATION_COLLECTION } from '../location/location.js';
 import type { PROJECTS_USER_COLLECTION } from '../projectsUser/projectsUser.js';
 import type { QUESTS_USER_COLLECTION } from '../questsUser/questsUser.js';
+import type { SCALE_TEAM_COLLECTION } from '../scaleTeam/scaleTeam.js';
 import type { TEAM_COLLECTION } from '../team/team.js';
 import { LambdaError } from '../util/error.js';
 
@@ -31,7 +32,8 @@ type LogUpdatedAt =
   | typeof LOCATION_COLLECTION
   | typeof QUESTS_USER_COLLECTION
   | typeof EVENT_COLLECTION
-  | typeof EVENTS_USER_COLLECTION;
+  | typeof EVENTS_USER_COLLECTION
+  | typeof SCALE_TEAM_COLLECTION;
 
 export const getCollectionUpdatedAt = async (
   client: MongoClient,
