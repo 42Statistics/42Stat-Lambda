@@ -1,5 +1,10 @@
 import type { MongoClient } from 'mongodb';
 import {
+  getCollectionUpdatedAt,
+  setCollectionUpdatedAt,
+  upsertManyById,
+} from '../mongodb/mongodb.js';
+import {
   FetchApiAction,
   LogAsyncEstimatedTime,
   UpdateAction,
@@ -10,11 +15,6 @@ import {
   QuestsUser,
   parseQuestsUsers,
 } from './api/questsUser.api.js';
-import {
-  getCollectionUpdatedAt,
-  setCollectionUpdatedAt,
-  upsertManyById,
-} from '../mongodb/mongodb.js';
 
 export const QUESTS_USER_COLLECTION = 'quests_users';
 
@@ -32,7 +32,7 @@ export class QuestsUserUpdator {
    * 한번에 100개 이상의 quests user 가 생기거나 변하지 않는 이상 불변함.
    */
   static async update(mongoClient: MongoClient): Promise<void> {
-    await this.updateUpdated(mongoClient);
+    await QuestsUserUpdator.updateUpdated(mongoClient);
   }
 
   @UpdateAction
@@ -45,8 +45,8 @@ export class QuestsUserUpdator {
 
     const end = new Date();
 
-    const updated = await this.fetchUpdated(start, end);
-    const wildcard = await this.fetchWildcard(start, end);
+    const updated = await QuestsUserUpdator.fetchUpdated(start, end);
+    const wildcard = await QuestsUserUpdator.fetchWildcard(start, end);
 
     await upsertManyById(mongoClient, QUESTS_USER_COLLECTION, [
       ...updated,

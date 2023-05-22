@@ -38,7 +38,7 @@ export class EventsUserUpdator {
    * 현재로썬 event 를 바로 직전에 갱신하기 때문에, 그럴 가능성이 없다고 생각 중.
    */
   static async update(mongoClient: MongoClient): Promise<void> {
-    await this.updateByEvent(mongoClient);
+    await EventsUserUpdator.updateByEvent(mongoClient);
   }
 
   @UpdateAction
@@ -62,7 +62,7 @@ export class EventsUserUpdator {
       return;
     }
 
-    const byEvent = await this.fetchByEvent(eventIds);
+    const byEvent = await EventsUserUpdator.fetchByEvent(eventIds);
 
     await upsertManyById(mongoClient, EVENTS_USER_COLLECTION, byEvent);
     await setCollectionUpdatedAt(mongoClient, EVENTS_USER_COLLECTION, end);

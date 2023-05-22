@@ -35,7 +35,7 @@ export class ProjectsUserUpdator {
    * 피신 기간이나 이그잼이 있는 날에는 요청 수가 증가할 가능성이 높음.
    */
   static async update(mongoClient: MongoClient): Promise<void> {
-    await this.updateUpdated(mongoClient);
+    await ProjectsUserUpdator.updateUpdated(mongoClient);
   }
 
   @UpdateAction
@@ -47,7 +47,7 @@ export class ProjectsUserUpdator {
     );
     const end = new Date();
 
-    const updated = await this.fetchUpdated(start, end);
+    const updated = await ProjectsUserUpdator.fetchUpdated(start, end);
     const studentIds = await getStudentIds(mongoClient);
 
     const validUpdated = updated.filter(

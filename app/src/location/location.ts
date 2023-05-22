@@ -1,21 +1,21 @@
 import { MongoClient } from 'mongodb';
 import {
-  FetchApiAction,
-  LogAsyncEstimatedTime,
-  UpdateAction,
-} from '../util/decorator.js';
-import {
   getCollectionUpdatedAt,
   setCollectionUpdatedAt,
   upsertManyById,
 } from '../mongodb/mongodb.js';
+import {
+  FetchApiAction,
+  LogAsyncEstimatedTime,
+  UpdateAction,
+} from '../util/decorator.js';
+import { pagedRequest } from '../util/pagedRequest.js';
 import {
   LOCATION_EP,
   Location,
   isCluster,
   parseLocations,
 } from './api/location.api.js';
-import { pagedRequest } from '../util/pagedRequest.js';
 
 export const LOCATION_COLLECTION = 'locations';
 
@@ -36,14 +36,14 @@ export class LocationUpdator {
    * E 의 경우, 접속을 종료하는 사람들이 한번에 400명을 넘지 않으면 불변함.
    */
   static async update(mongoClient: MongoClient): Promise<void> {
-    await this.updateOngoing(mongoClient);
-    await this.updateEnded(mongoClient);
+    await LocationUpdator.updateOngoing(mongoClient);
+    await LocationUpdator.updateEnded(mongoClient);
   }
 
   @UpdateAction
   @LogAsyncEstimatedTime
   private static async updateOngoing(mongoClient: MongoClient): Promise<void> {
-    const ongoing = await this.fetchOngoing();
+    const ongoing = await LocationUpdator.fetchOngoing();
     const ongoingInCluster = ongoing.filter(isCluster);
 
     await upsertManyById(mongoClient, LOCATION_COLLECTION, ongoingInCluster);
@@ -66,7 +66,7 @@ export class LocationUpdator {
 
     const end = new Date();
 
-    const ended = await this.fetchEnded(start, end);
+    const ended = await LocationUpdator.fetchEnded(start, end);
     const endedInCluster = ended.filter(isCluster);
 
     await upsertManyById(mongoClient, LOCATION_COLLECTION, endedInCluster);

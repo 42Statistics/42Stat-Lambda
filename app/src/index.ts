@@ -1,5 +1,4 @@
 import dotenv from 'dotenv';
-import { MongoClient } from 'mongodb';
 import { initSeine } from './connection.js';
 import { CursusUserUpdator } from './cursusUser/cursusUser.js';
 import { EventUpdator } from './event/event.js';
@@ -19,10 +18,6 @@ import { assertEnvExist } from './util/envCheck.js';
 
 dotenv.config();
 
-type Updator = {
-  update: (mongoClient: MongoClient, lambdaRedis: LambdaRedis) => Promise<void>;
-};
-
 const main = async (): Promise<void> => {
   const mongoClient = await createMongoClient();
   await initSeine();
@@ -31,24 +26,18 @@ const main = async (): Promise<void> => {
   assertEnvExist(url);
   const redis = await LambdaRedis.createInstance({ url });
 
-  const updators: Updator[] = [
-    ProjectsUserUpdator,
-    CursusUserUpdator,
-    ExamUpdator,
-    TeamUpdator,
-    TitleUpdator,
-    TitlesUserUpdator,
-    LocationUpdator,
-    ScoreUpdator,
-    QuestsUserUpdator,
-    EventUpdator,
-    EventsUserUpdator,
-    ScaleTeamUpdator,
-  ];
-
-  for (const updator of updators) {
-    await updator.update(mongoClient, redis);
-  }
+  await ProjectsUserUpdator.update(mongoClient);
+  await CursusUserUpdator.update(mongoClient, redis);
+  await ExamUpdator.update(mongoClient);
+  await TeamUpdator.update(mongoClient);
+  await TitleUpdator.update(mongoClient);
+  await TitlesUserUpdator.update(mongoClient);
+  await LocationUpdator.update(mongoClient);
+  await ScoreUpdator.update(mongoClient);
+  await QuestsUserUpdator.update(mongoClient);
+  await EventUpdator.update(mongoClient);
+  await EventsUserUpdator.update(mongoClient);
+  await ScaleTeamUpdator.update(mongoClient);
 
   await mongoClient.close();
   await redis.closeConnection();

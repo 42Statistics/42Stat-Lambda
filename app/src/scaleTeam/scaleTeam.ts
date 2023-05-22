@@ -1,20 +1,20 @@
 import { MongoClient } from 'mongodb';
 import {
-  FetchApiAction,
-  LogAsyncEstimatedTime,
-  UpdateAction,
-} from '../util/decorator.js';
-import {
   getCollectionUpdatedAt,
   setCollectionUpdatedAt,
   upsertManyById,
 } from '../mongodb/mongodb.js';
 import {
+  FetchApiAction,
+  LogAsyncEstimatedTime,
+  UpdateAction,
+} from '../util/decorator.js';
+import { pagedRequest } from '../util/pagedRequest.js';
+import {
   SCALE_TEAM_EP,
   ScaleTeam,
   parseScaleTeams,
 } from './api/scaleTeam.api.js';
-import { pagedRequest } from '../util/pagedRequest.js';
 
 export const SCALE_TEAM_COLLECTION = 'scale_teams';
 
@@ -32,7 +32,7 @@ export class ScaleTeamUpdator {
    * 한번에 100개의 평가가 끝나지 않는 이상 불변함.
    */
   static async update(mongoClient: MongoClient): Promise<void> {
-    await this.updateFilled(mongoClient);
+    await ScaleTeamUpdator.updateFilled(mongoClient);
   }
 
   @UpdateAction
@@ -45,7 +45,7 @@ export class ScaleTeamUpdator {
 
     const end = new Date();
 
-    const filled = await this.fetchFilled(start, end);
+    const filled = await ScaleTeamUpdator.fetchFilled(start, end);
 
     await upsertManyById(mongoClient, SCALE_TEAM_COLLECTION, filled);
     await setCollectionUpdatedAt(mongoClient, SCALE_TEAM_COLLECTION, end);

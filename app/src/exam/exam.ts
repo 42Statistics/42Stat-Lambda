@@ -28,7 +28,7 @@ export class ExamUpdator {
    * 버그가 있는 것을 제외하면 그다지 변수는 없음.
    */
   static async update(mongoClient: MongoClient): Promise<void> {
-    await this.updateUpdated(mongoClient);
+    await ExamUpdator.updateUpdated(mongoClient);
   }
 
   @UpdateAction
@@ -37,7 +37,7 @@ export class ExamUpdator {
     const start = await getCollectionUpdatedAt(mongoClient, EXAMS_COLLECTION);
     const end = new Date();
 
-    const created = await this.fetchCreated(start, end);
+    const created = await ExamUpdator.fetchCreated(start, end);
 
     // bug resolving start
 

@@ -1,4 +1,5 @@
 import { MongoClient } from 'mongodb';
+import { upsertManyById } from '../mongodb/mongodb.js';
 import {
   FetchApiAction,
   LogAsyncEstimatedTime,
@@ -11,7 +12,6 @@ import {
   parseScores,
   targetCoalitionIds,
 } from './api/score.api.js';
-import { upsertManyById } from '../mongodb/mongodb.js';
 
 export const SCORE_COLLECTION = 'scores';
 
@@ -38,7 +38,7 @@ export class ScoreUpdator {
    * 않게 로직이 개선되면 절반으로 줄일 수 있음.
    */
   static async update(mongoClient: MongoClient): Promise<void> {
-    await this.updateByCoalition(mongoClient);
+    await ScoreUpdator.updateByCoalition(mongoClient);
   }
 
   @UpdateAction
@@ -74,7 +74,7 @@ export class ScoreUpdator {
       ])
       .toArray();
 
-    const byCoalition = await this.fetchScoreByCoalition(
+    const byCoalition = await ScoreUpdator.fetchScoreByCoalition(
       targetCoalitionIds.map((coalitionId) => ({
         coalitionId: coalitionId,
         count:

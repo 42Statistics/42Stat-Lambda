@@ -39,7 +39,7 @@ type LevelTableElem = {
 // eslint-disable-next-line
 export class ExperienceUpdator {
   static async update(mongoClient: MongoClient): Promise<void> {
-    await this.updateProjectsUserUpdated(mongoClient);
+    await ExperienceUpdator.updateProjectsUserUpdated(mongoClient);
     await testLevelCalculation(mongoClient);
   }
 

@@ -29,13 +29,13 @@ export class TitlesUserUpdator {
    * 선형적으로 이 시간이 증가할텐데, 마땅한 대책이 없음. 별도의 람다 함수로 분리하는 것도 고려해야할 듯.
    */
   static async update(mongoClient: MongoClient): Promise<void> {
-    await this.updateAll(mongoClient);
+    await TitlesUserUpdator.updateAll(mongoClient);
   }
 
   @UpdateAction
   @LogAsyncEstimatedTime
   private static async updateAll(mongoClient: MongoClient): Promise<void> {
-    const titlesUsers = await this.fetchAll();
+    const titlesUsers = await TitlesUserUpdator.fetchAll();
 
     await upsertManyById(mongoClient, TITLES_USER_COLLECTION, titlesUsers);
   }

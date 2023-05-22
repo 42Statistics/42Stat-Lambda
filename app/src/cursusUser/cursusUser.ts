@@ -46,9 +46,9 @@ export class CursusUserUpdator {
     mongoClient: MongoClient,
     redis: LambdaRedis,
   ): Promise<void> {
-    await this.updateCursusChanged(mongoClient);
-    await this.updateActivated(mongoClient);
-    await this.updateCache(mongoClient, redis);
+    await CursusUserUpdator.updateCursusChanged(mongoClient);
+    await CursusUserUpdator.updateActivated(mongoClient);
+    await CursusUserUpdator.updateCache(mongoClient, redis);
   }
 
   /**
@@ -68,7 +68,10 @@ export class CursusUserUpdator {
 
     const end = new Date();
 
-    const cursusChanged = await this.fetchCursusChanged(start, end);
+    const cursusChanged = await CursusUserUpdator.fetchCursusChanged(
+      start,
+      end,
+    );
 
     await upsertManyById(mongoClient, CURSUS_USER_COLLECTION, cursusChanged);
     await setCollectionUpdatedAt(mongoClient, CURSUS_USER_COLLECTION, end);
@@ -93,8 +96,8 @@ export class CursusUserUpdator {
   private static async updateActivated(
     mongoClient: MongoClient,
   ): Promise<void> {
-    const activated = await this.fetchActivated();
-    const wildcard = await this.fetchWildcard();
+    const activated = await CursusUserUpdator.fetchActivated();
+    const wildcard = await CursusUserUpdator.fetchWildcard();
 
     await upsertManyById(mongoClient, CURSUS_USER_COLLECTION, activated);
     await upsertManyById(mongoClient, CURSUS_USER_COLLECTION, wildcard);

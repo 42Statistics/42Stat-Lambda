@@ -1,5 +1,4 @@
 import { MongoClient } from 'mongodb';
-import { EVENT_EP, Event, parseEvents } from './api/event.api.js';
 import {
   getCollectionUpdatedAt,
   setCollectionUpdatedAt,
@@ -11,6 +10,7 @@ import {
   UpdateAction,
 } from '../util/decorator.js';
 import { pagedRequest } from '../util/pagedRequest.js';
+import { EVENT_EP, Event, parseEvents } from './api/event.api.js';
 
 export const EVENT_COLLECTION = 'events';
 
@@ -28,7 +28,7 @@ export class EventUpdator {
    * 한번에 100개 이상의 event 가 변하지 않는 이상 불변함.
    */
   static async update(mongoClient: MongoClient): Promise<void> {
-    await this.updateUpdated(mongoClient);
+    await EventUpdator.updateUpdated(mongoClient);
   }
 
   @UpdateAction
@@ -37,7 +37,7 @@ export class EventUpdator {
     const start = await getCollectionUpdatedAt(mongoClient, EVENT_COLLECTION);
     const end = new Date();
 
-    const updated = await this.fetchUpdated(start, end);
+    const updated = await EventUpdator.fetchUpdated(start, end);
 
     await upsertManyById(mongoClient, EVENT_COLLECTION, updated);
     await setCollectionUpdatedAt(mongoClient, EVENT_COLLECTION, end);

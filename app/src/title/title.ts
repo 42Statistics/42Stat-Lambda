@@ -29,13 +29,13 @@ export class TitleUpdator {
    * @see TitlesUserUpdator.update
    */
   static async update(mongoClient: MongoClient): Promise<void> {
-    await this.updateAll(mongoClient);
+    await TitleUpdator.updateAll(mongoClient);
   }
 
   @UpdateAction
   @LogAsyncEstimatedTime
   private static async updateAll(mongoClient: MongoClient): Promise<void> {
-    const titles = await this.fetchAll();
+    const titles = await TitleUpdator.fetchAll();
 
     await upsertManyById(mongoClient, TITLE_COLLECTION, titles);
   }

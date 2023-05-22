@@ -30,7 +30,7 @@ export class TeamUpdator {
    * 신규 기수가 입과하는 날 초과할 가능성이 있긴 한데... 이것도 한순간에 전부 레지스터해야 초과함.
    */
   static async update(mongoClient: MongoClient): Promise<void> {
-    await this.updateUpdated(mongoClient);
+    await TeamUpdator.updateUpdated(mongoClient);
   }
 
   @UpdateAction
@@ -39,7 +39,7 @@ export class TeamUpdator {
     const start = await getCollectionUpdatedAt(mongoClient, TEAM_COLLECTION);
     const end = new Date();
 
-    const updated = await this.fetchUpdated(start, end);
+    const updated = await TeamUpdator.fetchUpdated(start, end);
     const studentIds = await getStudentIds(mongoClient);
 
     const updatedStudentTeams = updated.filter((team) =>
