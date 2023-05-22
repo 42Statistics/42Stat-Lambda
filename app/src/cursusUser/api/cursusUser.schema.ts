@@ -10,6 +10,12 @@ const userImageSchema = z.object({
   }),
 });
 
+/**
+ *
+ * @description
+ * passthrough 로 처리했어야 하는데, 실수로 누락된 부분이 있습니다만, 웬만해선 필요 없지 싶습니다.
+ * usual_first_name, usual_last_name
+ */
 export const userSchema = z.object({
   id: z.number(),
   email: z.string(),
