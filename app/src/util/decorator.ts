@@ -1,4 +1,4 @@
-import { MongoClient } from 'mongodb';
+import { LambdaMongo } from '../mongodb/mongodb.js';
 import { LambdaError, logError } from './error.js';
 import { sleepMs } from './sleepMs.js';
 
@@ -99,27 +99,23 @@ export function LogAsyncDocumentCount<
  * exception 발생 시, mongodb 에 로그를 작성하고, exception 을 밖으로 보내지 않습니다.
  */
 export function UpdateAction<This, Args extends any[], Return>(
-  target: (
-    this: This,
-    mongoClient: MongoClient,
-    ...args: Args
-  ) => Promise<void>,
+  target: (this: This, mongo: LambdaMongo, ...args: Args) => Promise<void>,
   context: ClassMethodDecoratorContext<
     This,
-    (this: This, mongoClient: MongoClient, ...args: Args) => void
+    (this: This, mongo: LambdaMongo, ...args: Args) => void
   >,
 ): typeof target {
   async function replacementMethod(
     this: This,
-    mongoClient: MongoClient,
+    mongo: LambdaMongo,
     ...args: Args
   ): Promise<void> {
     try {
-      await target.call(this, mongoClient, ...args);
+      await target.call(this, mongo, ...args);
     } catch (e) {
       try {
         if (e instanceof LambdaError) {
-          await logError(mongoClient, e);
+          await logError(mongo, e);
         }
       } catch {
       } finally {

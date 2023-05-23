@@ -1,5 +1,4 @@
-import { MongoClient } from 'mongodb';
-import { upsertManyById } from '../mongodb/mongodb.js';
+import { LambdaMongo } from '../mongodb/mongodb.js';
 // eslint-disable-next-line
 import type { TitlesUserUpdator } from '../titlesUser/titlesUser.js';
 import {
@@ -28,16 +27,16 @@ export class TitleUpdator {
    *
    * @see TitlesUserUpdator.update
    */
-  static async update(mongoClient: MongoClient): Promise<void> {
-    await TitleUpdator.updateAll(mongoClient);
+  static async update(mongo: LambdaMongo): Promise<void> {
+    await TitleUpdator.updateAll(mongo);
   }
 
   @UpdateAction
   @LogAsyncEstimatedTime
-  private static async updateAll(mongoClient: MongoClient): Promise<void> {
+  private static async updateAll(mongo: LambdaMongo): Promise<void> {
     const titles = await TitleUpdator.fetchAll();
 
-    await upsertManyById(mongoClient, TITLE_COLLECTION, titles);
+    await mongo.upsertManyById(TITLE_COLLECTION, titles);
   }
 
   @FetchApiAction

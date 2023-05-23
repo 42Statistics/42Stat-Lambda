@@ -1,9 +1,4 @@
-import { MongoClient } from 'mongodb';
-import {
-  getCollectionUpdatedAt,
-  setCollectionUpdatedAt,
-  upsertManyById,
-} from '../mongodb/mongodb.js';
+import { LambdaMongo } from '../mongodb/mongodb.js';
 import {
   FetchApiAction,
   LogAsyncEstimatedTime,
@@ -31,24 +26,21 @@ export class ScaleTeamUpdator {
    *
    * 한번에 100개의 평가가 끝나지 않는 이상 불변함.
    */
-  static async update(mongoClient: MongoClient): Promise<void> {
-    await ScaleTeamUpdator.updateFilled(mongoClient);
+  static async update(mongo: LambdaMongo): Promise<void> {
+    await ScaleTeamUpdator.updateFilled(mongo);
   }
 
   @UpdateAction
   @LogAsyncEstimatedTime
-  private static async updateFilled(mongoClient: MongoClient): Promise<void> {
-    const start = await getCollectionUpdatedAt(
-      mongoClient,
-      SCALE_TEAM_COLLECTION,
-    );
+  private static async updateFilled(mongo: LambdaMongo): Promise<void> {
+    const start = await mongo.getCollectionUpdatedAt(SCALE_TEAM_COLLECTION);
 
     const end = new Date();
 
     const filled = await ScaleTeamUpdator.fetchFilled(start, end);
 
-    await upsertManyById(mongoClient, SCALE_TEAM_COLLECTION, filled);
-    await setCollectionUpdatedAt(mongoClient, SCALE_TEAM_COLLECTION, end);
+    await mongo.upsertManyById(SCALE_TEAM_COLLECTION, filled);
+    await mongo.setCollectionUpdatedAt(SCALE_TEAM_COLLECTION, end);
   }
 
   @FetchApiAction

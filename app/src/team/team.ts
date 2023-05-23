@@ -1,10 +1,5 @@
-import { MongoClient } from 'mongodb';
 import { getStudentIds } from '../cursusUser/cursusUser.js';
-import {
-  getCollectionUpdatedAt,
-  setCollectionUpdatedAt,
-  upsertManyById,
-} from '../mongodb/mongodb.js';
+import { LambdaMongo } from '../mongodb/mongodb.js';
 import {
   FetchApiAction,
   LogAsyncEstimatedTime,
@@ -29,25 +24,25 @@ export class TeamUpdator {
    * 마지막으로 갱신했던 때로부터 팀이 200개 이상 바뀌지 않는 이상 괜찮음.
    * 신규 기수가 입과하는 날 초과할 가능성이 있긴 한데... 이것도 한순간에 전부 레지스터해야 초과함.
    */
-  static async update(mongoClient: MongoClient): Promise<void> {
-    await TeamUpdator.updateUpdated(mongoClient);
+  static async update(mongo: LambdaMongo): Promise<void> {
+    await TeamUpdator.updateUpdated(mongo);
   }
 
   @UpdateAction
   @LogAsyncEstimatedTime
-  private static async updateUpdated(mongoClient: MongoClient): Promise<void> {
-    const start = await getCollectionUpdatedAt(mongoClient, TEAM_COLLECTION);
+  private static async updateUpdated(mongo: LambdaMongo): Promise<void> {
+    const start = await mongo.getCollectionUpdatedAt(TEAM_COLLECTION);
     const end = new Date();
 
     const updated = await TeamUpdator.fetchUpdated(start, end);
-    const studentIds = await getStudentIds(mongoClient);
+    const studentIds = await getStudentIds(mongo);
 
     const updatedStudentTeams = updated.filter((team) =>
       studentIds.find((id) => id === team.users[0].id),
     );
 
-    await upsertManyById(mongoClient, TEAM_COLLECTION, updatedStudentTeams);
-    await setCollectionUpdatedAt(mongoClient, TEAM_COLLECTION, end);
+    await mongo.upsertManyById(TEAM_COLLECTION, updatedStudentTeams);
+    await mongo.setCollectionUpdatedAt(TEAM_COLLECTION, end);
   }
 
   @FetchApiAction

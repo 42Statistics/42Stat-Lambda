@@ -6,7 +6,7 @@ import { EventUpdator } from './event/event.js';
 import { EventsUserUpdator } from './eventsUser/eventsUser.js';
 import { ExamUpdator } from './exam/exam.js';
 import { LocationUpdator } from './location/location.js';
-import { createMongoClient } from './mongodb/mongodb.js';
+import { LambdaMongo } from './mongodb/mongodb.js';
 import { ProjectUpdator } from './project/project.js';
 import { ProjectsUserUpdator } from './projectsUser/projectsUser.js';
 import { QuestsUserUpdator } from './questsUser/questsUser.js';
@@ -21,29 +21,32 @@ import { assertEnvExist } from './util/envCheck.js';
 dotenv.config();
 
 const main = async (): Promise<void> => {
-  const mongoClient = await createMongoClient();
   await initSeine();
 
-  const url = process.env.REDIS_URL;
-  assertEnvExist(url);
-  const redis = await LambdaRedis.createInstance({ url });
+  const mongoUrl = process.env.MONGODB_URL;
+  assertEnvExist(mongoUrl);
+  const mongo = await LambdaMongo.createInstance(mongoUrl);
 
-  await ProjectsUserUpdator.update(mongoClient);
-  await CursusUserUpdator.update(mongoClient, redis);
-  await ExamUpdator.update(mongoClient);
-  await TeamUpdator.update(mongoClient);
-  await TitleUpdator.update(mongoClient);
-  await TitlesUserUpdator.update(mongoClient);
-  await LocationUpdator.update(mongoClient);
-  await ScoreUpdator.update(mongoClient);
-  await QuestsUserUpdator.update(mongoClient);
-  await EventUpdator.update(mongoClient);
-  await EventsUserUpdator.update(mongoClient);
-  await ScaleTeamUpdator.update(mongoClient);
-  await ProjectUpdator.update(mongoClient);
-  await CoalitionsUserUpdator.update(mongoClient);
+  const redisUrl = process.env.REDIS_URL;
+  assertEnvExist(redisUrl);
+  const redis = await LambdaRedis.createInstance(redisUrl);
 
-  await mongoClient.close();
+  await ProjectsUserUpdator.update(mongo);
+  await CursusUserUpdator.update(mongo, redis);
+  await ExamUpdator.update(mongo);
+  await TeamUpdator.update(mongo);
+  await TitleUpdator.update(mongo);
+  await TitlesUserUpdator.update(mongo);
+  await LocationUpdator.update(mongo);
+  await ScoreUpdator.update(mongo);
+  await QuestsUserUpdator.update(mongo);
+  await EventUpdator.update(mongo);
+  await EventsUserUpdator.update(mongo);
+  await ScaleTeamUpdator.update(mongo);
+  await ProjectUpdator.update(mongo);
+  await CoalitionsUserUpdator.update(mongo);
+
+  await mongo.closeConnection();
   await redis.closeConnection();
 };
 

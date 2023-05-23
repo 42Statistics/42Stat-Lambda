@@ -1,11 +1,6 @@
-import { MongoClient } from 'mongodb';
 import { FT_CURSUS_ID } from '../cursusUser/api/cursusUser.api.js';
 import { getStudentIds } from '../cursusUser/cursusUser.js';
-import {
-  getCollectionUpdatedAt,
-  setCollectionUpdatedAt,
-  upsertManyById,
-} from '../mongodb/mongodb.js';
+import { LambdaMongo } from '../mongodb/mongodb.js';
 import {
   FetchApiAction,
   LogAsyncEstimatedTime,
@@ -34,21 +29,18 @@ export class ProjectsUserUpdator {
    * 마지막으로 갱신했던 때로부터 팀이 생기거나 / 바뀌거나 / 끝나는 팀이 400개 이상이 아닌 이상 괜찮음.
    * 피신 기간이나 이그잼이 있는 날에는 요청 수가 증가할 가능성이 높음.
    */
-  static async update(mongoClient: MongoClient): Promise<void> {
-    await ProjectsUserUpdator.updateUpdated(mongoClient);
+  static async update(mongo: LambdaMongo): Promise<void> {
+    await ProjectsUserUpdator.updateUpdated(mongo);
   }
 
   @UpdateAction
   @LogAsyncEstimatedTime
-  private static async updateUpdated(mongoClient: MongoClient): Promise<void> {
-    const start = await getCollectionUpdatedAt(
-      mongoClient,
-      PROJECTS_USER_COLLECTION,
-    );
+  private static async updateUpdated(mongo: LambdaMongo): Promise<void> {
+    const start = await mongo.getCollectionUpdatedAt(PROJECTS_USER_COLLECTION);
     const end = new Date();
 
     const updated = await ProjectsUserUpdator.fetchUpdated(start, end);
-    const studentIds = await getStudentIds(mongoClient);
+    const studentIds = await getStudentIds(mongo);
 
     const validUpdated = updated.filter(
       (projectsUser) =>
@@ -56,8 +48,8 @@ export class ProjectsUserUpdator {
         projectsUser.cursusIds[0] === FT_CURSUS_ID,
     );
 
-    await upsertManyById(mongoClient, PROJECTS_USER_COLLECTION, validUpdated);
-    await setCollectionUpdatedAt(mongoClient, PROJECTS_USER_COLLECTION, end);
+    await mongo.upsertManyById(PROJECTS_USER_COLLECTION, validUpdated);
+    await mongo.setCollectionUpdatedAt(PROJECTS_USER_COLLECTION, end);
   }
 
   @FetchApiAction

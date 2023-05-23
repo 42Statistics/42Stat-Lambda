@@ -9,9 +9,10 @@ export type Types = RedisCommandArgument | number;
 
 export class LambdaRedis {
   static createInstance = async (
-    redisClientOptions: RedisClientOptions,
+    url: string,
+    redisClientOptions?: RedisClientOptions,
   ): Promise<LambdaRedis> => {
-    const client = createClient(redisClientOptions);
+    const client = createClient({ url, ...redisClientOptions });
 
     client.on('error', (err): never => {
       throw err;
@@ -101,7 +102,9 @@ function RedisAction<This, Args extends any[], Return>(
       const result = target.call(this, ...args);
       return result;
     } catch (e) {
-      throw new LambdaError(String(context.name) + JSON.stringify(e));
+      throw new LambdaError(
+        'Redis error at: ' + String(context.name) + JSON.stringify(e),
+      );
     }
   }
 

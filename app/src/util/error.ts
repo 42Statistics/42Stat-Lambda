@@ -1,4 +1,4 @@
-import { MongoClient } from 'mongodb';
+import { LambdaMongo } from '../mongodb/mongodb.js';
 
 const ERROR_COLLECTION = 'errors';
 
@@ -12,11 +12,11 @@ export class LambdaError extends Error {
 }
 
 export const logError = async (
-  client: MongoClient,
+  mongo: LambdaMongo,
   { name, message, udata }: LambdaError,
 ): Promise<void> => {
   try {
-    await client
+    await mongo
       .db()
       .collection(ERROR_COLLECTION)
       .insertOne({ name, message, udata });

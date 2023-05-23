@@ -1,10 +1,5 @@
-import { MongoClient } from 'mongodb';
 import { ExperienceUpdator } from '../experience/experience.js';
-import {
-  getCollectionUpdatedAt,
-  setCollectionUpdatedAt,
-  upsertManyById,
-} from '../mongodb/mongodb.js';
+import { LambdaMongo } from '../mongodb/mongodb.js';
 import { LambdaRedis } from '../redis/LambdaRedis.js';
 import {
   FetchApiAction,
@@ -42,13 +37,10 @@ export class CursusUserUpdator {
    * A 의 경우, 시간이 지날수록 선형적으로 증가하겠지만 당분간은 크게 문제 없음. 추후 이 부분이 커지면
    * 멤버들을 따로, 더 긴 간격으로 업데이트 하는 방법이 있음.
    */
-  static async update(
-    mongoClient: MongoClient,
-    redis: LambdaRedis,
-  ): Promise<void> {
-    await CursusUserUpdator.updateCursusChanged(mongoClient);
-    await CursusUserUpdator.updateActivated(mongoClient);
-    await CursusUserUpdator.updateCache(mongoClient, redis);
+  static async update(mongo: LambdaMongo, redis: LambdaRedis): Promise<void> {
+    await CursusUserUpdator.updateCursusChanged(mongo);
+    await CursusUserUpdator.updateActivated(mongo);
+    await CursusUserUpdator.updateCache(mongo, redis);
   }
 
   /**
@@ -58,14 +50,8 @@ export class CursusUserUpdator {
    */
   @UpdateAction
   @LogAsyncEstimatedTime
-  private static async updateCursusChanged(
-    mongoClient: MongoClient,
-  ): Promise<void> {
-    const start = await getCollectionUpdatedAt(
-      mongoClient,
-      CURSUS_USER_COLLECTION,
-    );
-
+  private static async updateCursusChanged(mongo: LambdaMongo): Promise<void> {
+    const start = await mongo.getCollectionUpdatedAt(CURSUS_USER_COLLECTION);
     const end = new Date();
 
     const cursusChanged = await CursusUserUpdator.fetchCursusChanged(
@@ -73,8 +59,8 @@ export class CursusUserUpdator {
       end,
     );
 
-    await upsertManyById(mongoClient, CURSUS_USER_COLLECTION, cursusChanged);
-    await setCollectionUpdatedAt(mongoClient, CURSUS_USER_COLLECTION, end);
+    await mongo.upsertManyById(CURSUS_USER_COLLECTION, cursusChanged);
+    await mongo.setCollectionUpdatedAt(CURSUS_USER_COLLECTION, end);
   }
 
   @FetchApiAction
@@ -93,17 +79,18 @@ export class CursusUserUpdator {
 
   @UpdateAction
   @LogAsyncEstimatedTime
-  private static async updateActivated(
-    mongoClient: MongoClient,
-  ): Promise<void> {
+  private static async updateActivated(mongo: LambdaMongo): Promise<void> {
     const activated = await CursusUserUpdator.fetchActivated();
     const wildcard = await CursusUserUpdator.fetchWildcard();
 
-    await upsertManyById(mongoClient, CURSUS_USER_COLLECTION, activated);
-    await upsertManyById(mongoClient, CURSUS_USER_COLLECTION, wildcard);
+    await mongo.upsertManyById(CURSUS_USER_COLLECTION, [
+      ...activated,
+      ...wildcard,
+    ]);
+
     // todo: 적당한 위치 찾아주기. 현재 시점에선 cursus user의 업데이트 성공을 알려주고 있지 않기
     // 때문에, 이런 조치가 필요합니다.
-    await ExperienceUpdator.update(mongoClient);
+    await ExperienceUpdator.update(mongo);
   }
 
   /**
@@ -133,10 +120,10 @@ export class CursusUserUpdator {
   @UpdateAction
   @LogAsyncEstimatedTime
   private static async updateCache(
-    mongoClient: MongoClient,
+    mongo: LambdaMongo,
     redis: LambdaRedis,
   ): Promise<void> {
-    const cursusUsers = await mongoClient
+    const cursusUsers = await mongo
       .db()
       .collection<CursusUser>(CURSUS_USER_COLLECTION)
       .find()
@@ -149,10 +136,8 @@ export class CursusUserUpdator {
   }
 }
 
-export const getStudentIds = async (
-  mongoClient: MongoClient,
-): Promise<number[]> => {
-  const ids = await mongoClient
+export const getStudentIds = async (mongo: LambdaMongo): Promise<number[]> => {
+  const ids = await mongo
     .db()
     .collection<CursusUser>(CURSUS_USER_COLLECTION)
     .find()

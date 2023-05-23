@@ -1,11 +1,6 @@
-import { MongoClient } from 'mongodb';
 import type { Event } from '../event/api/event.api.js';
 import { EVENT_COLLECTION } from '../event/event.js';
-import {
-  getCollectionUpdatedAt,
-  setCollectionUpdatedAt,
-  upsertManyById,
-} from '../mongodb/mongodb.js';
+import { LambdaMongo } from '../mongodb/mongodb.js';
 import {
   FetchApiAction,
   LogAsyncEstimatedTime,
@@ -37,21 +32,18 @@ export class EventsUserUpdator {
    * 과연 event 의 수정이 events user 에서 갱신했다고 생각하는 시점 이전으로 이루어질 수 있을지?
    * 현재로썬 event 를 바로 직전에 갱신하기 때문에, 그럴 가능성이 없다고 생각 중.
    */
-  static async update(mongoClient: MongoClient): Promise<void> {
-    await EventsUserUpdator.updateByEvent(mongoClient);
+  static async update(mongo: LambdaMongo): Promise<void> {
+    await EventsUserUpdator.updateByEvent(mongo);
   }
 
   @UpdateAction
   @LogAsyncEstimatedTime
-  private static async updateByEvent(mongoClient: MongoClient): Promise<void> {
-    const start = await getCollectionUpdatedAt(
-      mongoClient,
-      EVENTS_USER_COLLECTION,
-    );
+  private static async updateByEvent(mongo: LambdaMongo): Promise<void> {
+    const start = await mongo.getCollectionUpdatedAt(EVENTS_USER_COLLECTION);
 
     const end = new Date();
 
-    const eventIds = await mongoClient
+    const eventIds = await mongo
       .db()
       .collection<Event>(EVENT_COLLECTION)
       .find({ endAt: { $gte: start, $lt: end } })
@@ -64,8 +56,8 @@ export class EventsUserUpdator {
 
     const byEvent = await EventsUserUpdator.fetchByEvent(eventIds);
 
-    await upsertManyById(mongoClient, EVENTS_USER_COLLECTION, byEvent);
-    await setCollectionUpdatedAt(mongoClient, EVENTS_USER_COLLECTION, end);
+    await mongo.upsertManyById(EVENTS_USER_COLLECTION, byEvent);
+    await mongo.setCollectionUpdatedAt(EVENTS_USER_COLLECTION, end);
   }
 
   @FetchApiAction

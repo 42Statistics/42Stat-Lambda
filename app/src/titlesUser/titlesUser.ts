@@ -1,5 +1,4 @@
-import { MongoClient } from 'mongodb';
-import { upsertManyById } from '../mongodb/mongodb.js';
+import { LambdaMongo } from '../mongodb/mongodb.js';
 import {
   FetchApiAction,
   LogAsyncEstimatedTime,
@@ -28,16 +27,16 @@ export class TitlesUserUpdator {
    * 응답에 아무런 규칙성이 없기 때문에 처음부터 다 받아와야함.
    * 선형적으로 이 시간이 증가할텐데, 마땅한 대책이 없음. 별도의 람다 함수로 분리하는 것도 고려해야할 듯.
    */
-  static async update(mongoClient: MongoClient): Promise<void> {
-    await TitlesUserUpdator.updateAll(mongoClient);
+  static async update(mongo: LambdaMongo): Promise<void> {
+    await TitlesUserUpdator.updateAll(mongo);
   }
 
   @UpdateAction
   @LogAsyncEstimatedTime
-  private static async updateAll(mongoClient: MongoClient): Promise<void> {
+  private static async updateAll(mongo: LambdaMongo): Promise<void> {
     const titlesUsers = await TitlesUserUpdator.fetchAll();
 
-    await upsertManyById(mongoClient, TITLES_USER_COLLECTION, titlesUsers);
+    await mongo.upsertManyById(TITLES_USER_COLLECTION, titlesUsers);
   }
 
   @FetchApiAction

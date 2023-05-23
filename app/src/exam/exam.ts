@@ -1,9 +1,4 @@
-import { MongoClient } from 'mongodb';
-import {
-  getCollectionUpdatedAt,
-  setCollectionUpdatedAt,
-  upsertManyById,
-} from '../mongodb/mongodb.js';
+import { LambdaMongo } from '../mongodb/mongodb.js';
 import {
   FetchApiAction,
   LogAsyncEstimatedTime,
@@ -27,14 +22,14 @@ export class ExamUpdator {
    *
    * 버그가 있는 것을 제외하면 그다지 변수는 없음.
    */
-  static async update(mongoClient: MongoClient): Promise<void> {
-    await ExamUpdator.updateUpdated(mongoClient);
+  static async update(mongo: LambdaMongo): Promise<void> {
+    await ExamUpdator.updateUpdated(mongo);
   }
 
   @UpdateAction
   @LogAsyncEstimatedTime
-  private static async updateUpdated(mongoClient: MongoClient): Promise<void> {
-    const start = await getCollectionUpdatedAt(mongoClient, EXAMS_COLLECTION);
+  private static async updateUpdated(mongo: LambdaMongo): Promise<void> {
+    const start = await mongo.getCollectionUpdatedAt(EXAMS_COLLECTION);
     const end = new Date();
 
     const created = await ExamUpdator.fetchCreated(start, end);
@@ -49,8 +44,8 @@ export class ExamUpdator {
 
     // bug resolving end
 
-    await upsertManyById(mongoClient, EXAMS_COLLECTION, createdFixed);
-    await setCollectionUpdatedAt(mongoClient, EXAMS_COLLECTION, end);
+    await mongo.upsertManyById(EXAMS_COLLECTION, createdFixed);
+    await mongo.setCollectionUpdatedAt(EXAMS_COLLECTION, end);
   }
 
   @FetchApiAction

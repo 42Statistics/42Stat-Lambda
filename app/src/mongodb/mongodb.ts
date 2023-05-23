@@ -1,4 +1,4 @@
-import { MongoClient } from 'mongodb';
+import { Db, DbOptions, MongoClient, MongoClientOptions } from 'mongodb';
 import type { COALITIONS_USER_COLLECTION } from '../coalitionsUser/coalitionsUser.js';
 import type { CURSUS_USER_COLLECTION } from '../cursusUser/cursusUser.js';
 import type { EVENT_COLLECTION } from '../event/event.js';
@@ -11,19 +11,10 @@ import type { PROJECTS_USER_COLLECTION } from '../projectsUser/projectsUser.js';
 import type { QUESTS_USER_COLLECTION } from '../questsUser/questsUser.js';
 import type { SCALE_TEAM_COLLECTION } from '../scaleTeam/scaleTeam.js';
 import type { TEAM_COLLECTION } from '../team/team.js';
+import { Bound } from '../util/decorator.js';
 import { LambdaError } from '../util/error.js';
 
 export const LOG_COLLECTION = 'logs';
-
-export const createMongoClient = async (): Promise<MongoClient> => {
-  if (!process.env.MONGODB_URL) {
-    throw Error('no env');
-  }
-
-  const client = new MongoClient(process.env.MONGODB_URL);
-  await client.connect();
-  return client;
-};
 
 type LogUpdatedAt =
   | typeof CURSUS_USER_COLLECTION
@@ -39,12 +30,33 @@ type LogUpdatedAt =
   | typeof PROJECT_COLLECTION
   | typeof COALITIONS_USER_COLLECTION;
 
-export const getCollectionUpdatedAt = async (
-  client: MongoClient,
-  collection: LogUpdatedAt,
-): Promise<Date> => {
-  try {
-    const collectionLog = await client
+export class LambdaMongo {
+  static createInstance = async (
+    url: string,
+    mongoOptions?: MongoClientOptions,
+  ): Promise<LambdaMongo> => {
+    const client = new MongoClient(url, mongoOptions);
+
+    await client.connect();
+
+    return new LambdaMongo(client);
+  };
+
+  private readonly client: MongoClient;
+
+  private constructor(mongo: MongoClient) {
+    this.client = mongo;
+  }
+
+  @Bound
+  db(dbName?: string, options?: DbOptions): Db {
+    return this.client.db(dbName, options);
+  }
+
+  @Bound
+  @MongoAction
+  async getCollectionUpdatedAt(collection: LogUpdatedAt): Promise<Date> {
+    const collectionLog = await this.client
       .db()
       .collection(LOG_COLLECTION)
       .findOne<{ updatedAt: Date }>({ collection });
@@ -54,18 +66,15 @@ export const getCollectionUpdatedAt = async (
     }
 
     return new Date(0);
-  } catch (e) {
-    throw new LambdaError('mongodb read error at: ' + collection);
   }
-};
 
-export const setCollectionUpdatedAt = async (
-  client: MongoClient,
-  collection: LogUpdatedAt,
-  updatedAt: Date,
-): Promise<void> => {
-  try {
-    await client
+  @Bound
+  @MongoAction
+  async setCollectionUpdatedAt(
+    collection: LogUpdatedAt,
+    updatedAt: Date,
+  ): Promise<void> {
+    await this.client
       .db()
       .collection(LOG_COLLECTION)
       .updateOne(
@@ -73,32 +82,67 @@ export const setCollectionUpdatedAt = async (
         { $set: { collection, updatedAt } },
         { upsert: true },
       );
-  } catch {
-    throw new LambdaError('mongodb write error at: ' + collection);
   }
-};
 
-export const getDocuemntCount = async (
-  mongoClient: MongoClient,
-  collection: string,
-): Promise<number> =>
-  await mongoClient.db().collection(collection).estimatedDocumentCount();
+  @Bound
+  @MongoAction
+  async getDocuemntCount(collection: string): Promise<number> {
+    const count = await this.client
+      .db()
+      .collection(collection)
+      .estimatedDocumentCount();
 
-export const upsertManyById = async <T extends { id: number }>(
-  client: MongoClient,
-  collection: string,
-  datas: T[],
-): Promise<void> => {
-  try {
+    return count;
+  }
+
+  @Bound
+  @MongoAction
+  async upsertManyById<T extends { id: number }>(
+    collection: string,
+    datas: T[],
+  ): Promise<void> {
     await Promise.all(
       datas.map((data) =>
-        client
+        this.client
           .db()
           .collection(collection)
           .updateOne({ id: data.id }, { $set: data }, { upsert: true }),
       ),
     );
-  } catch {
-    throw new LambdaError('mongodb upsert error at: ' + collection);
   }
-};
+
+  @Bound
+  @MongoAction
+  async closeConnection(): Promise<void> {
+    await this.client.close();
+  }
+}
+
+// todo: UpdateAction 으로 통일?
+/**
+ *
+ * @description
+ * mongodb 와 상호작용할 때 발생할 수 있는 exception 을 ```LambdaErorr``` 로 바꿔주는 데코레이터
+ * 입니다.
+ */
+// eslint-disable-next-line
+function MongoAction<This, Args extends any[], Return>(
+  target: (this: This, ...args: Args) => Return,
+  context: ClassMethodDecoratorContext<
+    This,
+    (this: This, ...args: Args) => Return
+  >,
+): typeof target {
+  function replacementMethod(this: This, ...args: Args): Return {
+    try {
+      const result = target.call(this, ...args);
+      return result;
+    } catch (e) {
+      throw new LambdaError(
+        'Mongo error at: ' + String(context.name) + JSON.stringify(e),
+      );
+    }
+  }
+
+  return replacementMethod;
+}

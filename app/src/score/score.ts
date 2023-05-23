@@ -1,5 +1,5 @@
-import { MongoClient } from 'mongodb';
-import { upsertManyById } from '../mongodb/mongodb.js';
+import { SEOUL_COALITION_ID } from '../coalition/api/coalition.api.js';
+import { LambdaMongo } from '../mongodb/mongodb.js';
 import {
   FetchApiAction,
   LogAsyncEstimatedTime,
@@ -7,7 +7,6 @@ import {
 } from '../util/decorator.js';
 import { pagedRequestByCount } from '../util/pagedRequestByCount.js';
 import { SCORE_EP, Score, parseScores } from './api/score.api.js';
-import { SEOUL_COALITION_ID } from '../coalition/api/coalition.api.js';
 
 export const SCORE_COLLECTION = 'scores';
 
@@ -33,16 +32,14 @@ export class ScoreUpdator {
    * 추후 ```pagedRequestByCount``` 가 확인용 요청과 받아오는 요청을 구분하지
    * 않게 로직이 개선되면 절반으로 줄일 수 있음.
    */
-  static async update(mongoClient: MongoClient): Promise<void> {
-    await ScoreUpdator.updateByCoalition(mongoClient);
+  static async update(mongo: LambdaMongo): Promise<void> {
+    await ScoreUpdator.updateByCoalition(mongo);
   }
 
   @UpdateAction
   @LogAsyncEstimatedTime
-  private static async updateByCoalition(
-    mongoClient: MongoClient,
-  ): Promise<void> {
-    const coalitionScoreCounts = await mongoClient
+  private static async updateByCoalition(mongo: LambdaMongo): Promise<void> {
+    const coalitionScoreCounts = await mongo
       .db()
       .collection(SCORE_COLLECTION)
       .aggregate<CountByCoalitionId>([
@@ -81,7 +78,7 @@ export class ScoreUpdator {
       })),
     );
 
-    await upsertManyById(mongoClient, SCORE_COLLECTION, byCoalition);
+    await mongo.upsertManyById(SCORE_COLLECTION, byCoalition);
   }
 
   @FetchApiAction

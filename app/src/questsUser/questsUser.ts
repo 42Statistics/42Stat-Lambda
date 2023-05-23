@@ -1,9 +1,4 @@
-import type { MongoClient } from 'mongodb';
-import {
-  getCollectionUpdatedAt,
-  setCollectionUpdatedAt,
-  upsertManyById,
-} from '../mongodb/mongodb.js';
+import { LambdaMongo } from '../mongodb/mongodb.js';
 import {
   FetchApiAction,
   LogAsyncEstimatedTime,
@@ -31,29 +26,26 @@ export class QuestsUserUpdator {
    *
    * 한번에 100개 이상의 quests user 가 생기거나 변하지 않는 이상 불변함.
    */
-  static async update(mongoClient: MongoClient): Promise<void> {
-    await QuestsUserUpdator.updateUpdated(mongoClient);
+  static async update(mongo: LambdaMongo): Promise<void> {
+    await QuestsUserUpdator.updateUpdated(mongo);
   }
 
   @UpdateAction
   @LogAsyncEstimatedTime
-  private static async updateUpdated(mongoClient: MongoClient): Promise<void> {
-    const start = await getCollectionUpdatedAt(
-      mongoClient,
-      QUESTS_USER_COLLECTION,
-    );
+  private static async updateUpdated(mongo: LambdaMongo): Promise<void> {
+    const start = await mongo.getCollectionUpdatedAt(QUESTS_USER_COLLECTION);
 
     const end = new Date();
 
     const updated = await QuestsUserUpdator.fetchUpdated(start, end);
     const wildcard = await QuestsUserUpdator.fetchWildcard(start, end);
 
-    await upsertManyById(mongoClient, QUESTS_USER_COLLECTION, [
+    await mongo.upsertManyById(QUESTS_USER_COLLECTION, [
       ...updated,
       ...wildcard,
     ]);
 
-    await setCollectionUpdatedAt(mongoClient, QUESTS_USER_COLLECTION, end);
+    await mongo.setCollectionUpdatedAt(QUESTS_USER_COLLECTION, end);
   }
 
   @FetchApiAction

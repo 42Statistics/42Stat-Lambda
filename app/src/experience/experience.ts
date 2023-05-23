@@ -1,9 +1,5 @@
-import { MongoClient } from 'mongodb';
 import { CursusUser } from '../cursusUser/api/cursusUser.api.js';
-import {
-  getCollectionUpdatedAt,
-  setCollectionUpdatedAt,
-} from '../mongodb/mongodb.js';
+import { LambdaMongo } from '../mongodb/mongodb.js';
 import type { Project } from '../project/api/project.api.js';
 import { ProjectsUser } from '../projectsUser/api/projectsUser.api.js';
 import { PROJECTS_USER_COLLECTION } from '../projectsUser/projectsUser.js';
@@ -38,9 +34,9 @@ type LevelTableElem = {
  */
 // eslint-disable-next-line
 export class ExperienceUpdator {
-  static async update(mongoClient: MongoClient): Promise<void> {
-    await ExperienceUpdator.updateProjectsUserUpdated(mongoClient);
-    await testLevelCalculation(mongoClient);
+  static async update(mongo: LambdaMongo): Promise<void> {
+    await ExperienceUpdator.updateProjectsUserUpdated(mongo);
+    await testLevelCalculation(mongo);
   }
 
   /**
@@ -55,14 +51,11 @@ export class ExperienceUpdator {
   @UpdateAction
   @LogAsyncEstimatedTime
   private static async updateProjectsUserUpdated(
-    mongoClient: MongoClient,
+    mongo: LambdaMongo,
   ): Promise<void> {
-    const start = await getCollectionUpdatedAt(
-      mongoClient,
-      EXPERIENCE_COLLECTION,
-    );
+    const start = await mongo.getCollectionUpdatedAt(EXPERIENCE_COLLECTION);
 
-    const projectsUsersUpdated = await mongoClient
+    const projectsUsersUpdated = await mongo
       .db()
       .collection<ProjectsUser>(PROJECTS_USER_COLLECTION)
       .aggregate<
@@ -148,7 +141,7 @@ export class ExperienceUpdator {
       return;
     }
 
-    const levelTable = await mongoClient
+    const levelTable = await mongo
       .db()
       .collection<LevelTableElem>(LEVEL_COLLECTION)
       .find()
@@ -220,12 +213,12 @@ export class ExperienceUpdator {
       new Date(0),
     );
 
-    await mongoClient
+    await mongo
       .db()
       .collection(EXPERIENCE_COLLECTION)
       .insertMany(newExperiences);
 
-    await setCollectionUpdatedAt(mongoClient, EXPERIENCE_COLLECTION, end);
+    await mongo.setCollectionUpdatedAt(EXPERIENCE_COLLECTION, end);
   }
 }
 
@@ -284,10 +277,8 @@ function assertsLevelFound(
 }
 
 //#region 테스트 함수 입니다.
-const testLevelCalculation = async (
-  mongoClient: MongoClient,
-): Promise<void> => {
-  const info = await mongoClient
+const testLevelCalculation = async (mongo: LambdaMongo): Promise<void> => {
+  const info = await mongo
     .db()
     .collection('cursus_users')
     .aggregate<{
@@ -313,7 +304,7 @@ const testLevelCalculation = async (
     ])
     .toArray();
 
-  const levelTable = await mongoClient
+  const levelTable = await mongo
     .db()
     .collection<LevelTableElem>('levels')
     .find()

@@ -1,20 +1,15 @@
-import { MongoClient } from 'mongodb';
+import { LambdaMongo } from '../mongodb/mongodb.js';
 import {
   FetchApiAction,
   LogAsyncEstimatedTime,
   UpdateAction,
 } from '../util/decorator.js';
+import { pagedRequest } from '../util/pagedRequest.js';
 import {
   COALITIONS_USER_EP,
   CoalitionsUser,
   parseCoalitionsUsers,
 } from './api/coalitionsUser.api.js';
-import { pagedRequest } from '../util/pagedRequest.js';
-import {
-  getCollectionUpdatedAt,
-  setCollectionUpdatedAt,
-  upsertManyById,
-} from '../mongodb/mongodb.js';
 
 export const COALITIONS_USER_COLLECTION = 'coalitions_users';
 
@@ -31,15 +26,14 @@ export class CoalitionsUserUpdator {
    *
    * 요청을 1번 보냄으로써 새로 만들어진 사람들이 있는지 확인하고, 필요한 경우 추가로 요청을 보냅니다.
    */
-  static async update(mongoClient: MongoClient): Promise<void> {
-    await CoalitionsUserUpdator.updateCreated(mongoClient);
+  static async update(mongo: LambdaMongo): Promise<void> {
+    await CoalitionsUserUpdator.updateCreated(mongo);
   }
 
   @UpdateAction
   @LogAsyncEstimatedTime
-  private static async updateCreated(mongoClient: MongoClient): Promise<void> {
-    const start = await getCollectionUpdatedAt(
-      mongoClient,
+  private static async updateCreated(mongo: LambdaMongo): Promise<void> {
+    const start = await mongo.getCollectionUpdatedAt(
       COALITIONS_USER_COLLECTION,
     );
 
@@ -47,8 +41,8 @@ export class CoalitionsUserUpdator {
 
     const created = await CoalitionsUserUpdator.fetchCreated(start, end);
 
-    await upsertManyById(mongoClient, COALITIONS_USER_COLLECTION, created);
-    await setCollectionUpdatedAt(mongoClient, COALITIONS_USER_COLLECTION, end);
+    await mongo.upsertManyById(COALITIONS_USER_COLLECTION, created);
+    await mongo.setCollectionUpdatedAt(COALITIONS_USER_COLLECTION, end);
   }
 
   @FetchApiAction

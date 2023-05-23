@@ -1,9 +1,4 @@
-import { MongoClient } from 'mongodb';
-import {
-  getCollectionUpdatedAt,
-  setCollectionUpdatedAt,
-  upsertManyById,
-} from '../mongodb/mongodb.js';
+import { LambdaMongo } from '../mongodb/mongodb.js';
 import {
   FetchApiAction,
   LogAsyncEstimatedTime,
@@ -27,20 +22,20 @@ export class EventUpdator {
    *
    * 한번에 100개 이상의 event 가 변하지 않는 이상 불변함.
    */
-  static async update(mongoClient: MongoClient): Promise<void> {
-    await EventUpdator.updateUpdated(mongoClient);
+  static async update(mongo: LambdaMongo): Promise<void> {
+    await EventUpdator.updateUpdated(mongo);
   }
 
   @UpdateAction
   @LogAsyncEstimatedTime
-  private static async updateUpdated(mongoClient: MongoClient): Promise<void> {
-    const start = await getCollectionUpdatedAt(mongoClient, EVENT_COLLECTION);
+  private static async updateUpdated(mongo: LambdaMongo): Promise<void> {
+    const start = await mongo.getCollectionUpdatedAt(EVENT_COLLECTION);
     const end = new Date();
 
     const updated = await EventUpdator.fetchUpdated(start, end);
 
-    await upsertManyById(mongoClient, EVENT_COLLECTION, updated);
-    await setCollectionUpdatedAt(mongoClient, EVENT_COLLECTION, end);
+    await mongo.upsertManyById(EVENT_COLLECTION, updated);
+    await mongo.setCollectionUpdatedAt(EVENT_COLLECTION, end);
   }
 
   @FetchApiAction
