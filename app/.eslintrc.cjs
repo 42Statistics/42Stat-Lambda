@@ -18,7 +18,7 @@ module.exports = {
     jest: true,
   },
   // todo
-  ignorePatterns: ['.eslintrc.js', 'test.ts', '**/decorator.ts'],
+  ignorePatterns: ['.eslintrc.js', '**/decorator.ts'],
   rules: {
     'no-used-vars': 'off',
     '@typescript-eslint/no-unused-vars': [
