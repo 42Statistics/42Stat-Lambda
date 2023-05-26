@@ -6,7 +6,7 @@ import {
   parseEventsUsers,
 } from '#lambda/eventsUser/api/eventsUser.api.js';
 import { LambdaMongo } from '#lambda/mongodb/mongodb.js';
-import { pagedRequest } from '#lambda/request/pagedRequest.js';
+import { fetchAllPages } from '#lambda/request/fetchAllPages.js';
 import {
   FetchApiAction,
   LogAsyncEstimatedTime,
@@ -62,10 +62,8 @@ export class EventsUserUpdator {
 
   @FetchApiAction
   private static async fetchByEvent(eventIds: number[]): Promise<EventsUser[]> {
-    const eventsUserDtos = await pagedRequest(
+    const eventsUserDtos = await fetchAllPages(
       EVENTS_USER_EP.BY_EVENT(eventIds),
-      100,
-      2,
     );
 
     return parseEventsUsers(eventsUserDtos);

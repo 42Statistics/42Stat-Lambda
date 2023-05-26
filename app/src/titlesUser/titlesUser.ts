@@ -1,5 +1,5 @@
 import { LambdaMongo } from '#lambda/mongodb/mongodb.js';
-import { pagedRequestByCount } from '#lambda/request/pagedRequestByCount.js';
+import { fetchAllPages } from '#lambda/request/fetchAllPages.js';
 import {
   TITLES_USER_EP,
   TitlesUser,
@@ -41,11 +41,7 @@ export class TitlesUserUpdator {
 
   @FetchApiAction
   private static async fetchAll(): Promise<TitlesUser[]> {
-    const titlesUserDtos = await pagedRequestByCount(
-      TITLES_USER_EP.ALL(),
-      1,
-      100,
-    );
+    const titlesUserDtos = await fetchAllPages(TITLES_USER_EP.ALL(), 1, 100);
 
     return parseTitlesUsers(titlesUserDtos);
   }

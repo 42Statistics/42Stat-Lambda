@@ -1,6 +1,6 @@
 import { getStudentIds } from '#lambda/cursusUser/cursusUser.js';
 import { LambdaMongo } from '#lambda/mongodb/mongodb.js';
-import { pagedRequest } from '#lambda/request/pagedRequest.js';
+import { fetchAllPages } from '#lambda/request/fetchAllPages.js';
 import { TEAM_EP, Team, parseTeams } from '#lambda/team/api/team.api.js';
 import {
   FetchApiAction,
@@ -47,7 +47,7 @@ export class TeamUpdator {
 
   @FetchApiAction
   private static async fetchUpdated(start: Date, end: Date): Promise<Team[]> {
-    const teamDtos = await pagedRequest(TEAM_EP.UPDATED(start, end), 100, 2);
+    const teamDtos = await fetchAllPages(TEAM_EP.UPDATED(start, end));
 
     return parseTeams(teamDtos);
   }

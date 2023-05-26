@@ -1,6 +1,6 @@
 import { SEOUL_COALITION_ID } from '#lambda/coalition/api/coalition.api.js';
 import { LambdaMongo } from '#lambda/mongodb/mongodb.js';
-import { pagedRequestByCount } from '#lambda/request/pagedRequestByCount.js';
+import { fetchAllPages } from '#lambda/request/fetchAllPages.js';
 import { SCORE_EP, Score, parseScores } from '#lambda/score/api/score.api.js';
 import {
   FetchApiAction,
@@ -78,8 +78,6 @@ export class ScoreUpdator {
       })),
     );
 
-    console.log(byCoalition);
-
     await mongo.upsertManyById(SCORE_COLLECTION, byCoalition);
   }
 
@@ -90,10 +88,9 @@ export class ScoreUpdator {
     const scoreDtos: object[] = [];
 
     for (const { coalitionId, count } of coalitionScoreCounts) {
-      const currDtos = await pagedRequestByCount(
+      const currDtos = await fetchAllPages(
         new URL(SCORE_EP.BY_COALITION(coalitionId)),
-        count / 100,
-        100,
+        Math.floor(count / 100),
       );
 
       scoreDtos.push(...currDtos);

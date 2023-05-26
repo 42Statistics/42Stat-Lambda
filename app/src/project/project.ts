@@ -4,7 +4,7 @@ import {
   Project,
   parseProjects,
 } from '#lambda/project/api/project.api.js';
-import { pagedRequest } from '#lambda/request/pagedRequest.js';
+import { fetchAllPages } from '#lambda/request/fetchAllPages.js';
 import {
   FetchApiAction,
   LogAsyncEstimatedTime,
@@ -49,10 +49,10 @@ export class ProjectUpdator {
     start: Date,
     end: Date,
   ): Promise<Project[]> {
-    const projectDtos = await pagedRequest(
+    const projectDtos = await fetchAllPages(
       PROJECT_EP.UPDATED(start, end),
+      1,
       30,
-      10, //1,
     );
 
     return parseProjects(projectDtos);

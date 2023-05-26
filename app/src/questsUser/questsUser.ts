@@ -4,7 +4,7 @@ import {
   QuestsUser,
   parseQuestsUsers,
 } from '#lambda/questsUser/api/questsUser.api.js';
-import { pagedRequest } from '#lambda/request/pagedRequest.js';
+import { fetchAllPages } from '#lambda/request/fetchAllPages.js';
 import {
   FetchApiAction,
   LogAsyncEstimatedTime,
@@ -53,10 +53,8 @@ export class QuestsUserUpdator {
     start: Date,
     end: Date,
   ): Promise<QuestsUser[]> {
-    const questsUserDtos = await pagedRequest(
+    const questsUserDtos = await fetchAllPages(
       QUESTS_USER_EP.UPDATED(start, end),
-      100,
-      1,
     );
 
     return parseQuestsUsers(questsUserDtos);
@@ -67,10 +65,8 @@ export class QuestsUserUpdator {
     start: Date,
     end: Date,
   ): Promise<QuestsUser[]> {
-    const questsUserDtos = await pagedRequest(
+    const questsUserDtos = await fetchAllPages(
       QUESTS_USER_EP.WILDCARD(start, end),
-      100,
-      1,
     );
 
     return parseQuestsUsers(questsUserDtos);

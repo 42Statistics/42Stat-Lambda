@@ -1,6 +1,6 @@
 import { EXAM_EP, Exam, parseExams } from '#lambda/exam/api/exam.api.js';
 import { LambdaMongo } from '#lambda/mongodb/mongodb.js';
-import { pagedRequest } from '#lambda/request/pagedRequest.js';
+import { fetchAllPages } from '#lambda/request/fetchAllPages.js';
 import {
   FetchApiAction,
   LogAsyncEstimatedTime,
@@ -50,7 +50,7 @@ export class ExamUpdator {
 
   @FetchApiAction
   private static async fetchCreated(start: Date, end: Date): Promise<Exam[]> {
-    const examDtos = await pagedRequest(EXAM_EP.UPDATED(start, end), 100, 1);
+    const examDtos = await fetchAllPages(EXAM_EP.UPDATED(start, end));
 
     return parseExams(examDtos);
   }

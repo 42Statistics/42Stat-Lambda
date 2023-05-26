@@ -9,8 +9,7 @@ import { CURSUS_USERS_CACHE_KEY } from '#lambda/cursusUser/dto/cursusUser.redis.
 import { ExperienceUpdator } from '#lambda/experience/experience.js';
 import { LambdaMongo } from '#lambda/mongodb/mongodb.js';
 import { LambdaRedis } from '#lambda/redis/LambdaRedis.js';
-import { pagedRequest } from '#lambda/request/pagedRequest.js';
-import { singleRequest } from '#lambda/request/requestSingle.js';
+import { fetchAllPages } from '#lambda/request/fetchAllPages.js';
 import {
   FetchApiAction,
   LogAsyncEstimatedTime,
@@ -68,10 +67,8 @@ export class CursusUserUpdator {
     start: Date,
     end: Date,
   ): Promise<CursusUser[]> {
-    const cursusUserDtos = await pagedRequest(
+    const cursusUserDtos = await fetchAllPages(
       CURSUS_USER_EP.CURSUS_CHANGED(start, end),
-      100,
-      4,
     );
 
     return parseCursusUsers(cursusUserDtos).filter(isStudent);
@@ -99,20 +96,14 @@ export class CursusUserUpdator {
    */
   @FetchApiAction
   private static async fetchActivated(): Promise<CursusUser[]> {
-    const cursusUserDtos = await pagedRequest(
-      CURSUS_USER_EP.ACTIVATED(),
-      100,
-      10,
-    );
+    const cursusUserDtos = await fetchAllPages(CURSUS_USER_EP.ACTIVATED());
 
     return parseCursusUsers(cursusUserDtos).filter(isStudent);
   }
 
   @FetchApiAction
   private static async fetchWildcard(): Promise<CursusUser[]> {
-    const cursusUserDtos = await singleRequest<object[]>(
-      CURSUS_USER_EP.WILDCARD(),
-    );
+    const cursusUserDtos = await fetchAllPages(CURSUS_USER_EP.WILDCARD());
 
     return parseCursusUsers(cursusUserDtos);
   }

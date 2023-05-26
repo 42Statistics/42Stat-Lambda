@@ -1,6 +1,6 @@
 import { EVENT_EP, Event, parseEvents } from '#lambda/event/api/event.api.js';
 import { LambdaMongo } from '#lambda/mongodb/mongodb.js';
-import { pagedRequest } from '#lambda/request/pagedRequest.js';
+import { fetchAllPages } from '#lambda/request/fetchAllPages.js';
 import {
   FetchApiAction,
   LogAsyncEstimatedTime,
@@ -40,7 +40,7 @@ export class EventUpdator {
 
   @FetchApiAction
   private static async fetchUpdated(start: Date, end: Date): Promise<Event[]> {
-    const eventDtos = await pagedRequest(EVENT_EP.UPDATED(start, end), 100, 1);
+    const eventDtos = await fetchAllPages(EVENT_EP.UPDATED(start, end));
 
     return parseEvents(eventDtos);
   }

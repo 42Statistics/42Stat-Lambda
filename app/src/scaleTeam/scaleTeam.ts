@@ -1,5 +1,5 @@
 import { LambdaMongo } from '#lambda/mongodb/mongodb.js';
-import { pagedRequest } from '#lambda/request/pagedRequest.js';
+import { fetchAllPages } from '#lambda/request/fetchAllPages.js';
 import {
   SCALE_TEAM_EP,
   ScaleTeam,
@@ -48,11 +48,7 @@ export class ScaleTeamUpdator {
     start: Date,
     end: Date,
   ): Promise<ScaleTeam[]> {
-    const scaleTeamDtos = await pagedRequest(
-      SCALE_TEAM_EP.FILLED(start, end),
-      100,
-      1,
-    );
+    const scaleTeamDtos = await fetchAllPages(SCALE_TEAM_EP.FILLED(start, end));
 
     return parseScaleTeams(scaleTeamDtos);
   }

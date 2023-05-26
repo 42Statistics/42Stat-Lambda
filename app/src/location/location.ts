@@ -5,7 +5,7 @@ import {
   parseLocations,
 } from '#lambda/location/api/location.api.js';
 import { LambdaMongo } from '#lambda/mongodb/mongodb.js';
-import { pagedRequest } from '#lambda/request/pagedRequest.js';
+import { fetchAllPages } from '#lambda/request/fetchAllPages.js';
 import {
   FetchApiAction,
   LogAsyncEstimatedTime,
@@ -46,7 +46,7 @@ export class LocationUpdator {
 
   @FetchApiAction
   private static async fetchOngoing(): Promise<Location[]> {
-    const locationDtos = await pagedRequest(LOCATION_EP.ONGOING(), 100, 4);
+    const locationDtos = await fetchAllPages(LOCATION_EP.ONGOING());
 
     return parseLocations(locationDtos);
   }
@@ -67,11 +67,7 @@ export class LocationUpdator {
 
   @FetchApiAction
   private static async fetchEnded(start: Date, end: Date): Promise<Location[]> {
-    const locationDtos = await pagedRequest(
-      LOCATION_EP.ENDED(start, end),
-      100,
-      4,
-    );
+    const locationDtos = await fetchAllPages(LOCATION_EP.ENDED(start, end));
 
     return parseLocations(locationDtos);
   }

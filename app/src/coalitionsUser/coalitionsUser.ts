@@ -4,7 +4,7 @@ import {
   parseCoalitionsUsers,
 } from '#lambda/coalitionsUser/api/coalitionsUser.api.js';
 import { LambdaMongo } from '#lambda/mongodb/mongodb.js';
-import { pagedRequest } from '#lambda/request/pagedRequest.js';
+import { fetchAllPages } from '#lambda/request/fetchAllPages.js';
 import {
   FetchApiAction,
   LogAsyncEstimatedTime,
@@ -50,10 +50,8 @@ export class CoalitionsUserUpdator {
     start: Date,
     end: Date,
   ): Promise<CoalitionsUser[]> {
-    const coalitionsUserDtos = await pagedRequest(
+    const coalitionsUserDtos = await fetchAllPages(
       COALITIONS_USER_EP.CREATED(start, end),
-      100,
-      1,
     );
 
     return parseCoalitionsUsers(coalitionsUserDtos);

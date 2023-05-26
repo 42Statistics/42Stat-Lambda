@@ -95,6 +95,12 @@ export class LambdaMongo {
     return count;
   }
 
+  /**
+   *
+   * @description
+   * 인자로 들어온 ```datas``` 를 map 과 Promise.all 을 통해 실행하기 때문에, 빈 배열이 삽입되는
+   * 경우를 자연스럽게 막을 수 있습니다.
+   */
   @Bound
   @MongoAction
   async upsertManyById<T extends { id: number }>(
