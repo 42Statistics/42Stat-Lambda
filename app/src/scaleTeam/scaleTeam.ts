@@ -24,7 +24,7 @@ export class ScaleTeamUpdator {
    * 필요 요청 수: F(1)
    * 예상 소요 시간: 5초
    *
-   * 한번에 100개의 평가가 끝나지 않는 이상 불변함.
+   * 끝난 평가가 100개를 넘을 때 마다 요청을 한번씩 더 보내야 함.
    */
   static async update(mongo: LambdaMongo): Promise<void> {
     await ScaleTeamUpdator.updateFilled(mongo);

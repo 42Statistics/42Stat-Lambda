@@ -18,11 +18,10 @@ export class TeamUpdator {
    * @see updateUpdated   U: 갱신 된 팀
    *
    * 2023-05 기준
-   * 필요 요청 수: U(1 ~ 2)
-   * 예상 소요 시간: 5초
+   * 필요 요청 수: U(1)
+   * 예상 소요 시간: 3초
    *
-   * 마지막으로 갱신했던 때로부터 팀이 200개 이상 바뀌지 않는 이상 괜찮음.
-   * 신규 기수가 입과하는 날 초과할 가능성이 있긴 한데... 이것도 한순간에 전부 레지스터해야 초과함.
+   * team 이 100개 이상 생기거나 갱신될 때 마다 요청을 한번씩 더 보내야 함.
    */
   static async update(mongo: LambdaMongo): Promise<void> {
     await TeamUpdator.updateUpdated(mongo);

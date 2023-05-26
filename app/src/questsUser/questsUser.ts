@@ -21,10 +21,11 @@ export class QuestsUserUpdator {
    * @see updateUpdated   U: 새로 달성되거나 블랙홀로 끝난 퀘스트
    *
    * 2023-05 기준
-   * 필요 요청 수: U(2)
-   * 예상 소요 시간: 5초
+   * 필요 요청 수: U(1 | 4)
+   * 예상 소요 시간: 3 | 8초
    *
-   * 한번에 100개 이상의 quests user 가 생기거나 변하지 않는 이상 불변함.
+   * 생기거나 갱신되는 quests user 가 100명을 넘어갈 때 마다 하나씩 요청을 더 보내야 함.
+   * 신규 기수 입과일이 아니면 한번으로 충분함.
    */
   static async update(mongo: LambdaMongo): Promise<void> {
     await QuestsUserUpdator.updateUpdated(mongo);

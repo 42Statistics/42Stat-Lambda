@@ -23,11 +23,11 @@ export class ProjectsUserUpdator {
    * @see updateUpdated   U: 갱신 된 팀
    *
    * 2023-05 기준
-   * 필요 요청 수: U(2 ~ 4)
+   * 필요 요청 수: U(1 ~ 4)
    * 예상 소요 시간: 3 ~ 6초
    *
-   * 마지막으로 갱신했던 때로부터 팀이 생기거나 / 바뀌거나 / 끝나는 팀이 400개 이상이 아닌 이상 괜찮음.
-   * 피신 기간이나 이그잼이 있는 날에는 요청 수가 증가할 가능성이 높음.
+   * 생기거나 / 바뀌거나 / 끝나는 팀이 100개가 넘을 때 마다 한번씩 더 요청을 보내야 함.
+   * 이그잼이 있는 날에는 요청 수가 증가할 가능성이 높음.
    */
   static async update(mongo: LambdaMongo): Promise<void> {
     await ProjectsUserUpdator.updateUpdated(mongo);

@@ -22,9 +22,9 @@ export class CoalitionsUserUpdator {
    *
    * 2023-05 기준
    * 필요 요청 수: C(1 | 3 ~ 4)
-   * 예상 소요 시간: 3초 | 10초
+   * 예상 소요 시간: 2초 | 6초
    *
-   * 요청을 1번 보냄으로써 새로 만들어진 사람들이 있는지 확인하고, 필요한 경우 추가로 요청을 보냅니다.
+   * 신규 기수가 입과하는 날에만 3번 (300명 기준) 의 요청이 필요함. 평소에는 한번으로 충분함.
    */
   static async update(mongo: LambdaMongo): Promise<void> {
     await CoalitionsUserUpdator.updateCreated(mongo);

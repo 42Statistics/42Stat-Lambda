@@ -23,12 +23,15 @@ export class LocationUpdator {
    * @see updateEnded     E: 접속을 종료한 유저
    *
    * 2023-05 기준
-   * 필요 요청 수: U(4 * n) + E(4)
-   * 에상 소요 시간: 10초
+   * 필요 요청 수: U(1 ~ 3 + n) + E(1 ~ 2)
+   * 에상 소요 시간: 5 ~ 10초 + n
    *
-   * U 의 경우, 피신이 진행되는 기간은 폭증할 가능성이 있지만, 평소엔 4번 정도의 요청이면 충분함.
+   * !! 피신이 구분되지 않음 !!
    *
-   * E 의 경우, 접속을 종료하는 사람들이 한번에 400명을 넘지 않으면 불변함.
+   * U 의 경우, 피신이 진행되는 기간은 폭증할 가능성이 있지만, 평소엔 1 ~ 3번 정도의 요청이면 충분함.
+   *
+   * E 의 경우, 접속을 종료하는 사람들이 100명을 넘을 때 마다 한번씩 요청을 더 보내야함.
+   * 평소엔 1 ~ 2번으로 충분함.
    */
   static async update(mongo: LambdaMongo): Promise<void> {
     await LocationUpdator.updateOngoing(mongo);
