@@ -1,5 +1,5 @@
+import { languageSchema } from '#lambda/language/api/language.schema.js';
 import { z } from 'zod';
-import { languageSchema } from '../../language/api/language.schema.js';
 
 export const campusSchema = z.object({
   id: z.number(),

@@ -1,7 +1,7 @@
+import { FT_CURSUS_ID } from '#lambda/cursusUser/api/cursusUser.api.js';
+import { examSchema, examSchema_ } from '#lambda/exam/api/exam.schema.js';
+import { parseFromDtoMany } from '#lambda/util/parseFromDto.js';
 import { z } from 'zod';
-import { FT_CURSUS_ID } from '../../cursusUser/api/cursusUser.api.js';
-import { parseFromDtoMany } from '../../util/parseFromDto.js';
-import { examSchema, examSchema_ } from './exam.schema.js';
 
 export type Exam = z.infer<typeof examSchema>;
 

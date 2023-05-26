@@ -1,5 +1,5 @@
+import { LambdaError } from '#lambda/util/error.js';
 import seine from 'la-seine';
-import { LambdaError } from '../util/error.js';
 
 /**
  *

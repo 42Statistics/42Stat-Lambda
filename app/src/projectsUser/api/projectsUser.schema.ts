@@ -1,10 +1,13 @@
-import { z } from 'zod';
-import { userSchema } from '../../cursusUser/api/cursusUser.schema.js';
+import { userSchema } from '#lambda/cursusUser/api/cursusUser.schema.js';
 import {
   projectBaseSchema,
   projectBaseSchema_,
-} from '../../project/api/project.schema.js';
-import { teamBaseSchema, teamBaseSchema_ } from '../../team/api/team.schema.js';
+} from '#lambda/project/api/project.schema.js';
+import {
+  teamBaseSchema,
+  teamBaseSchema_,
+} from '#lambda/team/api/team.schema.js';
+import { z } from 'zod';
 
 export const projectsUserSchema = z.object({
   id: z.number(),

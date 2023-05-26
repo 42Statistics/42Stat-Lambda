@@ -1,17 +1,17 @@
-import { FT_CURSUS_ID } from '../cursusUser/api/cursusUser.api.js';
-import { getStudentIds } from '../cursusUser/cursusUser.js';
-import { LambdaMongo } from '../mongodb/mongodb.js';
-import {
-  FetchApiAction,
-  LogAsyncEstimatedTime,
-  UpdateAction,
-} from '../util/decorator.js';
-import { pagedRequest } from '../request/pagedRequest.js';
+import { FT_CURSUS_ID } from '#lambda/cursusUser/api/cursusUser.api.js';
+import { getStudentIds } from '#lambda/cursusUser/cursusUser.js';
+import { LambdaMongo } from '#lambda/mongodb/mongodb.js';
 import {
   PROJECTS_USER_EP,
   ProjectsUser,
   parseProjectsUsers,
-} from './api/projectsUser.api.js';
+} from '#lambda/projectsUser/api/projectsUser.api.js';
+import { pagedRequest } from '#lambda/request/pagedRequest.js';
+import {
+  FetchApiAction,
+  LogAsyncEstimatedTime,
+  UpdateAction,
+} from '#lambda/util/decorator.js';
 
 export const PROJECTS_USER_COLLECTION = 'projects_users';
 

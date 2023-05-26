@@ -1,12 +1,12 @@
-import { getStudentIds } from '../cursusUser/cursusUser.js';
-import { LambdaMongo } from '../mongodb/mongodb.js';
+import { getStudentIds } from '#lambda/cursusUser/cursusUser.js';
+import { LambdaMongo } from '#lambda/mongodb/mongodb.js';
+import { pagedRequest } from '#lambda/request/pagedRequest.js';
+import { TEAM_EP, Team, parseTeams } from '#lambda/team/api/team.api.js';
 import {
   FetchApiAction,
   LogAsyncEstimatedTime,
   UpdateAction,
-} from '../util/decorator.js';
-import { pagedRequest } from '../request/pagedRequest.js';
-import { TEAM_EP, Team, parseTeams } from './api/team.api.js';
+} from '#lambda/util/decorator.js';
 
 export const TEAM_COLLECTION = 'teams';
 

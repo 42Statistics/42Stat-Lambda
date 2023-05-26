@@ -1,5 +1,5 @@
+import { LambdaError } from '#lambda/util/error.js';
 import seine, { SeineResult } from 'la-seine';
-import { LambdaError } from '../util/error.js';
 
 export const pagedRequest = async (
   endpoint: URL,

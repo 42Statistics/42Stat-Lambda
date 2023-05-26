@@ -1,15 +1,15 @@
-import { LambdaMongo } from '../mongodb/mongodb.js';
-import {
-  FetchApiAction,
-  LogAsyncEstimatedTime,
-  UpdateAction,
-} from '../util/decorator.js';
-import { pagedRequestByCount } from '../request/pagedRequestByCount.js';
+import { LambdaMongo } from '#lambda/mongodb/mongodb.js';
+import { pagedRequestByCount } from '#lambda/request/pagedRequestByCount.js';
 import {
   TITLES_USER_EP,
   TitlesUser,
   parseTitlesUsers,
-} from './api/titlesUser.api.js';
+} from '#lambda/titlesUser/api/titlesUser.api.js';
+import {
+  FetchApiAction,
+  LogAsyncEstimatedTime,
+  UpdateAction,
+} from '#lambda/util/decorator.js';
 export const TITLES_USER_COLLECTION = 'titles_users';
 
 // eslint-disable-next-line

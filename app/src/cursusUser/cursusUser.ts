@@ -1,21 +1,21 @@
-import { ExperienceUpdator } from '../experience/experience.js';
-import { LambdaMongo } from '../mongodb/mongodb.js';
-import { LambdaRedis } from '../redis/LambdaRedis.js';
-import {
-  FetchApiAction,
-  LogAsyncEstimatedTime,
-  UpdateAction,
-} from '../util/decorator.js';
-import { pagedRequest } from '../request/pagedRequest.js';
-import { singleRequest } from '../request/requestSingle.js';
 import {
   CURSUS_USER_EP,
   CursusUser,
   isStudent,
   parseCursusUsers,
   wildcardUserIds,
-} from './api/cursusUser.api.js';
-import { CURSUS_USERS_CACHE_KEY } from './dto/cursusUser.redis.js';
+} from '#lambda/cursusUser/api/cursusUser.api.js';
+import { CURSUS_USERS_CACHE_KEY } from '#lambda/cursusUser/dto/cursusUser.redis.js';
+import { ExperienceUpdator } from '#lambda/experience/experience.js';
+import { LambdaMongo } from '#lambda/mongodb/mongodb.js';
+import { LambdaRedis } from '#lambda/redis/LambdaRedis.js';
+import { pagedRequest } from '#lambda/request/pagedRequest.js';
+import { singleRequest } from '#lambda/request/requestSingle.js';
+import {
+  FetchApiAction,
+  LogAsyncEstimatedTime,
+  UpdateAction,
+} from '#lambda/util/decorator.js';
 
 export const CURSUS_USER_COLLECTION = 'cursus_users';
 

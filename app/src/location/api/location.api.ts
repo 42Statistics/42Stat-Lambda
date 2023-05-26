@@ -1,7 +1,7 @@
+import { SEOUL_CAMPUS_ID } from '#lambda/campus/api/campus.api.js';
+import { locationSchema } from '#lambda/location/api/location.schema.js';
+import { parseFromDtoMany } from '#lambda/util/parseFromDto.js';
 import { z } from 'zod';
-import { parseFromDtoMany } from '../../util/parseFromDto.js';
-import { locationSchema } from './location.schema.js';
-import { SEOUL_CAMPUS_ID } from '../../campus/api/campus.api.js';
 
 export type Location = z.infer<typeof locationSchema>;
 

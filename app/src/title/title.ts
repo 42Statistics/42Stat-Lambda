@@ -1,13 +1,13 @@
-import { LambdaMongo } from '../mongodb/mongodb.js';
+import { LambdaMongo } from '#lambda/mongodb/mongodb.js';
+import { pagedRequestByCount } from '#lambda/request/pagedRequestByCount.js';
+import { TITLE_EP, Title, parseTitles } from '#lambda/title/api/title.api.js';
 // eslint-disable-next-line
-import type { TitlesUserUpdator } from '../titlesUser/titlesUser.js';
+import type { TitlesUserUpdator } from '#lambda/titlesUser/titlesUser.js';
 import {
   FetchApiAction,
   LogAsyncEstimatedTime,
   UpdateAction,
-} from '../util/decorator.js';
-import { pagedRequestByCount } from '../request/pagedRequestByCount.js';
-import { TITLE_EP, Title, parseTitles } from './api/title.api.js';
+} from '#lambda/util/decorator.js';
 
 export const TITLE_COLLECTION = 'titles';
 

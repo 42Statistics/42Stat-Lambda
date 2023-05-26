@@ -1,16 +1,16 @@
-import { LambdaMongo } from '../mongodb/mongodb.js';
-import {
-  FetchApiAction,
-  LogAsyncEstimatedTime,
-  UpdateAction,
-} from '../util/decorator.js';
-import { pagedRequest } from '../request/pagedRequest.js';
 import {
   LOCATION_EP,
   Location,
   isCluster,
   parseLocations,
-} from './api/location.api.js';
+} from '#lambda/location/api/location.api.js';
+import { LambdaMongo } from '#lambda/mongodb/mongodb.js';
+import { pagedRequest } from '#lambda/request/pagedRequest.js';
+import {
+  FetchApiAction,
+  LogAsyncEstimatedTime,
+  UpdateAction,
+} from '#lambda/util/decorator.js';
 
 export const LOCATION_COLLECTION = 'locations';
 

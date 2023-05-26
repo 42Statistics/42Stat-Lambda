@@ -1,6 +1,6 @@
+import { Bound } from '#lambda/util/decorator.js';
+import { LambdaError } from '#lambda/util/error.js';
 import { createClient, RedisClientOptions, SetOptions } from 'redis';
-import { Bound } from '../util/decorator.js';
-import { LambdaError } from '../util/error.js';
 
 export type RedisClient = ReturnType<typeof createClient>;
 export type RedisCommandArgument = string | Buffer;

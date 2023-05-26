@@ -125,8 +125,8 @@ const config: Config = {
 
   // A map from regular expressions to module names or to arrays of module names that allow to stub out resources with a single module
   moduleNameMapper: {
-    '^(\\.\\.?\\/.+)\\.jsx?$': '$1',
-    '^(.*)\\.jsx?$': '<rootDir>/$1',
+    '^(\\.\\.?\\/.+)\\.js$': '$1',
+    '^#lambda/(.*)\\.js$': '<rootDir>/$1',
   },
 
   // Allows you to use a custom runner instead of Jest's default test runner

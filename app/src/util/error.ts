@@ -1,4 +1,4 @@
-import { LambdaMongo } from '../mongodb/mongodb.js';
+import { LambdaMongo } from '#lambda/mongodb/mongodb.js';
 
 const ERROR_COLLECTION = 'errors';
 

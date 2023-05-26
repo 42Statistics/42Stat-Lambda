@@ -1,7 +1,11 @@
+import { FT_CURSUS_ID } from '#lambda/cursusUser/api/cursusUser.api.js';
+import {
+  teamBaseSchema,
+  teamSchema,
+  teamSchema_,
+} from '#lambda/team/api/team.schema.js';
+import { parseFromDtoMany } from '#lambda/util/parseFromDto.js';
 import { z } from 'zod';
-import { FT_CURSUS_ID } from '../../cursusUser/api/cursusUser.api.js';
-import { parseFromDtoMany } from '../../util/parseFromDto.js';
-import { teamBaseSchema, teamSchema, teamSchema_ } from './team.schema.js';
 
 export type TeamBase = z.infer<typeof teamBaseSchema>;
 export type Team = z.infer<typeof teamSchema>;

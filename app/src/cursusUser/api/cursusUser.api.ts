@@ -1,7 +1,10 @@
+import {
+  cursusUserSchema,
+  cursusUserSchema_,
+} from '#lambda/cursusUser/api/cursusUser.schema.js';
+import type { CursusUserCache } from '#lambda/cursusUser/dto/cursusUser.redis.js';
+import { parseFromDtoMany } from '#lambda/util/parseFromDto.js';
 import { z } from 'zod';
-import { parseFromDtoMany } from '../../util/parseFromDto.js';
-import type { CursusUserCache } from '../dto/cursusUser.redis.js';
-import { cursusUserSchema, cursusUserSchema_ } from './cursusUser.schema.js';
 
 export type CursusUser = z.infer<typeof cursusUserSchema>;
 

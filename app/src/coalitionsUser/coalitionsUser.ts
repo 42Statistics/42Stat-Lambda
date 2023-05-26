@@ -1,15 +1,15 @@
-import { LambdaMongo } from '../mongodb/mongodb.js';
-import {
-  FetchApiAction,
-  LogAsyncEstimatedTime,
-  UpdateAction,
-} from '../util/decorator.js';
-import { pagedRequest } from '../request/pagedRequest.js';
 import {
   COALITIONS_USER_EP,
   CoalitionsUser,
   parseCoalitionsUsers,
-} from './api/coalitionsUser.api.js';
+} from '#lambda/coalitionsUser/api/coalitionsUser.api.js';
+import { LambdaMongo } from '#lambda/mongodb/mongodb.js';
+import { pagedRequest } from '#lambda/request/pagedRequest.js';
+import {
+  FetchApiAction,
+  LogAsyncEstimatedTime,
+  UpdateAction,
+} from '#lambda/util/decorator.js';
 
 export const COALITIONS_USER_COLLECTION = 'coalitions_users';
 

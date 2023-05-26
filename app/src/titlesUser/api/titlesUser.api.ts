@@ -1,6 +1,6 @@
+import { titlesUserSchema } from '#lambda/titlesUser/api/titlesUser.schema.js';
+import { parseFromDtoMany } from '#lambda/util/parseFromDto.js';
 import { z } from 'zod';
-import { titlesUserSchema } from './titlesUser.schema.js';
-import { parseFromDtoMany } from '../../util/parseFromDto.js';
 
 export type TitlesUser = z.infer<typeof titlesUserSchema>;
 

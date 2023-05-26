@@ -1,5 +1,5 @@
+import { sleepMs } from '#lambda/util/sleepMs.js';
 import { describe, expect, test } from '@jest/globals';
-import { sleepMs } from 'util/sleepMs.js';
 
 describe('util - sleepMs', () => {
   test('sleeps as wanted', async () => {

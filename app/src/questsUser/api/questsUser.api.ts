@@ -1,7 +1,10 @@
+import { wildcardUserIds } from '#lambda/cursusUser/api/cursusUser.api.js';
+import {
+  questsUserSchema,
+  questsUserSchema_,
+} from '#lambda/questsUser/api/questsUser.schema.js';
+import { parseFromDtoMany } from '#lambda/util/parseFromDto.js';
 import { z } from 'zod';
-import { questsUserSchema, questsUserSchema_ } from './questsUser.schema.js';
-import { parseFromDtoMany } from '../../util/parseFromDto.js';
-import { wildcardUserIds } from '../../cursusUser/api/cursusUser.api.js';
 
 export type QuestsUser = z.infer<typeof questsUserSchema>;
 

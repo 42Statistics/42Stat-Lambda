@@ -1,12 +1,12 @@
-import { SEOUL_COALITION_ID } from '../coalition/api/coalition.api.js';
-import { LambdaMongo } from '../mongodb/mongodb.js';
+import { SEOUL_COALITION_ID } from '#lambda/coalition/api/coalition.api.js';
+import { LambdaMongo } from '#lambda/mongodb/mongodb.js';
+import { pagedRequestByCount } from '#lambda/request/pagedRequestByCount.js';
+import { SCORE_EP, Score, parseScores } from '#lambda/score/api/score.api.js';
 import {
   FetchApiAction,
   LogAsyncEstimatedTime,
   UpdateAction,
-} from '../util/decorator.js';
-import { pagedRequestByCount } from '../request/pagedRequestByCount.js';
-import { SCORE_EP, Score, parseScores } from './api/score.api.js';
+} from '#lambda/util/decorator.js';
 
 export const SCORE_COLLECTION = 'scores';
 

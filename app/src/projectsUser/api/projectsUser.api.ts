@@ -1,10 +1,10 @@
-import { z } from 'zod';
-import { FT_CURSUS_ID } from '../../cursusUser/api/cursusUser.api.js';
-import { parseFromDtoMany } from '../../util/parseFromDto.js';
+import { FT_CURSUS_ID } from '#lambda/cursusUser/api/cursusUser.api.js';
 import {
   projectsUserSchema,
   projectsUserSchema_,
-} from './projectsUser.schema.js';
+} from '#lambda/projectsUser/api/projectsUser.schema.js';
+import { parseFromDtoMany } from '#lambda/util/parseFromDto.js';
+import { z } from 'zod';
 
 export type ProjectsUser = z.infer<typeof projectsUserSchema>;
 

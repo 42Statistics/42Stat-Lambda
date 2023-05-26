@@ -1,7 +1,7 @@
+import { SEOUL_CAMPUS_ID } from '#lambda/campus/api/campus.api.js';
+import { eventSchema, eventSchema_ } from '#lambda/event/api/event.schema.js';
+import { parseFromDtoMany } from '#lambda/util/parseFromDto.js';
 import { z } from 'zod';
-import { eventSchema, eventSchema_ } from './event.schema.js';
-import { parseFromDtoMany } from '../../util/parseFromDto.js';
-import { SEOUL_CAMPUS_ID } from '../../campus/api/campus.api.js';
 
 export type Event = z.infer<typeof eventSchema>;
 

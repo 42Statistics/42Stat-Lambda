@@ -1,8 +1,14 @@
+import { userSchema } from '#lambda/cursusUser/api/cursusUser.schema.js';
+import { languageSchema } from '#lambda/language/api/language.schema.js';
+import {
+  flagSchema,
+  scaleTeamBaseSchema,
+} from '#lambda/scaleTeam/api/scaleTeam.schema.base.js';
+import {
+  teamBaseSchema,
+  teamBaseSchema_,
+} from '#lambda/team/api/team.schema.js';
 import { z } from 'zod';
-import { languageSchema } from '../../language/api/language.schema.js';
-import { flagSchema, scaleTeamBaseSchema } from './scaleTeam.schema.base.js';
-import { teamBaseSchema, teamBaseSchema_ } from '../../team/api/team.schema.js';
-import { userSchema } from '../../cursusUser/api/cursusUser.schema.js';
 
 const scaleSchema = z.object({
   id: z.number(),

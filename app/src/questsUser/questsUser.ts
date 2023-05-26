@@ -1,15 +1,15 @@
-import { LambdaMongo } from '../mongodb/mongodb.js';
-import {
-  FetchApiAction,
-  LogAsyncEstimatedTime,
-  UpdateAction,
-} from '../util/decorator.js';
-import { pagedRequest } from '../request/pagedRequest.js';
+import { LambdaMongo } from '#lambda/mongodb/mongodb.js';
 import {
   QUESTS_USER_EP,
   QuestsUser,
   parseQuestsUsers,
-} from './api/questsUser.api.js';
+} from '#lambda/questsUser/api/questsUser.api.js';
+import { pagedRequest } from '#lambda/request/pagedRequest.js';
+import {
+  FetchApiAction,
+  LogAsyncEstimatedTime,
+  UpdateAction,
+} from '#lambda/util/decorator.js';
 
 export const QUESTS_USER_COLLECTION = 'quests_users';
 

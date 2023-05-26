@@ -1,5 +1,5 @@
+import { userSchema } from '#lambda/cursusUser/api/cursusUser.schema.js';
 import { z } from 'zod';
-import { userSchema } from '../../cursusUser/api/cursusUser.schema.js';
 
 const questSchema = z.object({
   id: z.number(),

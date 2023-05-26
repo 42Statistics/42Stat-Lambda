@@ -1,6 +1,6 @@
 import seine, { SeineResult, SeineSuccess } from 'la-seine';
-import { LambdaError } from '../util/error.js';
-import { getPagedResults } from './pagedRequest.js';
+import { LambdaError } from '#lambda/util/error.js';
+import { getPagedResults } from '#lambda/request/pagedRequest.js';
 
 type StartPageInfo = {
   totalCount: number;

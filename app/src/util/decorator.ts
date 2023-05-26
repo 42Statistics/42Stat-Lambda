@@ -1,6 +1,6 @@
-import { LambdaMongo } from '../mongodb/mongodb.js';
-import { LambdaError, logError } from './error.js';
-import { sleepMs } from './sleepMs.js';
+import { LambdaMongo } from '#lambda/mongodb/mongodb.js';
+import { LambdaError, logError } from '#lambda/util/error.js';
+import { sleepMs } from '#lambda/util/sleepMs.js';
 
 /**
  *

@@ -1,13 +1,16 @@
-import { z } from 'zod';
-import { campusSchema, campusSchema_ } from '../../campus/api/campus.schema.js';
+import {
+  campusSchema,
+  campusSchema_,
+} from '#lambda/campus/api/campus.schema.js';
 import {
   cursusSchema,
   cursusSchema_,
-} from '../../cursusUser/api/cursusUser.schema.js';
+} from '#lambda/cursusUser/api/cursusUser.schema.js';
 import {
   projectSchema,
   projectSchema_,
-} from '../../project/api/project.schema.js';
+} from '#lambda/project/api/project.schema.js';
+import { z } from 'zod';
 
 export const examSchema = z.object({
   id: z.number(),

@@ -1,11 +1,15 @@
-import { LambdaMongo } from '../mongodb/mongodb.js';
+import { LambdaMongo } from '#lambda/mongodb/mongodb.js';
+import {
+  PROJECT_EP,
+  Project,
+  parseProjects,
+} from '#lambda/project/api/project.api.js';
+import { pagedRequest } from '#lambda/request/pagedRequest.js';
 import {
   FetchApiAction,
   LogAsyncEstimatedTime,
   UpdateAction,
-} from '../util/decorator.js';
-import { pagedRequest } from '../request/pagedRequest.js';
-import { PROJECT_EP, Project, parseProjects } from './api/project.api.js';
+} from '#lambda/util/decorator.js';
 
 export const PROJECT_COLLECTION = 'projects';
 

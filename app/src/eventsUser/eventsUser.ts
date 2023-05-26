@@ -1,17 +1,17 @@
-import type { Event } from '../event/api/event.api.js';
-import { EVENT_COLLECTION } from '../event/event.js';
-import { LambdaMongo } from '../mongodb/mongodb.js';
-import {
-  FetchApiAction,
-  LogAsyncEstimatedTime,
-  UpdateAction,
-} from '../util/decorator.js';
-import { pagedRequest } from '../request/pagedRequest.js';
+import type { Event } from '#lambda/event/api/event.api.js';
+import { EVENT_COLLECTION } from '#lambda/event/event.js';
 import {
   EVENTS_USER_EP,
   EventsUser,
   parseEventsUsers,
-} from './api/eventsUser.api.js';
+} from '#lambda/eventsUser/api/eventsUser.api.js';
+import { LambdaMongo } from '#lambda/mongodb/mongodb.js';
+import { pagedRequest } from '#lambda/request/pagedRequest.js';
+import {
+  FetchApiAction,
+  LogAsyncEstimatedTime,
+  UpdateAction,
+} from '#lambda/util/decorator.js';
 
 export const EVENTS_USER_COLLECTION = 'events_users';
 

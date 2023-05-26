@@ -1,9 +1,9 @@
-import { z } from 'zod';
-import { userSchema } from '../../cursusUser/api/cursusUser.schema.js';
+import { userSchema } from '#lambda/cursusUser/api/cursusUser.schema.js';
 import {
   scaleTeamBaseSchema,
   scaleTeamBaseSchema_,
-} from '../../scaleTeam/api/scaleTeam.schema.base.js';
+} from '#lambda/scaleTeam/api/scaleTeam.schema.base.js';
+import { z } from 'zod';
 
 const teamUserSchema = userSchema
   .pick({

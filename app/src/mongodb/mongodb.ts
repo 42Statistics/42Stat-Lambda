@@ -1,18 +1,18 @@
+import type { COALITIONS_USER_COLLECTION } from '#lambda/coalitionsUser/coalitionsUser.js';
+import type { CURSUS_USER_COLLECTION } from '#lambda/cursusUser/cursusUser.js';
+import type { EVENT_COLLECTION } from '#lambda/event/event.js';
+import type { EVENTS_USER_COLLECTION } from '#lambda/eventsUser/eventsUser.js';
+import type { EXAMS_COLLECTION } from '#lambda/exam/exam.js';
+import type { EXPERIENCE_COLLECTION } from '#lambda/experience/experience.js';
+import type { LOCATION_COLLECTION } from '#lambda/location/location.js';
+import type { PROJECT_COLLECTION } from '#lambda/project/project.js';
+import type { PROJECTS_USER_COLLECTION } from '#lambda/projectsUser/projectsUser.js';
+import type { QUESTS_USER_COLLECTION } from '#lambda/questsUser/questsUser.js';
+import type { SCALE_TEAM_COLLECTION } from '#lambda/scaleTeam/scaleTeam.js';
+import type { TEAM_COLLECTION } from '#lambda/team/team.js';
+import { Bound } from '#lambda/util/decorator.js';
+import { LambdaError } from '#lambda/util/error.js';
 import { Db, DbOptions, MongoClient, MongoClientOptions } from 'mongodb';
-import type { COALITIONS_USER_COLLECTION } from '../coalitionsUser/coalitionsUser.js';
-import type { CURSUS_USER_COLLECTION } from '../cursusUser/cursusUser.js';
-import type { EVENT_COLLECTION } from '../event/event.js';
-import type { EVENTS_USER_COLLECTION } from '../eventsUser/eventsUser.js';
-import type { EXAMS_COLLECTION } from '../exam/exam.js';
-import type { EXPERIENCE_COLLECTION } from '../experience/experience.js';
-import type { LOCATION_COLLECTION } from '../location/location.js';
-import type { PROJECT_COLLECTION } from '../project/project.js';
-import type { PROJECTS_USER_COLLECTION } from '../projectsUser/projectsUser.js';
-import type { QUESTS_USER_COLLECTION } from '../questsUser/questsUser.js';
-import type { SCALE_TEAM_COLLECTION } from '../scaleTeam/scaleTeam.js';
-import type { TEAM_COLLECTION } from '../team/team.js';
-import { Bound } from '../util/decorator.js';
-import { LambdaError } from '../util/error.js';
 
 export const LOG_COLLECTION = 'logs';
 

@@ -1,15 +1,15 @@
-import { LambdaMongo } from '../mongodb/mongodb.js';
-import {
-  FetchApiAction,
-  LogAsyncEstimatedTime,
-  UpdateAction,
-} from '../util/decorator.js';
-import { pagedRequest } from '../request/pagedRequest.js';
+import { LambdaMongo } from '#lambda/mongodb/mongodb.js';
+import { pagedRequest } from '#lambda/request/pagedRequest.js';
 import {
   SCALE_TEAM_EP,
   ScaleTeam,
   parseScaleTeams,
-} from './api/scaleTeam.api.js';
+} from '#lambda/scaleTeam/api/scaleTeam.api.js';
+import {
+  FetchApiAction,
+  LogAsyncEstimatedTime,
+  UpdateAction,
+} from '#lambda/util/decorator.js';
 
 export const SCALE_TEAM_COLLECTION = 'scale_teams';
 

@@ -1,5 +1,5 @@
+import { userSchema } from '#lambda/cursusUser/api/cursusUser.schema.js';
 import { z } from 'zod';
-import { userSchema } from '../../cursusUser/api/cursusUser.schema.js';
 
 export const flagSchema = z.object({
   id: z.number(),

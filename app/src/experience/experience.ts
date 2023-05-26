@@ -1,12 +1,12 @@
-import { CursusUser } from '../cursusUser/api/cursusUser.api.js';
-import { LambdaMongo } from '../mongodb/mongodb.js';
-import type { Project } from '../project/api/project.api.js';
-import { ProjectsUser } from '../projectsUser/api/projectsUser.api.js';
-import { PROJECTS_USER_COLLECTION } from '../projectsUser/projectsUser.js';
-import type { PassedTeam } from '../team/api/team.api.js';
-import { LogAsyncEstimatedTime, UpdateAction } from '../util/decorator.js';
-import { LambdaError } from '../util/error.js';
-import { Experience } from './api/experience.api.js';
+import { CursusUser } from '#lambda/cursusUser/api/cursusUser.api.js';
+import { Experience } from '#lambda/experience/api/experience.api.js';
+import { LambdaMongo } from '#lambda/mongodb/mongodb.js';
+import type { Project } from '#lambda/project/api/project.api.js';
+import { ProjectsUser } from '#lambda/projectsUser/api/projectsUser.api.js';
+import { PROJECTS_USER_COLLECTION } from '#lambda/projectsUser/projectsUser.js';
+import type { PassedTeam } from '#lambda/team/api/team.api.js';
+import { LogAsyncEstimatedTime, UpdateAction } from '#lambda/util/decorator.js';
+import { LambdaError } from '#lambda/util/error.js';
 
 export const EXPERIENCE_COLLECTION = 'experience_users';
 const LEVEL_COLLECTION = 'levels';

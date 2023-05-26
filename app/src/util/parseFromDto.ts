@@ -1,6 +1,6 @@
+import { LambdaError } from '#lambda/util/error.js';
 import camelcaseKeys from 'camelcase-keys';
 import { z } from 'zod';
-import { LambdaError } from './error.js';
 
 export const parseFromDtoMany = <T extends z.ZodRawShape>(
   dtos: object[],

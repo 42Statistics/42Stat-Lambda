@@ -1,6 +1,9 @@
+import {
+  eventsUserSchema,
+  eventsUserSchema_,
+} from '#lambda/eventsUser/api/eventsUser.schema.js';
+import { parseFromDtoMany } from '#lambda/util/parseFromDto.js';
 import { z } from 'zod';
-import { parseFromDtoMany } from '../../util/parseFromDto.js';
-import { eventsUserSchema, eventsUserSchema_ } from './eventsUser.schema.js';
 
 export type EventsUser = z.infer<typeof eventsUserSchema>;
 

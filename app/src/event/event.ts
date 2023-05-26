@@ -1,11 +1,11 @@
-import { LambdaMongo } from '../mongodb/mongodb.js';
+import { EVENT_EP, Event, parseEvents } from '#lambda/event/api/event.api.js';
+import { LambdaMongo } from '#lambda/mongodb/mongodb.js';
+import { pagedRequest } from '#lambda/request/pagedRequest.js';
 import {
   FetchApiAction,
   LogAsyncEstimatedTime,
   UpdateAction,
-} from '../util/decorator.js';
-import { pagedRequest } from '../request/pagedRequest.js';
-import { EVENT_EP, Event, parseEvents } from './api/event.api.js';
+} from '#lambda/util/decorator.js';
 
 export const EVENT_COLLECTION = 'events';
 

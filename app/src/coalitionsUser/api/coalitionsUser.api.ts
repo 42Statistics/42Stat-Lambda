@@ -1,10 +1,10 @@
-import { z } from 'zod';
+import { SEOUL_COALITION_ID } from '#lambda/coalition/api/coalition.api.js';
 import {
   coalitionsUserSchema,
   coalitionsUserSchema_,
-} from './coalitionsUser.schema.js';
-import { parseFromDtoMany } from '../../util/parseFromDto.js';
-import { SEOUL_COALITION_ID } from '../../coalition/api/coalition.api.js';
+} from '#lambda/coalitionsUser/api/coalitionsUser.schema.js';
+import { parseFromDtoMany } from '#lambda/util/parseFromDto.js';
+import { z } from 'zod';
 
 export type CoalitionsUser = z.infer<typeof coalitionsUserSchema>;
 

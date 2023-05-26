@@ -1,6 +1,6 @@
+import { scoreSchema, scoreSchema_ } from '#lambda/score/api/score.schema.js';
+import { parseFromDtoMany } from '#lambda/util/parseFromDto.js';
 import { z } from 'zod';
-import { scoreSchema, scoreSchema_ } from './score.schema.js';
-import { parseFromDtoMany } from '../../util/parseFromDto.js';
 
 export type Score = z.infer<typeof scoreSchema>;
 
