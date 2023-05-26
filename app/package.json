@@ -8,8 +8,8 @@
     "build": "rm -rf ./dist && tsc -p tsconfig.build.json && cp ../env/.env ./",
     "start": "node ./dist/index.js",
     "dev": "pnpm build && pnpm start",
-    "compile": "rm -rf ./dist && pnpm ncc build src/index.ts -o dist && cp ../env/.env ./",
-    "prepare": "pnpm compile && rm -rf deploy && mkdir -p deploy && zip -rjD deploy/index.zip dist/* .env",
+    "compile": "pnpm build && rm -rf deploy && mkdir -p deploy && pnpm ncc build dist/index.js -o deploy && cp ../env/.env ./",
+    "prepare": "pnpm compile && zip -rjD deploy/index.zip deploy/* .env",
     "start:dev": "cp ../.env ./ && pnpm start",
     "lint:peek": "eslint \"{src,apps,libs,test}/**/*.ts\" --cache",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js"
