@@ -1,5 +1,5 @@
 import seine from 'la-seine';
-import { assertEnvExist } from './util/envCheck.js';
+import { assertEnvExist } from '../util/envCheck.js';
 
 export const initSeine = async (): Promise<void> => {
   const clientId = process.env.API_CLIENT_ID;

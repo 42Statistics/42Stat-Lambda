@@ -1,6 +1,6 @@
 import dotenv from 'dotenv';
 import { CoalitionsUserUpdator } from './coalitionsUser/coalitionsUser.js';
-import { initSeine } from './connection.js';
+import { initSeine } from './request/initSeine.js';
 import { CursusUserUpdator } from './cursusUser/cursusUser.js';
 import { EventUpdator } from './event/event.js';
 import { EventsUserUpdator } from './eventsUser/eventsUser.js';

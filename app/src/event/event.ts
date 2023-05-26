@@ -4,7 +4,7 @@ import {
   LogAsyncEstimatedTime,
   UpdateAction,
 } from '../util/decorator.js';
-import { pagedRequest } from '../util/pagedRequest.js';
+import { pagedRequest } from '../request/pagedRequest.js';
 import { EVENT_EP, Event, parseEvents } from './api/event.api.js';
 
 export const EVENT_COLLECTION = 'events';

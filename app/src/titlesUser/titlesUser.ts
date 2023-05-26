@@ -4,7 +4,7 @@ import {
   LogAsyncEstimatedTime,
   UpdateAction,
 } from '../util/decorator.js';
-import { pagedRequestByCount } from '../util/pagedRequestByCount.js';
+import { pagedRequestByCount } from '../request/pagedRequestByCount.js';
 import {
   TITLES_USER_EP,
   TitlesUser,
@@ -43,7 +43,7 @@ export class TitlesUserUpdator {
   private static async fetchAll(): Promise<TitlesUser[]> {
     const titlesUserDtos = await pagedRequestByCount(
       TITLES_USER_EP.ALL(),
-      0,
+      1,
       100,
     );
 

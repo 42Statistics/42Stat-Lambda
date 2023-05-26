@@ -6,8 +6,8 @@ import {
   LogAsyncEstimatedTime,
   UpdateAction,
 } from '../util/decorator.js';
-import { pagedRequest } from '../util/pagedRequest.js';
-import { singleRequest } from '../util/requestSingle.js';
+import { pagedRequest } from '../request/pagedRequest.js';
+import { singleRequest } from '../request/requestSingle.js';
 import {
   CURSUS_USER_EP,
   CursusUser,

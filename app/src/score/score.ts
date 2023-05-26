@@ -5,7 +5,7 @@ import {
   LogAsyncEstimatedTime,
   UpdateAction,
 } from '../util/decorator.js';
-import { pagedRequestByCount } from '../util/pagedRequestByCount.js';
+import { pagedRequestByCount } from '../request/pagedRequestByCount.js';
 import { SCORE_EP, Score, parseScores } from './api/score.api.js';
 
 export const SCORE_COLLECTION = 'scores';
@@ -78,6 +78,8 @@ export class ScoreUpdator {
       })),
     );
 
+    console.log(byCoalition);
+
     await mongo.upsertManyById(SCORE_COLLECTION, byCoalition);
   }
 
@@ -90,7 +92,8 @@ export class ScoreUpdator {
     for (const { coalitionId, count } of coalitionScoreCounts) {
       const currDtos = await pagedRequestByCount(
         new URL(SCORE_EP.BY_COALITION(coalitionId)),
-        count,
+        count / 100,
+        100,
       );
 
       scoreDtos.push(...currDtos);

@@ -1,5 +1,5 @@
 import seine, { SeineResult } from 'la-seine';
-import { LambdaError } from './error.js';
+import { LambdaError } from '../util/error.js';
 
 export const pagedRequest = async (
   endpoint: URL,
@@ -45,14 +45,13 @@ export const getPagedResults = async (
   endpoint: URL,
   pageSize: number,
 ): Promise<SeineResult> => {
-  const hasParams = endpoint.searchParams.keys().next().done !== true;
-
   for (let i = start; i < end; i++) {
-    seine.addRequest(
-      `${endpoint.toString()}${
-        hasParams ? '&' : '?'
-      }page[size]=${pageSize}&page[number]=${i}`,
-    );
+    const currEndpoint = new URL(endpoint);
+
+    currEndpoint.searchParams.append('page[size]', pageSize.toString());
+    currEndpoint.searchParams.append('page[number]', i.toString());
+
+    seine.addRequest(currEndpoint);
   }
 
   return await seine.getResult();

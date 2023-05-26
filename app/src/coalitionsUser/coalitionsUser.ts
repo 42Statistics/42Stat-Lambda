@@ -4,7 +4,7 @@ import {
   LogAsyncEstimatedTime,
   UpdateAction,
 } from '../util/decorator.js';
-import { pagedRequest } from '../util/pagedRequest.js';
+import { pagedRequest } from '../request/pagedRequest.js';
 import {
   COALITIONS_USER_EP,
   CoalitionsUser,

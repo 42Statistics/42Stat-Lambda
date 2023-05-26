@@ -4,7 +4,7 @@ import {
   LogAsyncEstimatedTime,
   UpdateAction,
 } from '../util/decorator.js';
-import { pagedRequest } from '../util/pagedRequest.js';
+import { pagedRequest } from '../request/pagedRequest.js';
 import { EXAM_EP, Exam, parseExams } from './api/exam.api.js';
 
 export const EXAMS_COLLECTION = 'exams';

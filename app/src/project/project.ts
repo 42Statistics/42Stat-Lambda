@@ -4,7 +4,7 @@ import {
   LogAsyncEstimatedTime,
   UpdateAction,
 } from '../util/decorator.js';
-import { pagedRequest } from '../util/pagedRequest.js';
+import { pagedRequest } from '../request/pagedRequest.js';
 import { PROJECT_EP, Project, parseProjects } from './api/project.api.js';
 
 export const PROJECT_COLLECTION = 'projects';

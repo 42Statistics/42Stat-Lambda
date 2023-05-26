@@ -6,7 +6,7 @@ import {
   LogAsyncEstimatedTime,
   UpdateAction,
 } from '../util/decorator.js';
-import { pagedRequestByCount } from '../util/pagedRequestByCount.js';
+import { pagedRequestByCount } from '../request/pagedRequestByCount.js';
 import { TITLE_EP, Title, parseTitles } from './api/title.api.js';
 
 export const TITLE_COLLECTION = 'titles';
@@ -41,7 +41,7 @@ export class TitleUpdator {
 
   @FetchApiAction
   private static async fetchAll(): Promise<Title[]> {
-    const titlesUserDtos = await pagedRequestByCount(TITLE_EP.ALL(), 0, 100);
+    const titlesUserDtos = await pagedRequestByCount(TITLE_EP.ALL(), 1, 100);
 
     return parseTitles(titlesUserDtos);
   }

@@ -5,7 +5,7 @@ import {
   LogAsyncEstimatedTime,
   UpdateAction,
 } from '../util/decorator.js';
-import { pagedRequest } from '../util/pagedRequest.js';
+import { pagedRequest } from '../request/pagedRequest.js';
 import { TEAM_EP, Team, parseTeams } from './api/team.api.js';
 
 export const TEAM_COLLECTION = 'teams';
