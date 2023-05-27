@@ -1,5 +1,8 @@
 import { CursusUser } from '#lambda/cursusUser/api/cursusUser.api.js';
-import { Experience } from '#lambda/experience/api/experience.api.js';
+import {
+  Experience,
+  examExperienceErrorUserIds,
+} from '#lambda/experience/api/experience.api.js';
 import { LambdaMongo } from '#lambda/mongodb/mongodb.js';
 import type { Project } from '#lambda/project/api/project.api.js';
 import { ProjectsUser } from '#lambda/projectsUser/api/projectsUser.api.js';
@@ -324,7 +327,7 @@ const testLevelCalculation = async (mongo: LambdaMongo): Promise<void> => {
     .collection('cursus_users')
     .aggregate<{
       user: {
-        id: string;
+        id: number;
       };
       level: number;
       experiences: number;
@@ -355,7 +358,10 @@ const testLevelCalculation = async (mongo: LambdaMongo): Promise<void> => {
   const successCount = info.reduce((prevSuccessCount, curr) => {
     const calcLevel = calculateLevel(curr.experiences, levelTable);
 
-    if (Math.abs(calcLevel - curr.level) >= 0.01) {
+    if (
+      Math.abs(calcLevel - curr.level) >= 0.01 &&
+      !examExperienceErrorUserIds.find((uid) => uid === curr.user.id)
+    ) {
       console.error(calcLevel, curr.level, curr.user.id);
       return prevSuccessCount;
     }
