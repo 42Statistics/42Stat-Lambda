@@ -67,8 +67,8 @@ const fetchStartPage = async (
 ): Promise<StartPageInfo> => {
   const currEndpoint = new URL(endpoint);
 
-  currEndpoint.searchParams.append('page[number]', startPage.toString());
   currEndpoint.searchParams.append('page[size]', pageSize.toString());
+  currEndpoint.searchParams.append('page[number]', startPage.toString());
 
   seine.addRequest(currEndpoint);
 
@@ -93,15 +93,15 @@ const fetchStartPage = async (
 
 const fetchRestPages = async (
   start: number,
-  end: number,
+  count: number,
   endpoint: URL,
   pageSize: number,
 ): Promise<SeineResult> => {
-  for (let i = start; i < end; i++) {
+  for (let i = 0; i < count; i++) {
     const currEndpoint = new URL(endpoint);
 
     currEndpoint.searchParams.append('page[size]', pageSize.toString());
-    currEndpoint.searchParams.append('page[number]', i.toString());
+    currEndpoint.searchParams.append('page[number]', (start + i).toString());
 
     seine.addRequest(currEndpoint);
   }
