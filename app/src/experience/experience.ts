@@ -5,6 +5,7 @@ import type { Project } from '#lambda/project/api/project.api.js';
 import { ProjectsUser } from '#lambda/projectsUser/api/projectsUser.api.js';
 import { PROJECTS_USER_COLLECTION } from '#lambda/projectsUser/projectsUser.js';
 import type { PassedTeam } from '#lambda/team/api/team.api.js';
+import { TEAM_COLLECTION } from '#lambda/team/team.js';
 import { LogAsyncEstimatedTime, UpdateAction } from '#lambda/util/decorator.js';
 import { LambdaError } from '#lambda/util/error.js';
 
@@ -53,6 +54,17 @@ export class ExperienceUpdator {
   private static async updateProjectsUserUpdated(
     mongo: LambdaMongo,
   ): Promise<void> {
+    const projectsUserUpdated = await mongo.getCollectionUpdatedAt(
+      PROJECTS_USER_COLLECTION,
+    );
+
+    const teamUpdated = await mongo.getCollectionUpdatedAt(TEAM_COLLECTION);
+
+    if (teamUpdated < projectsUserUpdated) {
+      console.log('team update fail occurred before.');
+      return;
+    }
+
     const start = await mongo.getCollectionUpdatedAt(EXPERIENCE_COLLECTION);
 
     const projectsUsersUpdated = await mongo
@@ -71,6 +83,7 @@ export class ExperienceUpdator {
         [
           {
             $match: {
+              // todo: $gte
               markedAt: { $gt: start },
               'project.name': { $not: { $regex: 'Exam' } },
               'validated?': true,
@@ -132,6 +145,19 @@ export class ExperienceUpdator {
               as: 'experienceUsers',
             },
           },
+          {
+            $lookup: {
+              from: TEAM_COLLECTION,
+              localField: 'currTeam.id',
+              foreignField: 'id',
+              as: 'currTeam',
+            },
+          },
+          {
+            $addFields: {
+              currTeam: { $first: '$currTeam' },
+            },
+          },
         ],
         //#endregion
       )
@@ -150,11 +176,26 @@ export class ExperienceUpdator {
 
     const newExperiences = projectsUsersUpdated.reduce(
       (acc: Experience[], projectsUser) => {
-        const currMark = projectsUser.currTeam.finalMark;
+        const scaleTeamMark =
+          projectsUser.currTeam.scaleTeams.reduce(
+            (mark, scaleTeam) => mark + (scaleTeam.finalMark ?? 0),
+            0,
+          ) / projectsUser.currTeam.scaleTeams.length;
+
+        const teamUploadMark = projectsUser.currTeam.teamsUploads[0]?.finalMark;
+
+        const currMark =
+          Math.floor(
+            (teamUploadMark
+              ? (scaleTeamMark + teamUploadMark) / 2
+              : scaleTeamMark) * 100,
+          ) / 100;
+
         const projectPrevExperience =
           projectsUser.experienceUsers.find(
             (experience) => experience.project.id === projectsUser.project.id,
           )?.experience ?? 0;
+
         const totalPrevExpereince = projectsUser.experienceUsers.reduce(
           (experienceSum, { experience }) => experienceSum + experience,
           0,
@@ -311,37 +352,17 @@ const testLevelCalculation = async (mongo: LambdaMongo): Promise<void> => {
     .sort({ lvl: 1 })
     .toArray();
 
-  const calcexp = (
-    experiences: number,
-    levelTable: LevelTableElem[],
-  ): number => {
-    const upper = levelTable.find(({ xp }) => xp > experiences);
-    assertsLevelFound(upper);
-
-    const { lvl: upperLevel, xp: upperNeed } = upper;
-    const { lvl: lowerLevel, xp: lowerNeed } = levelTable[upperLevel - 1];
-
-    const levelFloat =
-      Math.floor(
-        (1 + (experiences - upperNeed) / (1.0 * (upperNeed - lowerNeed))) *
-          100 +
-          Number.EPSILON,
-      ) / 100;
-
-    return lowerLevel + levelFloat;
-  };
-
-  let i = 0;
-  info.forEach((curr) => {
-    const calcLevel = calcexp(curr.experiences, levelTable);
+  const successCount = info.reduce((prevSuccessCount, curr) => {
+    const calcLevel = calculateLevel(curr.experiences, levelTable);
 
     if (Math.abs(calcLevel - curr.level) >= 0.01) {
       console.error(calcLevel, curr.level, curr.user.id);
-    } else {
-      i++;
+      return prevSuccessCount;
     }
-  });
 
-  console.log(`total: ${info.length} correct: ${i}`);
+    return prevSuccessCount + 1;
+  }, 0);
+
+  console.log(`total: ${info.length} correct: ${successCount}`);
 };
 //#endregion

@@ -18,6 +18,14 @@ const teamUserSchema = userSchema
     projectsUserId: z.number(),
   });
 
+const teamUploadSchema = z.object({
+  id: z.number(),
+  finalMark: z.number(),
+  comment: z.string(),
+  createdAt: z.coerce.date(),
+  uploadId: z.number(),
+});
+
 export const teamBaseSchema = z.object({
   id: z.number(),
   name: z.string(),
@@ -37,16 +45,19 @@ export const teamBaseSchema = z.object({
   closedAt: z.coerce.date().nullable(),
   projectSessionId: z.number(),
   // projectGitlabPath: z.string().nullable(),
-  // teamsUploads: [],
   users: teamUserSchema.array(),
 });
 
 export const teamBaseSchema_ = teamBaseSchema.passthrough();
 
 export const teamSchema = teamBaseSchema.extend({
+  teamsUploads: teamUploadSchema.array(),
   scaleTeams: scaleTeamBaseSchema.array(),
 });
 
 export const teamSchema_ = teamBaseSchema_
-  .extend({ scaleTeams: scaleTeamBaseSchema_.array() })
+  .extend({
+    teamsUploads: teamUploadSchema.array(),
+    scaleTeams: scaleTeamBaseSchema_.array(),
+  })
   .passthrough();

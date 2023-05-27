@@ -32,9 +32,9 @@ const main = async (): Promise<void> => {
   const redis = await LambdaRedis.createInstance(redisUrl);
 
   await ProjectsUserUpdator.update(mongo);
+  await TeamUpdator.update(mongo);
   await CursusUserUpdator.update(mongo, redis);
   await ExamUpdator.update(mongo);
-  await TeamUpdator.update(mongo);
   await TitleUpdator.update(mongo);
   await TitlesUserUpdator.update(mongo);
   await LocationUpdator.update(mongo);
