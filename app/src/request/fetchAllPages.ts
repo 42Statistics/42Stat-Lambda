@@ -1,5 +1,5 @@
 import { LambdaError } from '#lambda/util/error.js';
-import seine, { SeineResult, SeineSuccess } from 'la-seine';
+import seine, { SeineResult } from 'la-seine';
 
 type StartPageInfo = {
   totalCount: number;
@@ -109,9 +109,7 @@ const fetchRestPages = async (
   return await seine.getResult();
 };
 
-function assertsSeineSuccess(
-  seineResult: SeineResult,
-): asserts seineResult is SeineSuccess {
+function assertsSeineSuccess(seineResult: SeineResult): void {
   if (seineResult.status === 'fail') {
     throw new LambdaError(
       'fecthAllPages failed. url: ' + String(seineResult.failedRequests[0].url),

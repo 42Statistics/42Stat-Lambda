@@ -39,7 +39,7 @@
   "dependencies": {
     "camelcase-keys": "^8.0.2",
     "dotenv": "^16.0.3",
-    "la-seine": "^0.0.6",
+    "la-seine": "^0.0.7",
     "mongodb": "^5.3.0",
     "redis": "^4.6.6",
     "zod": "^3.21.4"

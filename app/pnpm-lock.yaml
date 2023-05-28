@@ -8,8 +8,8 @@ dependencies:
     specifier: ^16.0.3
     version: 16.0.3
   la-seine:
-    specifier: ^0.0.6
-    version: 0.0.6
+    specifier: ^0.0.7
+    version: 0.0.7
   mongodb:
     specifier: ^5.3.0
     version: 5.3.0
@@ -2487,8 +2487,8 @@ packages:
     engines: {node: '>=6'}
     dev: true
 
-  /la-seine@0.0.6:
-    resolution: {integrity: sha512-7Q73yea1y7fvy/Nl8fIujPgEqe5AGMoGmmqU3YzIVJbg77wgdrvHYDIXECgu2VsYseRLsoKTt9hE7c0M1IcUNw==}
+  /la-seine@0.0.7:
+    resolution: {integrity: sha512-mftXibGsQDSF08BHkbw/tRi1l00fla8sEoqDqzOHJdB7b6h1IT++fGS3XWz5zU8JEJlVoiSht1euKWuKMdWwBQ==}
     dev: false
 
   /leven@3.1.0:
