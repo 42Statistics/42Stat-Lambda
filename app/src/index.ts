@@ -35,14 +35,6 @@ const main = async (): Promise<void> => {
   await TeamUpdator.update(mongo);
   await CursusUserUpdator.update(mongo, redis);
   await ExamUpdator.update(mongo);
-  {
-    const miniutes = new Date().getUTCMinutes();
-
-    if (Math.floor(miniutes / 10) === 0) {
-      await TitleUpdator.update(mongo);
-      await TitlesUserUpdator.update(mongo);
-    }
-  }
   await LocationUpdator.update(mongo);
   await ScoreUpdator.update(mongo);
   await QuestsUserUpdator.update(mongo);
@@ -51,6 +43,15 @@ const main = async (): Promise<void> => {
   await ScaleTeamUpdator.update(mongo);
   await ProjectUpdator.update(mongo);
   await CoalitionsUserUpdator.update(mongo);
+
+  {
+    const miniutes = new Date().getUTCMinutes();
+
+    if (Math.floor(miniutes / 10) === 0) {
+      await TitleUpdator.update(mongo);
+      await TitlesUserUpdator.update(mongo);
+    }
+  }
 
   await mongo.closeConnection();
   await redis.closeConnection();

@@ -1,7 +1,12 @@
 import { SEOUL_COALITION_ID } from '#lambda/coalition/api/coalition.api.js';
 import { LambdaMongo } from '#lambda/mongodb/mongodb.js';
 import { fetchAllPages } from '#lambda/request/fetchAllPages.js';
-import { SCORE_EP, Score, parseScores } from '#lambda/score/api/score.api.js';
+import {
+  SCORE_EP,
+  SCORE_EXCEPTION,
+  Score,
+  parseScores,
+} from '#lambda/score/api/score.api.js';
 import {
   FetchApiAction,
   LogAsyncEstimatedTime,
@@ -43,6 +48,7 @@ export class ScoreUpdator {
         {
           $match: {
             coalitionId: { $in: SEOUL_COALITION_ID },
+            ...SCORE_EXCEPTION.COUNT_FILTER,
           },
         },
         {
@@ -87,7 +93,7 @@ export class ScoreUpdator {
     for (const { coalitionId, count } of coalitionScoreCounts) {
       const currDtos = await fetchAllPages(
         new URL(SCORE_EP.BY_COALITION(coalitionId)),
-        Math.floor(count / 100),
+        Math.floor(count / 100) + 1,
       );
 
       scoreDtos.push(...currDtos);

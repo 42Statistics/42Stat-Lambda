@@ -22,6 +22,20 @@
 - https://api.intra.42.fr/v2/coalitions/87/coalitions_users?range[created_at]=2015-03-31T15:00:00.000Z,2023-04-11T14:59:59.999Z
 - https://api.intra.42.fr/v2/coalitions/88/coalitions_users?range[created_at]=2015-03-31T15:00:00.000Z,2023-04-11T14:59:59.999Z
 - 99962,99754,99982,98364,98274,98003,98321 해당 user_id를 갖고 있는 사람들만 중복으로 coalitions_users가 생성되어 있음.
+  - 이것을 42에서 삭제하는 방식으로 해결을 했는데, 이로 인해 score endpoint 에서 예전 score 들이 없어지는 문제가 발생함. 하단 참조.
+
+```json
+[
+  {'id': 69780, 'coalition_id': 88, 'user_id': 99962, 'score': 4121, 'rank': 4, 'created_at': '2021-11-08T01:00:39.689Z''updated_at': '2021-11-08T01:00:39.689Z'},
+  {'id': 69757, 'coalition_id': 88, 'user_id': 98274, 'score': 0, 'rank': 158, 'created_at': '2021-11-08T01:00:39.493Z', 'updated_at': '2021-11-08T01:00:39.493Z'},
+  {'id': 69741, 'coalition_id': 88, 'user_id': 98364, 'score': 0, 'rank': 158, 'created_at': '2021-11-08T01:00:39.395Z', 'updated_at': '2021-11-08T01:00:39.395Z'},
+  {'id': 69698, 'coalition_id': 85, 'user_id': 99982, 'score': 887, 'rank': 40, 'created_at': '2021-11-08T01:00:38.852Z', 'updated_at': '2021-11-08T01:00:38.852Z'},
+  {'id': 69606, 'coalition_id': 87, 'user_id': 98003, 'score': 0, 'rank': 177, 'created_at': '2021-11-08T01:00:37.943Z', 'updated_at': '2021-11-08T01:00:37.943Z'},
+  {'id': 69572, 'coalition_id': 86, 'user_id': 99754, 'score': 0, 'rank': 175, 'created_at': '2021-11-08T01:00:37.519Z', 'updated_at': '2021-11-08T01:00:37.519Z'},
+  {'id': 69546, 'coalition_id': 88, 'user_id': 98321, 'score': 1004, 'rank': 38, 'created_at': '2021-11-08T01:00:37.349Z', 'updated_at': '2021-11-08T01:00:37.349Z'}
+]
+```
+
 - score가 현시점 전체 코알리숑 순위 조회하기 편하긴 함. 단, 과거 이력은 알 수 없고, 계속 모든 유저들을 업데이트 해야하는 문제가 있음.
   - 사실 전부 업데이트 하는 건 향후 42 서울 사람이 엄청나게 늘어나도 요청 50개면 될텐데, 거기서 중복되는 사람들을 처리해야하는 문제가 남아있음.
   - 현재 dump에는 중복되는 사람들의 데이터를 하나씩 지워둔 상태. 이 방식을 유지할 경우, insert 로직을 만들어야할듯.
@@ -51,6 +65,7 @@
 - range 기능이 없다... api 보낼 때 직접 filter로 잘라야할듯.
 - 생각해보면 validate 해야하는게 날짜밖에 없음
 - coalition 자체에 들어가는 점수 예외를 잘 처리해야함
+- coalitions_users 중복 버그로 인해 영향을 받음
 
 ---
 
