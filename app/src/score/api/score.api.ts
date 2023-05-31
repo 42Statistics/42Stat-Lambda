@@ -28,7 +28,23 @@ const COUNT_FILTER = {
   ],
 } as const;
 
-export const SCORE_EXCEPTION = {
+/**
+ *
+ * 1. 2023년 05월 coalitions users 중복 삭제로 인해, 기존의 데이터 (n개) 대신 3개의 새로운 데이터가 생김.
+ *    이를 대응하기 위해 기존 데이터는 ```COUNT_FILTER``` 를 통해 세고, 3개의 새로운 데이터를 삭제,
+ *    이에 따라 ```COUNT_HINT``` 에 +3
+ */
+const COUNT_HINT = (coalitionId: number) =>
+  [
+    { coalitionId: 85, value: 1 },
+    { coalitionId: 88, value: 2 },
+  ].find((el) => el.coalitionId === coalitionId)?.value ?? 0;
+
+// todo: 이런거 id 목록 받는 함수로 추상화 가능할듯
+const IS_GOOD_IDS = <T extends { id: number }>(score: T) =>
+  [2945871, 2945872, 2945873].find((weird) => weird === score.id) === undefined;
+
+export const SCORE_EDGE_CASE = {
   /**
    *
    * @description
@@ -36,4 +52,18 @@ export const SCORE_EXCEPTION = {
    * 이를 제외하고 count 한 후, fetchAllPages 를 호출해야 하기 때문에 이런 처리를 해야 합니다.
    */
   COUNT_FILTER,
+
+  /**
+   *
+   * @description
+   * score 수를 셀 때 더해줘야 하는 값 입니다.
+   */
+  COUNT_HINT,
+
+  /**
+   *
+   * @description
+   * score 를 가져올떄 무조건 제외해야 하는 id 입니다.
+   */
+  IS_GOOD_IDS,
 } as const;

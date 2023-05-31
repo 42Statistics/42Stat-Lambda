@@ -92,7 +92,9 @@ export class CursusUserUpdator {
 
   /**
    *
-   * @description 실제로 정보가 바뀔 가능성이 있는 사람들을 업데이트 하는 로직
+   * @description
+   * 실제로 정보가 바뀔 가능성이 있는 사람들의 정보를 가져오는 함수 입니다. 반환 시 실제 학생 계정들만
+   * 남깁니다.
    */
   @FetchApiAction
   private static async fetchActivated(): Promise<CursusUser[]> {

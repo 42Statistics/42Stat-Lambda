@@ -3,7 +3,7 @@ import { LambdaMongo } from '#lambda/mongodb/mongodb.js';
 import { fetchAllPages } from '#lambda/request/fetchAllPages.js';
 import {
   SCORE_EP,
-  SCORE_EXCEPTION,
+  SCORE_EDGE_CASE,
   Score,
   parseScores,
 } from '#lambda/score/api/score.api.js';
@@ -48,7 +48,7 @@ export class ScoreUpdator {
         {
           $match: {
             coalitionId: { $in: SEOUL_COALITION_ID },
-            ...SCORE_EXCEPTION.COUNT_FILTER,
+            ...SCORE_EDGE_CASE.COUNT_FILTER,
           },
         },
         {
@@ -74,10 +74,10 @@ export class ScoreUpdator {
       SEOUL_COALITION_ID.map((coalitionId) => ({
         coalitionId: coalitionId,
         count:
-          coalitionScoreCounts.find(
+          (coalitionScoreCounts.find(
             (coalitoinScoreCount) =>
               coalitoinScoreCount.coalitionId === coalitionId,
-          )?.count ?? 0,
+          )?.count ?? 0) + SCORE_EDGE_CASE.COUNT_HINT(coalitionId),
       })),
     );
 
@@ -99,6 +99,6 @@ export class ScoreUpdator {
       scoreDtos.push(...currDtos);
     }
 
-    return parseScores(scoreDtos);
+    return parseScores(scoreDtos).filter(SCORE_EDGE_CASE.IS_GOOD_IDS);
   }
 }
