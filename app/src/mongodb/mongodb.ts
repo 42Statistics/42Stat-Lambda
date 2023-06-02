@@ -10,6 +10,7 @@ import type { PROJECT_SESSION_COLLECTION } from '#lambda/projectSession/projectS
 import type { PROJECTS_USER_COLLECTION } from '#lambda/projectsUser/projectsUser.js';
 import type { QUESTS_USER_COLLECTION } from '#lambda/questsUser/questsUser.js';
 import type { SCALE_TEAM_COLLECTION } from '#lambda/scaleTeam/scaleTeam.js';
+import type { SKILL_COLLECTION } from '#lambda/skill/skill.js';
 import type { TEAM_COLLECTION } from '#lambda/team/team.js';
 import { Bound } from '#lambda/util/decorator.js';
 import { LambdaError } from '#lambda/util/error.js';
@@ -30,7 +31,8 @@ type LogUpdatedAt =
   | typeof SCALE_TEAM_COLLECTION
   | typeof PROJECT_COLLECTION
   | typeof COALITIONS_USER_COLLECTION
-  | typeof PROJECT_SESSION_COLLECTION;
+  | typeof PROJECT_SESSION_COLLECTION
+  | typeof SKILL_COLLECTION;
 
 export class LambdaMongo {
   static createInstance = async (

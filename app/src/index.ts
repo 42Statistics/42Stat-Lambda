@@ -13,6 +13,7 @@ import { LambdaRedis } from '#lambda/redis/LambdaRedis.js';
 import { initSeine } from '#lambda/request/initSeine.js';
 import { ScaleTeamUpdator } from '#lambda/scaleTeam/scaleTeam.js';
 import { ScoreUpdator } from '#lambda/score/score.js';
+import { SkillUpdator } from '#lambda/skill/skill.js';
 import { TeamUpdator } from '#lambda/team/team.js';
 import { TitleUpdator } from '#lambda/title/title.js';
 import { TitlesUserUpdator } from '#lambda/titlesUser/titlesUser.js';
@@ -52,6 +53,7 @@ const main = async (): Promise<void> => {
     if (Math.floor(miniutes / 10) === 0) {
       await TitleUpdator.update(mongo);
       await TitlesUserUpdator.update(mongo);
+      await SkillUpdator.update(mongo);
     }
   }
 
