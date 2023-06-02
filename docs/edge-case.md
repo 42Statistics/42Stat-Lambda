@@ -58,6 +58,12 @@
 
 ---
 
+# project sessions skill
+
+- id 가 paged Request 를 보내면 중복으로 나오는 현상이 있음
+
+---
+
 ## projects_users
 
 - filter 에 cursus id 걸어도 작동 안함.

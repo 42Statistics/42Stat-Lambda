@@ -7,6 +7,7 @@ import type { EXPERIENCE_COLLECTION } from '#lambda/experience/experience.js';
 import type { LOCATION_COLLECTION } from '#lambda/location/location.js';
 import type { PROJECT_COLLECTION } from '#lambda/project/project.js';
 import type { PROJECT_SESSION_COLLECTION } from '#lambda/projectSession/projectSession.js';
+import type { PROJECT_SESSIONS_SKILL_COLLECTION } from '#lambda/projectSessionsSkill/projectSessionsSkill.js';
 import type { PROJECTS_USER_COLLECTION } from '#lambda/projectsUser/projectsUser.js';
 import type { QUESTS_USER_COLLECTION } from '#lambda/questsUser/questsUser.js';
 import type { SCALE_TEAM_COLLECTION } from '#lambda/scaleTeam/scaleTeam.js';
@@ -32,7 +33,8 @@ type LogUpdatedAt =
   | typeof PROJECT_COLLECTION
   | typeof COALITIONS_USER_COLLECTION
   | typeof PROJECT_SESSION_COLLECTION
-  | typeof SKILL_COLLECTION;
+  | typeof SKILL_COLLECTION
+  | typeof PROJECT_SESSIONS_SKILL_COLLECTION;
 
 export class LambdaMongo {
   static createInstance = async (
