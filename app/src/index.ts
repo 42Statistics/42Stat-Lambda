@@ -6,6 +6,7 @@ import { ExamUpdator } from '#lambda/exam/exam.js';
 import { LocationUpdator } from '#lambda/location/location.js';
 import { LambdaMongo } from '#lambda/mongodb/mongodb.js';
 import { ProjectUpdator } from '#lambda/project/project.js';
+import { ProjectSessionUpdator } from '#lambda/projectSession/projectSession.js';
 import { ProjectsUserUpdator } from '#lambda/projectsUser/projectsUser.js';
 import { QuestsUserUpdator } from '#lambda/questsUser/questsUser.js';
 import { LambdaRedis } from '#lambda/redis/LambdaRedis.js';
@@ -42,6 +43,7 @@ const main = async (): Promise<void> => {
   await EventsUserUpdator.update(mongo);
   await ScaleTeamUpdator.update(mongo);
   await ProjectUpdator.update(mongo);
+  await ProjectSessionUpdator.update(mongo);
   await CoalitionsUserUpdator.update(mongo);
 
   {
@@ -58,3 +60,4 @@ const main = async (): Promise<void> => {
 };
 
 export const handler = main;
+await handler();

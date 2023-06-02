@@ -52,6 +52,12 @@
 
 ---
 
+## project sessions
+
+- campus_id 가 null 인 경우가 default session 임.
+
+---
+
 ## projects_users
 
 - filter 에 cursus id 걸어도 작동 안함.
