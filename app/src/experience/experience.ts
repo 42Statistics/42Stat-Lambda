@@ -1,4 +1,4 @@
-import { CursusUser } from '#lambda/cursusUser/api/cursusUser.api.js';
+import type { CursusUser } from '#lambda/cursusUser/api/cursusUser.api.js';
 import {
   Experience,
   examExperienceErrorUserIds,
@@ -7,6 +7,7 @@ import { LambdaMongo } from '#lambda/mongodb/mongodb.js';
 import type { Project } from '#lambda/project/api/project.api.js';
 import { ProjectsUser } from '#lambda/projectsUser/api/projectsUser.api.js';
 import { PROJECTS_USER_COLLECTION } from '#lambda/projectsUser/projectsUser.js';
+import type { ScaleTeam } from '#lambda/scaleTeam/api/scaleTeam.api.js';
 import type { PassedTeam } from '#lambda/team/api/team.api.js';
 import { TEAM_COLLECTION } from '#lambda/team/team.js';
 import { LogAsyncEstimatedTime, UpdateAction } from '#lambda/util/decorator.js';
@@ -179,11 +180,19 @@ export class ExperienceUpdator {
 
     const newExperiences = projectsUsersUpdated.reduce(
       (acc: Experience[], projectsUser) => {
+        const scaleTeams = projectsUser.currTeam.scaleTeams.filter(
+          (
+            scaleTeam,
+          ): scaleTeam is Omit<ScaleTeam, 'finalMark'> & {
+            finalMark: number;
+          } => scaleTeam.finalMark !== null,
+        );
+
         const scaleTeamMark =
-          projectsUser.currTeam.scaleTeams.reduce(
-            (mark, scaleTeam) => mark + (scaleTeam.finalMark ?? 0),
+          scaleTeams.reduce(
+            (mark, scaleTeam) => mark + scaleTeam.finalMark,
             0,
-          ) / projectsUser.currTeam.scaleTeams.length;
+          ) / scaleTeams.length;
 
         const teamUploadMark = projectsUser.currTeam.teamsUploads[0]?.finalMark;
 
@@ -309,7 +318,7 @@ const calculateLevel = (
         Number.EPSILON,
     ) / 100;
 
-  return lowerLevel + levelFloat;
+  return Math.floor((lowerLevel + levelFloat) * 100 + Number.EPSILON) / 100;
 };
 
 function assertsLevelFound(
