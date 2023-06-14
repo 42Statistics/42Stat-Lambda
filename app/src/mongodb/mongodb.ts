@@ -3,7 +3,7 @@ import type { CURSUS_USER_COLLECTION } from '#lambda/cursusUser/cursusUser.js';
 import type { EVENT_COLLECTION } from '#lambda/event/event.js';
 import type { EVENTS_USER_COLLECTION } from '#lambda/eventsUser/eventsUser.js';
 import type { EXAMS_COLLECTION } from '#lambda/exam/exam.js';
-import type { EXPERIENCE_COLLECTION } from '#lambda/experience/experience.js';
+import type { EXPERIENCE_USER_COLLECTION } from '#lambda/experience/experience.js';
 import type { LOCATION_COLLECTION } from '#lambda/location/location.js';
 import type { PROJECT_COLLECTION } from '#lambda/project/project.js';
 import type { PROJECT_SESSION_COLLECTION } from '#lambda/projectSession/projectSession.js';
@@ -22,7 +22,7 @@ export const LOG_COLLECTION = 'logs';
 type LogUpdatedAt =
   | typeof CURSUS_USER_COLLECTION
   | typeof EXAMS_COLLECTION
-  | typeof EXPERIENCE_COLLECTION
+  | typeof EXPERIENCE_USER_COLLECTION
   | typeof PROJECTS_USER_COLLECTION
   | typeof TEAM_COLLECTION
   | typeof LOCATION_COLLECTION

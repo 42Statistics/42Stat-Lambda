@@ -13,7 +13,7 @@ import { TEAM_COLLECTION } from '#lambda/team/team.js';
 import { LogAsyncEstimatedTime, UpdateAction } from '#lambda/util/decorator.js';
 import { LambdaError } from '#lambda/util/error.js';
 
-export const EXPERIENCE_COLLECTION = 'experience_users';
+export const EXPERIENCE_USER_COLLECTION = 'experience_users';
 const LEVEL_COLLECTION = 'levels';
 
 type LevelTableElem = {
@@ -69,7 +69,9 @@ export class ExperienceUpdator {
       return;
     }
 
-    const start = await mongo.getCollectionUpdatedAt(EXPERIENCE_COLLECTION);
+    const start = await mongo.getCollectionUpdatedAt(
+      EXPERIENCE_USER_COLLECTION,
+    );
 
     const projectsUsersUpdated = await mongo
       .db()
@@ -142,8 +144,13 @@ export class ExperienceUpdator {
             },
           },
           {
+            $match: {
+              'cursusUser.user.alumni?': false,
+            },
+          },
+          {
             $lookup: {
-              from: EXPERIENCE_COLLECTION,
+              from: EXPERIENCE_USER_COLLECTION,
               localField: 'user.id',
               foreignField: 'userId',
               as: 'experienceUsers',
@@ -203,10 +210,13 @@ export class ExperienceUpdator {
               : scaleTeamMark) * 100,
           ) / 100;
 
-        const projectPrevExperience =
-          projectsUser.experienceUsers.find(
+        const projectPrevExperience = projectsUser.experienceUsers
+          .filter(
             (experience) => experience.project.id === projectsUser.project.id,
-          )?.experience ?? 0;
+          )
+          .reduce((expSum, { experience }) => {
+            return expSum + experience;
+          }, 0);
 
         const totalPrevExpereince = projectsUser.experienceUsers.reduce(
           (experienceSum, { experience }) => experienceSum + experience,
@@ -268,10 +278,10 @@ export class ExperienceUpdator {
 
     await mongo
       .db()
-      .collection(EXPERIENCE_COLLECTION)
+      .collection(EXPERIENCE_USER_COLLECTION)
       .insertMany(newExperiences);
 
-    await mongo.setCollectionUpdatedAt(EXPERIENCE_COLLECTION, end);
+    await mongo.setCollectionUpdatedAt(EXPERIENCE_USER_COLLECTION, end);
   }
 }
 
@@ -343,7 +353,7 @@ const testLevelCalculation = async (mongo: LambdaMongo): Promise<void> => {
     }>([
       {
         $lookup: {
-          from: EXPERIENCE_COLLECTION,
+          from: EXPERIENCE_USER_COLLECTION,
           localField: 'user.id',
           foreignField: 'userId',
           as: 'experiences',
