@@ -5,10 +5,8 @@ import {
   parseCursusUsers,
   wildcardUserIds,
 } from '#lambda/cursusUser/api/cursusUser.api.js';
-import { CURSUS_USERS_CACHE_KEY } from '#lambda/cursusUser/dto/cursusUser.redis.js';
 import { ExperienceUpdator } from '#lambda/experience/experience.js';
 import { LambdaMongo } from '#lambda/mongodb/mongodb.js';
-import { LambdaRedis } from '#lambda/redis/LambdaRedis.js';
 import { fetchAllPages } from '#lambda/request/fetchAllPages.js';
 import {
   FetchApiAction,
@@ -36,10 +34,9 @@ export class CursusUserUpdator {
    * A 의 경우, 시간이 지날수록 선형적으로 증가하겠지만 당분간은 크게 문제 없음. 추후 이 부분이 커지면
    * 멤버들을 따로, 더 긴 간격으로 업데이트 하는 방법이 있음.
    */
-  static async update(mongo: LambdaMongo, redis: LambdaRedis): Promise<void> {
+  static async update(mongo: LambdaMongo): Promise<void> {
     await CursusUserUpdator.updateCursusChanged(mongo);
     await CursusUserUpdator.updateActivated(mongo);
-    await CursusUserUpdator.updateCache(mongo, redis);
   }
 
   /**
@@ -108,24 +105,6 @@ export class CursusUserUpdator {
     const cursusUserDtos = await fetchAllPages(CURSUS_USER_EP.WILDCARD());
 
     return parseCursusUsers(cursusUserDtos);
-  }
-
-  @UpdateAction
-  @LogAsyncEstimatedTime
-  private static async updateCache(
-    mongo: LambdaMongo,
-    redis: LambdaRedis,
-  ): Promise<void> {
-    const cursusUsers = await mongo
-      .db()
-      .collection<CursusUser>(CURSUS_USER_COLLECTION)
-      .find()
-      .toArray();
-
-    await redis.replaceHashDatasWithId(
-      CURSUS_USERS_CACHE_KEY.USER_HASH,
-      cursusUsers,
-    );
   }
 }
 

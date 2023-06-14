@@ -10,7 +10,6 @@ import { ProjectSessionUpdator } from '#lambda/projectSession/projectSession.js'
 import { ProjectSessionsSkillUpdator } from '#lambda/projectSessionsSkill/projectSessionsSkill.js';
 import { ProjectsUserUpdator } from '#lambda/projectsUser/projectsUser.js';
 import { QuestsUserUpdator } from '#lambda/questsUser/questsUser.js';
-import { LambdaRedis } from '#lambda/redis/LambdaRedis.js';
 import { initSeine } from '#lambda/request/initSeine.js';
 import { ScaleTeamUpdator } from '#lambda/scaleTeam/scaleTeam.js';
 import { ScoreUpdator } from '#lambda/score/score.js';
@@ -30,13 +29,9 @@ const main = async (): Promise<void> => {
   assertEnvExist(mongoUrl);
   const mongo = await LambdaMongo.createInstance(mongoUrl);
 
-  const redisUrl = process.env.REDIS_URL;
-  assertEnvExist(redisUrl);
-  const redis = await LambdaRedis.createInstance(redisUrl);
-
   await ProjectsUserUpdator.update(mongo);
   await TeamUpdator.update(mongo);
-  await CursusUserUpdator.update(mongo, redis);
+  await CursusUserUpdator.update(mongo);
   await ExamUpdator.update(mongo);
   await LocationUpdator.update(mongo);
   await ScoreUpdator.update(mongo);
@@ -60,7 +55,6 @@ const main = async (): Promise<void> => {
   }
 
   await mongo.closeConnection();
-  await redis.closeConnection();
 };
 
 export const handler = main;

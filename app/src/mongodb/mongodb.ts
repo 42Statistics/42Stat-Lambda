@@ -49,9 +49,12 @@ export class LambdaMongo {
   };
 
   private readonly client: MongoClient;
+  private readonly mode: 'prod' | 'dev';
 
   private constructor(mongo: MongoClient) {
     this.client = mongo;
+
+    this.mode = process.env.DEV ? 'dev' : 'prod';
   }
 
   @Bound
@@ -80,6 +83,11 @@ export class LambdaMongo {
     collection: LogUpdatedAt,
     updatedAt: Date,
   ): Promise<void> {
+    if (this.mode === 'dev') {
+      console.debug('aborting in[up]serting in dev mode');
+      return;
+    }
+
     await this.client
       .db()
       .collection(LOG_COLLECTION)
@@ -113,6 +121,11 @@ export class LambdaMongo {
     collection: string,
     datas: T[],
   ): Promise<void> {
+    if (this.mode === 'dev') {
+      console.debug('aborting in[up]sert in dev mode');
+      return;
+    }
+
     await Promise.all(
       datas.map((data) =>
         this.client
