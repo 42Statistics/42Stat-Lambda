@@ -1,3 +1,4 @@
+import { CURSUS_USER_COLLECTION } from '#lambda/cursusUser/cursusUser.js';
 import {
   LOCATION_EP,
   Location,
@@ -36,6 +37,7 @@ export class LocationUpdator {
   static async update(mongo: LambdaMongo): Promise<void> {
     await LocationUpdator.updateOngoing(mongo);
     await LocationUpdator.updateEnded(mongo);
+    await LocationUpdator.pruneNoCursusUser(mongo);
   }
 
   @UpdateAction
@@ -73,5 +75,37 @@ export class LocationUpdator {
     const locationDtos = await fetchAllPages(LOCATION_EP.ENDED(start, end));
 
     return parseLocations(locationDtos);
+  }
+
+  @UpdateAction
+  private static async pruneNoCursusUser(mongo: LambdaMongo): Promise<void> {
+    const userIds = await mongo
+      .db()
+      .collection(LOCATION_COLLECTION)
+      .aggregate<{ id: number }>()
+      .group({ _id: '$user.id' })
+      .lookup({
+        from: CURSUS_USER_COLLECTION,
+        localField: '_id',
+        foreignField: 'user.id',
+        as: 'cursus_users',
+      })
+      .match({ cursus_users: { $size: 0 } })
+      .project({ cursus_users: 0 })
+      .map((doc) => doc._id as number)
+      .toArray();
+
+    if (!userIds.length) {
+      return;
+    }
+
+    console.log('pruning locations, userIds:', userIds);
+
+    const result = await mongo
+      .db()
+      .collection(LOCATION_COLLECTION)
+      .deleteMany({ 'user.id': { $in: userIds } });
+
+    console.log('deleted locatinos:', result.deletedCount);
   }
 }
