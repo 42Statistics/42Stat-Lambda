@@ -10,9 +10,9 @@ export type Location = z.infer<typeof locationSchema>;
  * @description
  * 어차피 지금 시점에서 로그인 한 사람들이기 때문에, 추가적인 인자가 필요 없음.
  */
-const ONGOING = (): URL =>
+const ONGOING = (start: Date, end: Date): URL =>
   new URL(
-    `https://api.intra.42.fr/v2/campus/${SEOUL_CAMPUS_ID}/locations?filter[campus_id]=29&filter[end]=false`,
+    `https://api.intra.42.fr/v2/campus/${SEOUL_CAMPUS_ID}/locations?filter[campus_id]=29&filter[end]=false&range[begin_at]=${start.toISOString()},${end.toISOString()}&sort=begin_at`,
   );
 
 const ENDED = (start: Date, end: Date): URL =>

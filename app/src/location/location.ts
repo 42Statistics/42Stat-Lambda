@@ -34,40 +34,51 @@ export class LocationUpdator {
    * E 의 경우, 접속을 종료하는 사람들이 100명을 넘을 때 마다 한번씩 요청을 더 보내야함.
    * 평소엔 1 ~ 2번으로 충분함.
    */
-  static async update(mongo: LambdaMongo): Promise<void> {
-    await LocationUpdator.updateOngoing(mongo);
-    await LocationUpdator.updateEnded(mongo);
+  static async update(mongo: LambdaMongo, end: Date): Promise<void> {
+    const start = await mongo.getCollectionUpdatedAt(LOCATION_COLLECTION);
+
+    await LocationUpdator.updateOngoing(mongo, start, end);
+    await LocationUpdator.updateEnded(mongo, start, end);
+
+    await mongo.setCollectionUpdatedAt(LOCATION_COLLECTION, end);
+
     await LocationUpdator.pruneNoCursusUser(mongo);
   }
 
   @UpdateAction
   @LogAsyncEstimatedTime
-  private static async updateOngoing(mongo: LambdaMongo): Promise<void> {
-    const ongoing = await LocationUpdator.fetchOngoing();
+  private static async updateOngoing(
+    mongo: LambdaMongo,
+    start: Date,
+    end: Date,
+  ): Promise<void> {
+    const ongoing = await LocationUpdator.fetchOngoing(start, end);
     const ongoingInCluster = ongoing.filter(isCluster);
 
     await mongo.upsertManyById(LOCATION_COLLECTION, ongoingInCluster);
   }
 
   @FetchApiAction
-  private static async fetchOngoing(): Promise<Location[]> {
-    const locationDtos = await fetchAllPages(LOCATION_EP.ONGOING());
+  private static async fetchOngoing(
+    start: Date,
+    end: Date,
+  ): Promise<Location[]> {
+    const locationDtos = await fetchAllPages(LOCATION_EP.ONGOING(start, end));
 
     return parseLocations(locationDtos);
   }
 
   @UpdateAction
   @LogAsyncEstimatedTime
-  private static async updateEnded(mongo: LambdaMongo): Promise<void> {
-    const start = await mongo.getCollectionUpdatedAt(LOCATION_COLLECTION);
-
-    const end = new Date();
-
+  private static async updateEnded(
+    mongo: LambdaMongo,
+    start: Date,
+    end: Date,
+  ): Promise<void> {
     const ended = await LocationUpdator.fetchEnded(start, end);
     const endedInCluster = ended.filter(isCluster);
 
     await mongo.upsertManyById(LOCATION_COLLECTION, endedInCluster);
-    await mongo.setCollectionUpdatedAt(LOCATION_COLLECTION, end);
   }
 
   @FetchApiAction

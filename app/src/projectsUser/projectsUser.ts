@@ -29,15 +29,17 @@ export class ProjectsUserUpdator {
    * 생기거나 / 바뀌거나 / 끝나는 팀이 100개가 넘을 때 마다 한번씩 더 요청을 보내야 함.
    * 이그잼이 있는 날에는 요청 수가 증가할 가능성이 높음.
    */
-  static async update(mongo: LambdaMongo): Promise<void> {
-    await ProjectsUserUpdator.updateUpdated(mongo);
+  static async update(mongo: LambdaMongo, end: Date): Promise<void> {
+    await ProjectsUserUpdator.updateUpdated(mongo, end);
   }
 
   @UpdateAction
   @LogAsyncEstimatedTime
-  private static async updateUpdated(mongo: LambdaMongo): Promise<void> {
+  private static async updateUpdated(
+    mongo: LambdaMongo,
+    end: Date,
+  ): Promise<void> {
     const start = await mongo.getCollectionUpdatedAt(PROJECTS_USER_COLLECTION);
-    const end = new Date();
 
     const updated = await ProjectsUserUpdator.fetchUpdated(start, end);
     const studentIds = await getStudentIds(mongo);

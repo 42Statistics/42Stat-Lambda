@@ -24,18 +24,19 @@ export class ProjectSessionsSkillUpdator {
    * 필요 요청 수: U(1)
    * 예상 소요 시간: 3초
    */
-  static async update(mongo: LambdaMongo): Promise<void> {
-    await ProjectSessionsSkillUpdator.updateUpdated(mongo);
+  static async update(mongo: LambdaMongo, end: Date): Promise<void> {
+    await ProjectSessionsSkillUpdator.updateUpdated(mongo, end);
   }
 
   @UpdateAction
   @LogAsyncEstimatedTime
-  private static async updateUpdated(mongo: LambdaMongo): Promise<void> {
+  private static async updateUpdated(
+    mongo: LambdaMongo,
+    end: Date,
+  ): Promise<void> {
     const start = await mongo.getCollectionUpdatedAt(
       PROJECT_SESSIONS_SKILL_COLLECTION,
     );
-
-    const end = new Date();
 
     const updated = await ProjectSessionsSkillUpdator.fetchUpdated(start, end);
 

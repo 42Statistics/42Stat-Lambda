@@ -22,15 +22,17 @@ export class EventUpdator {
    *
    * 한번에 100개 이상의 event 가 변하지 않는 이상 불변함.
    */
-  static async update(mongo: LambdaMongo): Promise<void> {
-    await EventUpdator.updateUpdated(mongo);
+  static async update(mongo: LambdaMongo, end: Date): Promise<void> {
+    await EventUpdator.updateUpdated(mongo, end);
   }
 
   @UpdateAction
   @LogAsyncEstimatedTime
-  private static async updateUpdated(mongo: LambdaMongo): Promise<void> {
+  private static async updateUpdated(
+    mongo: LambdaMongo,
+    end: Date,
+  ): Promise<void> {
     const start = await mongo.getCollectionUpdatedAt(EVENT_COLLECTION);
-    const end = new Date();
 
     const updated = await EventUpdator.fetchUpdated(start, end);
 

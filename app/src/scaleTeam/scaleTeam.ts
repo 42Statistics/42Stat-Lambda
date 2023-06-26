@@ -26,16 +26,17 @@ export class ScaleTeamUpdator {
    *
    * 끝난 평가가 100개를 넘을 때 마다 요청을 한번씩 더 보내야 함.
    */
-  static async update(mongo: LambdaMongo): Promise<void> {
-    await ScaleTeamUpdator.updateFilled(mongo);
+  static async update(mongo: LambdaMongo, end: Date): Promise<void> {
+    await ScaleTeamUpdator.updateFilled(mongo, end);
   }
 
   @UpdateAction
   @LogAsyncEstimatedTime
-  private static async updateFilled(mongo: LambdaMongo): Promise<void> {
+  private static async updateFilled(
+    mongo: LambdaMongo,
+    end: Date,
+  ): Promise<void> {
     const start = await mongo.getCollectionUpdatedAt(SCALE_TEAM_COLLECTION);
-
-    const end = new Date();
 
     const filled = await ScaleTeamUpdator.fetchFilled(start, end);
 

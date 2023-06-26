@@ -22,15 +22,17 @@ export class ExamUpdator {
    *
    * 버그가 있는 것을 제외하면 그다지 변수는 없음.
    */
-  static async update(mongo: LambdaMongo): Promise<void> {
-    await ExamUpdator.updateUpdated(mongo);
+  static async update(mongo: LambdaMongo, end: Date): Promise<void> {
+    await ExamUpdator.updateUpdated(mongo, end);
   }
 
   @UpdateAction
   @LogAsyncEstimatedTime
-  private static async updateUpdated(mongo: LambdaMongo): Promise<void> {
+  private static async updateUpdated(
+    mongo: LambdaMongo,
+    end: Date,
+  ): Promise<void> {
     const start = await mongo.getCollectionUpdatedAt(EXAMS_COLLECTION);
-    const end = new Date();
 
     const created = await ExamUpdator.fetchCreated(start, end);
 

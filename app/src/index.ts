@@ -4,7 +4,7 @@ import { EventUpdator } from '#lambda/event/event.js';
 import { EventsUserUpdator } from '#lambda/eventsUser/eventsUser.js';
 import { ExamUpdator } from '#lambda/exam/exam.js';
 import { LocationUpdator } from '#lambda/location/location.js';
-import { LambdaMongo } from '#lambda/mongodb/mongodb.js';
+import { LambdaMongo, withMongo } from '#lambda/mongodb/mongodb.js';
 import { ProjectUpdator } from '#lambda/project/project.js';
 import { ProjectSessionUpdator } from '#lambda/projectSession/projectSession.js';
 import { ProjectSessionsSkillUpdator } from '#lambda/projectSessionsSkill/projectSessionsSkill.js';
@@ -22,39 +22,62 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
+type LambdaUpdator = {
+  update: (mongo: LambdaMongo, end: Date) => Promise<void>;
+};
+
+const execUpdators = async (
+  updators: LambdaUpdator[],
+  mongo: LambdaMongo,
+  end: Date,
+): Promise<void> => {
+  for (const updator of updators) {
+    await updator.update(mongo, end);
+  }
+};
+
 const main = async (): Promise<void> => {
   await initSeine();
 
   const mongoUrl = process.env.MONGODB_URL;
   assertEnvExist(mongoUrl);
-  const mongo = await LambdaMongo.createInstance(mongoUrl);
 
-  await ProjectsUserUpdator.update(mongo);
-  await TeamUpdator.update(mongo);
-  await CursusUserUpdator.update(mongo);
-  await ExamUpdator.update(mongo);
-  await LocationUpdator.update(mongo);
-  await ScoreUpdator.update(mongo);
-  await QuestsUserUpdator.update(mongo);
-  await EventUpdator.update(mongo);
-  await EventsUserUpdator.update(mongo);
-  await ScaleTeamUpdator.update(mongo);
-  await ProjectUpdator.update(mongo);
-  await ProjectSessionUpdator.update(mongo);
-  await ProjectSessionsSkillUpdator.update(mongo);
-  await CoalitionsUserUpdator.update(mongo);
+  await withMongo(mongoUrl, async (mongo) => {
+    const end = new Date();
 
-  {
-    const miniutes = new Date().getUTCMinutes();
+    const defaultUpdators: LambdaUpdator[] = [
+      ProjectsUserUpdator,
+      TeamUpdator,
+      CursusUserUpdator,
+      ExamUpdator,
+      LocationUpdator,
+      ScoreUpdator,
+      QuestsUserUpdator,
+      EventUpdator,
+      EventsUserUpdator,
+      ScaleTeamUpdator,
+      ProjectUpdator,
+      ProjectSessionUpdator,
+      ProjectSessionsSkillUpdator,
+      CoalitionsUserUpdator,
+    ];
 
-    if (Math.floor(miniutes / 10) === 0) {
-      await TitleUpdator.update(mongo);
-      await TitlesUserUpdator.update(mongo);
-      await SkillUpdator.update(mongo);
+    await execUpdators(defaultUpdators, mongo, end);
+
+    {
+      const conditionalUpdators: LambdaUpdator[] = [
+        TitleUpdator,
+        TitlesUserUpdator,
+        SkillUpdator,
+      ];
+
+      const miniutes = new Date().getUTCMinutes();
+
+      if (Math.floor(miniutes / 10) === 0) {
+        await execUpdators(conditionalUpdators, mongo, end);
+      }
     }
-  }
-
-  await mongo.closeConnection();
+  });
 };
 
 export const handler = main;

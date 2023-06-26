@@ -32,16 +32,17 @@ export class EventsUserUpdator {
    * 과연 event 의 수정이 events user 에서 갱신했다고 생각하는 시점 이전으로 이루어질 수 있을지?
    * 현재로썬 event 를 바로 직전에 갱신하기 때문에, 그럴 가능성이 없다고 생각 중.
    */
-  static async update(mongo: LambdaMongo): Promise<void> {
-    await EventsUserUpdator.updateByEvent(mongo);
+  static async update(mongo: LambdaMongo, end: Date): Promise<void> {
+    await EventsUserUpdator.updateByEvent(mongo, end);
   }
 
   @UpdateAction
   @LogAsyncEstimatedTime
-  private static async updateByEvent(mongo: LambdaMongo): Promise<void> {
+  private static async updateByEvent(
+    mongo: LambdaMongo,
+    end: Date,
+  ): Promise<void> {
     const start = await mongo.getCollectionUpdatedAt(EVENTS_USER_COLLECTION);
-
-    const end = new Date();
 
     const eventIds = await mongo
       .db()

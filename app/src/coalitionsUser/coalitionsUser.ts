@@ -26,18 +26,19 @@ export class CoalitionsUserUpdator {
    *
    * 신규 기수가 입과하는 날에만 3번 (300명 기준) 의 요청이 필요함. 평소에는 한번으로 충분함.
    */
-  static async update(mongo: LambdaMongo): Promise<void> {
-    await CoalitionsUserUpdator.updateCreated(mongo);
+  static async update(mongo: LambdaMongo, end: Date): Promise<void> {
+    await CoalitionsUserUpdator.updateCreated(mongo, end);
   }
 
   @UpdateAction
   @LogAsyncEstimatedTime
-  private static async updateCreated(mongo: LambdaMongo): Promise<void> {
+  private static async updateCreated(
+    mongo: LambdaMongo,
+    end: Date,
+  ): Promise<void> {
     const start = await mongo.getCollectionUpdatedAt(
       COALITIONS_USER_COLLECTION,
     );
-
-    const end = new Date();
 
     const created = await CoalitionsUserUpdator.fetchCreated(start, end);
 

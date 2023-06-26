@@ -27,16 +27,17 @@ export class QuestsUserUpdator {
    * 생기거나 갱신되는 quests user 가 100명을 넘어갈 때 마다 하나씩 요청을 더 보내야 함.
    * 신규 기수 입과일이 아니면 한번으로 충분함.
    */
-  static async update(mongo: LambdaMongo): Promise<void> {
-    await QuestsUserUpdator.updateUpdated(mongo);
+  static async update(mongo: LambdaMongo, end: Date): Promise<void> {
+    await QuestsUserUpdator.updateUpdated(mongo, end);
   }
 
   @UpdateAction
   @LogAsyncEstimatedTime
-  private static async updateUpdated(mongo: LambdaMongo): Promise<void> {
+  private static async updateUpdated(
+    mongo: LambdaMongo,
+    end: Date,
+  ): Promise<void> {
     const start = await mongo.getCollectionUpdatedAt(QUESTS_USER_COLLECTION);
-
-    const end = new Date();
 
     const updated = await QuestsUserUpdator.fetchUpdated(start, end);
     const wildcard = await QuestsUserUpdator.fetchWildcard(start, end);

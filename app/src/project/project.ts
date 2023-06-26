@@ -26,15 +26,17 @@ export class ProjectUpdator {
    *
    * project 가 한번에 대량 생성 / 변경되지 않는 이상 불변함.
    */
-  static async update(mongo: LambdaMongo): Promise<void> {
-    await ProjectUpdator.updateUpdated(mongo);
+  static async update(mongo: LambdaMongo, end: Date): Promise<void> {
+    await ProjectUpdator.updateUpdated(mongo, end);
   }
 
   @UpdateAction
   @LogAsyncEstimatedTime
-  private static async updateUpdated(mongo: LambdaMongo): Promise<void> {
+  private static async updateUpdated(
+    mongo: LambdaMongo,
+    end: Date,
+  ): Promise<void> {
     const start = await mongo.getCollectionUpdatedAt(PROJECT_COLLECTION);
-    const end = new Date();
 
     await ProjectUpdator.fetchUpdated(start, end);
 

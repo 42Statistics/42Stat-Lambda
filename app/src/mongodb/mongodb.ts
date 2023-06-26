@@ -36,6 +36,17 @@ type LogUpdatedAt =
   | typeof SKILL_COLLECTION
   | typeof PROJECT_SESSIONS_SKILL_COLLECTION;
 
+export const withMongo = async (
+  url: string,
+  callback: (mogno: LambdaMongo) => unknown,
+): Promise<void> => {
+  const mongo = await LambdaMongo.createInstance(url);
+
+  await callback(mongo);
+
+  await mongo.closeConnection();
+};
+
 export class LambdaMongo {
   static createInstance = async (
     url: string,

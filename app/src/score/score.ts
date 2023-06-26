@@ -2,8 +2,8 @@ import { SEOUL_COALITION_ID } from '#lambda/coalition/api/coalition.api.js';
 import { LambdaMongo } from '#lambda/mongodb/mongodb.js';
 import { fetchAllPages } from '#lambda/request/fetchAllPages.js';
 import {
-  SCORE_EP,
   SCORE_EDGE_CASE,
+  SCORE_EP,
   Score,
   parseScores,
 } from '#lambda/score/api/score.api.js';
@@ -34,13 +34,16 @@ export class ScoreUpdator {
    * coalition 별로 한번씩 요청을 보내보아야 하지만, 체육대회 등의 행사가 있어 모든 coalition user
    * 에게 score 가 지급되는게 아니면, 각 한번으로 충분함.
    */
-  static async update(mongo: LambdaMongo): Promise<void> {
-    await ScoreUpdator.updateByCoalition(mongo);
+  static async update(mongo: LambdaMongo, end: Date): Promise<void> {
+    await ScoreUpdator.updateByCoalition(mongo, end);
   }
 
   @UpdateAction
   @LogAsyncEstimatedTime
-  private static async updateByCoalition(mongo: LambdaMongo): Promise<void> {
+  private static async updateByCoalition(
+    mongo: LambdaMongo,
+    end: Date,
+  ): Promise<void> {
     const coalitionScoreCounts = await mongo
       .db()
       .collection(SCORE_COLLECTION)
@@ -79,6 +82,7 @@ export class ScoreUpdator {
               coalitoinScoreCount.coalitionId === coalitionId,
           )?.count ?? 0) + SCORE_EDGE_CASE.COUNT_HINT(coalitionId),
       })),
+      end,
     );
 
     await mongo.upsertManyById(SCORE_COLLECTION, byCoalition);
@@ -87,6 +91,7 @@ export class ScoreUpdator {
   @FetchApiAction
   private static async fetchScoreByCoalition(
     coalitionScoreCounts: CountByCoalitionId[],
+    end: Date,
   ): Promise<Score[]> {
     const scoreDtos: object[] = [];
 
@@ -99,6 +104,10 @@ export class ScoreUpdator {
       scoreDtos.push(...currDtos);
     }
 
-    return parseScores(scoreDtos).filter(SCORE_EDGE_CASE.IS_GOOD_IDS);
+    return parseScores(scoreDtos).filter(
+      (score) =>
+        SCORE_EDGE_CASE.IS_GOOD_IDS(score) &&
+        score.createdAt.getTime() < end.getTime(),
+    );
   }
 }

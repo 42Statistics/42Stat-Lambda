@@ -34,8 +34,8 @@ export class CursusUserUpdator {
    * A 의 경우, 시간이 지날수록 선형적으로 증가하겠지만 당분간은 크게 문제 없음. 추후 이 부분이 커지면
    * 멤버들을 따로, 더 긴 간격으로 업데이트 하는 방법이 있음.
    */
-  static async update(mongo: LambdaMongo): Promise<void> {
-    await CursusUserUpdator.updateCursusChanged(mongo);
+  static async update(mongo: LambdaMongo, end: Date): Promise<void> {
+    await CursusUserUpdator.updateCursusChanged(mongo, end);
     await CursusUserUpdator.updateActivated(mongo);
   }
 
@@ -46,9 +46,11 @@ export class CursusUserUpdator {
    */
   @UpdateAction
   @LogAsyncEstimatedTime
-  private static async updateCursusChanged(mongo: LambdaMongo): Promise<void> {
+  private static async updateCursusChanged(
+    mongo: LambdaMongo,
+    end: Date,
+  ): Promise<void> {
     const start = await mongo.getCollectionUpdatedAt(CURSUS_USER_COLLECTION);
-    const end = new Date();
 
     const cursusChanged = await CursusUserUpdator.fetchCursusChanged(
       start,

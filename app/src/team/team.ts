@@ -23,15 +23,17 @@ export class TeamUpdator {
    *
    * team 이 100개 이상 생기거나 갱신될 때 마다 요청을 한번씩 더 보내야 함.
    */
-  static async update(mongo: LambdaMongo): Promise<void> {
-    await TeamUpdator.updateUpdated(mongo);
+  static async update(mongo: LambdaMongo, end: Date): Promise<void> {
+    await TeamUpdator.updateUpdated(mongo, end);
   }
 
   @UpdateAction
   @LogAsyncEstimatedTime
-  private static async updateUpdated(mongo: LambdaMongo): Promise<void> {
+  private static async updateUpdated(
+    mongo: LambdaMongo,
+    end: Date,
+  ): Promise<void> {
     const start = await mongo.getCollectionUpdatedAt(TEAM_COLLECTION);
-    const end = new Date();
 
     const updated = await TeamUpdator.fetchUpdated(start, end);
     const studentIds = await getStudentIds(mongo);

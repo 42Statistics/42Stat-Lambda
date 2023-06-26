@@ -63,7 +63,7 @@ export const SCORE_EDGE_CASE = {
   /**
    *
    * @description
-   * score 를 가져올떄 무조건 제외해야 하는 id 입니다.
+   * 무조건 제외해야 하는 id 를 제외한 나머지 입니다.
    */
   IS_GOOD_IDS,
 } as const;
