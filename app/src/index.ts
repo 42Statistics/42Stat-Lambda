@@ -1,3 +1,4 @@
+import { CampusUserUpdator } from '#lambda/campusUser/campusUser.js';
 import { CoalitionsUserUpdator } from '#lambda/coalitionsUser/coalitionsUser.js';
 import { CursusUserUpdator } from '#lambda/cursusUser/cursusUser.js';
 import { EventUpdator } from '#lambda/event/event.js';
@@ -59,6 +60,7 @@ const main = async (): Promise<void> => {
     const end = new Date();
 
     const defaultUpdators: LambdaUpdator[] = [
+      CampusUserUpdator,
       ProjectsUserUpdator,
       TeamUpdator,
       CursusUserUpdator,

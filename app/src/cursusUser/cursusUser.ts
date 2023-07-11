@@ -1,3 +1,5 @@
+import type { CampusUser } from '#lambda/campusUser/api/campusUser.api.js';
+import { CAMPUS_USER_COLLECTION } from '#lambda/campusUser/campusUser.js';
 import {
   CURSUS_USER_EP,
   CursusUser,
@@ -6,7 +8,7 @@ import {
   wildcardUserIds,
 } from '#lambda/cursusUser/api/cursusUser.api.js';
 import { ExperienceUpdator } from '#lambda/experience/experience.js';
-import { LambdaMongo } from '#lambda/mongodb/mongodb.js';
+import type { LambdaMongo } from '#lambda/mongodb/mongodb.js';
 import { fetchAllPages } from '#lambda/request/fetchAllPages.js';
 import {
   FetchApiAction,
@@ -76,12 +78,26 @@ export class CursusUserUpdator {
   @UpdateAction
   @LogAsyncEstimatedTime
   private static async updateActivated(mongo: LambdaMongo): Promise<void> {
+    const transferedIds = await mongo
+      .db()
+      .collection(CAMPUS_USER_COLLECTION)
+      .aggregate<CampusUser & { cursus_users: CursusUser[] }>()
+      .lookup({
+        from: CURSUS_USER_COLLECTION,
+        localField: 'userId',
+        foreignField: 'user.id',
+        as: 'cursus_users',
+      })
+      .match({ cursus_users: { $not: { $size: 0 } } })
+      .map((doc) => doc.userId)
+      .toArray();
+
     const activated = await CursusUserUpdator.fetchActivated();
-    const wildcard = await CursusUserUpdator.fetchWildcard();
+    const transfered = await CursusUserUpdator.fetchTransfered(transferedIds);
 
     await mongo.upsertManyById(CURSUS_USER_COLLECTION, [
       ...activated,
-      ...wildcard,
+      ...transfered,
     ]);
 
     // todo: 적당한 위치 찾아주기. 현재 시점에선 cursus user의 업데이트 성공을 알려주고 있지 않기
@@ -103,8 +119,12 @@ export class CursusUserUpdator {
   }
 
   @FetchApiAction
-  private static async fetchWildcard(): Promise<CursusUser[]> {
-    const cursusUserDtos = await fetchAllPages(CURSUS_USER_EP.WILDCARD());
+  private static async fetchTransfered(
+    userIds: number[],
+  ): Promise<CursusUser[]> {
+    const cursusUserDtos = await fetchAllPages(
+      CURSUS_USER_EP.TRANSFERED(userIds),
+    );
 
     return parseCursusUsers(cursusUserDtos);
   }

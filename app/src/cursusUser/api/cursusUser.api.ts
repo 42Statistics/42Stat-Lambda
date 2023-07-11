@@ -20,9 +20,9 @@ const ACTIVATED = (): URL =>
     `https://api.intra.42.fr/v2/cursus/${FT_CURSUS_ID}/cursus_users?filter[campus_id]=29&filter[has_coalition]=true&filter[end]=false&sort=created_at`,
   );
 
-const WILDCARD = (): URL =>
+const TRANSFERED = (userIds: number[]): URL =>
   new URL(
-    `https://api.intra.42.fr/v2/cursus/${FT_CURSUS_ID}/cursus_users?filter[user_id]=${wildcardUserIds.join(
+    `https://api.intra.42.fr/v2/cursus/${FT_CURSUS_ID}/cursus_users?filter[user_id]=${userIds.join(
       ',',
     )}`,
   );
@@ -30,7 +30,7 @@ const WILDCARD = (): URL =>
 export const CURSUS_USER_EP = {
   CURSUS_CHANGED,
   ACTIVATED,
-  WILDCARD,
+  TRANSFERED,
 } as const;
 
 export const parseCursusUsers = (dtos: object[]): CursusUser[] =>
@@ -45,9 +45,10 @@ const weirdUserIds = [
 ] as const;
 
 // 무조건 포함해야하지만 제외된 user.
+// 더이상 이를 강제로 보낼 필요는 없지만, 예외를 기록해두는 의도로 보존.
 export const wildcardUserIds = [
   // 68891, // 1기 중 버그 있어보이지만 피신 평가 내역은 존재함.
-  68857, // 파리로 transfer, login: sucho
+  // 68857, // 파리로 transfer, login: sucho
   // 69000, // hyulim
 ] as const;
 
