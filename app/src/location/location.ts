@@ -112,11 +112,12 @@ export class LocationUpdator {
 
     console.log('pruning locations, userIds:', userIds);
 
-    const result = await mongo
-      .db()
-      .collection(LOCATION_COLLECTION)
-      .deleteMany({ 'user.id': { $in: userIds } });
+    const result = await mongo.deleteMany(LOCATION_COLLECTION, {
+      'user.id': { $in: userIds },
+    });
 
-    console.log('deleted locatinos:', result.deletedCount);
+    if (result) {
+      console.log('deleted locatinos:', result.deletedCount);
+    }
   }
 }

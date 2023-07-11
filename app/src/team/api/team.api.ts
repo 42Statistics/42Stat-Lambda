@@ -34,8 +34,12 @@ const UPDATED = (start: Date, end: Date): URL =>
     `https://api.intra.42.fr/v2/cursus/${FT_CURSUS_ID}/teams?filter[campus]=29&range[updated_at]=${start.toISOString()},${end.toISOString()}&sort=created_at`,
   );
 
+const BY_IDS = (ids: number[]) =>
+  new URL(`https://api.intra.42.fr/v2/teams?filter[id]=${ids.join(',')}`);
+
 export const TEAM_EP = {
   UPDATED,
+  BY_IDS,
 } as const;
 
 export const parseTeams = (dtos: object[]): Team[] =>

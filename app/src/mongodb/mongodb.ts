@@ -15,7 +15,15 @@ import type { SKILL_COLLECTION } from '#lambda/skill/skill.js';
 import type { TEAM_COLLECTION } from '#lambda/team/team.js';
 import { Bound } from '#lambda/util/decorator.js';
 import { LambdaError } from '#lambda/util/error.js';
-import { Db, DbOptions, MongoClient, MongoClientOptions } from 'mongodb';
+import {
+  type Db,
+  type DbOptions,
+  type DeleteResult,
+  type Document,
+  type Filter,
+  MongoClient,
+  type MongoClientOptions,
+} from 'mongodb';
 
 export const LOG_COLLECTION = 'logs';
 
@@ -145,6 +153,20 @@ export class LambdaMongo {
           .updateOne({ id: data.id }, { $set: data }, { upsert: true }),
       ),
     );
+  }
+
+  @Bound
+  @MongoAction
+  async deleteMany(
+    collection: string,
+    filter?: Filter<Document>,
+  ): Promise<DeleteResult | undefined> {
+    if (this.mode === 'dev') {
+      console.debug('aborting deleteMany in dev mode');
+      return;
+    }
+
+    return await this.client.db().collection(collection).deleteMany(filter);
   }
 
   @Bound
