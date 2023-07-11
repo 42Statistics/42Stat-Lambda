@@ -102,8 +102,8 @@ export class LocationUpdator {
         as: 'cursus_users',
       })
       .match({ cursus_users: { $size: 0 } })
-      .project({ cursus_users: 0 })
-      .map((doc) => doc._id as number)
+      .project<{ _id: number }>({ cursus_users: 0 })
+      .map((doc) => doc._id)
       .toArray();
 
     if (!userIds.length) {

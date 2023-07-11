@@ -1,4 +1,8 @@
-import { getStudentIds } from '#lambda/cursusUser/cursusUser.js';
+import { HYULIM } from '#lambda/cursusUser/api/cursusUser.api.js';
+import {
+  CURSUS_USER_COLLECTION,
+  getStudentIds,
+} from '#lambda/cursusUser/cursusUser.js';
 import { LambdaMongo } from '#lambda/mongodb/mongodb.js';
 import { fetchAllPages } from '#lambda/request/fetchAllPages.js';
 import { TEAM_EP, Team, parseTeams } from '#lambda/team/api/team.api.js';
@@ -25,6 +29,8 @@ export class TeamUpdator {
    */
   static async update(mongo: LambdaMongo, end: Date): Promise<void> {
     await TeamUpdator.updateUpdated(mongo, end);
+
+    await TeamUpdator.pruneNoCursusUser(mongo);
   }
 
   @UpdateAction
@@ -51,5 +57,44 @@ export class TeamUpdator {
     const teamDtos = await fetchAllPages(TEAM_EP.UPDATED(start, end));
 
     return parseTeams(teamDtos);
+  }
+
+  @UpdateAction
+  private static async pruneNoCursusUser(mongo: LambdaMongo): Promise<void> {
+    const teamIds = await mongo
+      .db()
+      .collection(TEAM_COLLECTION)
+      .aggregate<{ id: number }>()
+      .lookup({
+        from: CURSUS_USER_COLLECTION,
+        localField: 'users.id',
+        foreignField: 'user.id',
+        as: 'cursus_users',
+      })
+      .match({
+        cursus_users: { $size: 0 },
+        $or: [
+          { users: { $not: { $size: 1 } } },
+          {
+            $and: [{ 'users.id': { $ne: HYULIM } }, { users: { $size: 1 } }],
+          },
+        ],
+      })
+      .project<{ id: number }>({ id: 1 })
+      .map((doc) => doc.id)
+      .toArray();
+
+    if (!teamIds.length) {
+      return;
+    }
+
+    console.log('pruning teams, teamIds:', teamIds);
+
+    const result = await mongo
+      .db()
+      .collection(TEAM_COLLECTION)
+      .deleteMany({ id: { $in: teamIds } });
+
+    console.log('deleted teams:', result.deletedCount);
   }
 }

@@ -51,6 +51,8 @@ export const wildcardUserIds = [
   // 69000, // hyulim
 ] as const;
 
+export const HYULIM = 69000;
+
 const isWeirdUserId = (userId: number): boolean => {
   return weirdUserIds.find((id) => id === userId) !== undefined;
 };
