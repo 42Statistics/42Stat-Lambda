@@ -195,6 +195,7 @@ export class ExperienceUpdator {
           } => scaleTeam.finalMark !== null,
         );
 
+        // todo: scale team 없이 통과하는 경우 NaN 발생
         const scaleTeamMark =
           scaleTeams.reduce(
             (mark, scaleTeam) => mark + scaleTeam.finalMark,
