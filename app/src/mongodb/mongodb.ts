@@ -26,6 +26,7 @@ import {
 } from 'mongodb';
 
 export const LOG_COLLECTION = 'logs';
+export const PRUNE_COLLECTION = 'prunes';
 
 type LogUpdatedAt =
   | typeof CURSUS_USER_COLLECTION
@@ -167,6 +168,42 @@ export class LambdaMongo {
     }
 
     return await this.client.db().collection(collection).deleteMany(filter);
+  }
+
+  @Bound
+  @MongoAction
+  async pruneMany(
+    collection: string,
+    filter?: Filter<Document>,
+  ): Promise<DeleteResult | undefined> {
+    if (this.mode === 'dev') {
+      console.debug('aborting pruneMany in dev mode');
+      return;
+    }
+
+    console.log(`pruning ${collection}`);
+
+    const deleting = await this.client
+      .db()
+      .collection(collection)
+      .find(filter ?? {})
+      .toArray();
+
+    if (!deleting.length) {
+      console.log(`${collection}: nothing to prune`);
+      return;
+    }
+
+    await this.client
+      .db()
+      .collection(PRUNE_COLLECTION)
+      .insertMany(deleting.map((el) => ({ ...el, __collection: collection })));
+
+    const deleteResult = await this.deleteMany(collection, filter);
+
+    console.log(`delete ${collection}: ${deleteResult?.deletedCount ?? 0}`);
+
+    return deleteResult;
   }
 
   @Bound

@@ -110,14 +110,6 @@ export class LocationUpdator {
       return;
     }
 
-    console.log('pruning locations, userIds:', userIds);
-
-    const result = await mongo.deleteMany(LOCATION_COLLECTION, {
-      'user.id': { $in: userIds },
-    });
-
-    if (result) {
-      console.log('deleted locatinos:', result.deletedCount);
-    }
+    await mongo.pruneMany(LOCATION_COLLECTION, { 'user.id': { $in: userIds } });
   }
 }

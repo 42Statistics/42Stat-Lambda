@@ -90,15 +90,7 @@ export class TeamUpdator {
       return;
     }
 
-    console.log('pruning teams, teamIds:', teamIds);
-
-    const result = await mongo.deleteMany(TEAM_COLLECTION, {
-      id: { $in: teamIds },
-    });
-
-    if (result) {
-      console.log('deleted teams:', result.deletedCount);
-    }
+    await mongo.pruneMany(TEAM_COLLECTION, { id: { $in: teamIds } });
   }
 
   @UpdateAction
@@ -124,15 +116,11 @@ export class TeamUpdator {
       });
     }
 
-    console.log('pruning teams, teamIds:', targetTeamIds);
-
-    const result = await mongo.deleteMany(TEAM_COLLECTION, {
-      id: { $in: targetTeamIds },
-    });
-
-    if (result) {
-      console.log('deleted teams:', result.deletedCount);
+    if (!targetTeamIds.length) {
+      return;
     }
+
+    await mongo.pruneMany(TEAM_COLLECTION, { id: { $in: targetTeamIds } });
   }
 
   @FetchApiAction
