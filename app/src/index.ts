@@ -98,6 +98,23 @@ const main = async (): Promise<void> => {
         await execDeletors(conditionalDeletors, mongo);
       }
     }
+
+    const statUrl = process.env.STAT_APP_URL;
+    assertEnvExist(statUrl);
+
+    const response = await fetch(statUrl, {
+      method: 'post',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ timestamp: end.getTime() }),
+    });
+
+    if (response.ok) {
+      console.log('lambda update success');
+    } else {
+      console.error('lambda update failed');
+    }
   });
 };
 
