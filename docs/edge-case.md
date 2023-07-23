@@ -1,6 +1,5 @@
-## scale_teams (begin_at으로 가져오는 중) // created_at으로 가져와야 하나?
+## scale_teams
 
-- https://api.intra.42.fr/v2/scale_teams?filter[cursus_id]=21&filter[campus_id]=29&page[size]=100&range[begin_at]=2015-03-31T15:00:00.000Z,2023-04-10T14:59:59.999Z
 - truant: 평가 취소를 뜻함
 - feedback === null && truant === {} 인 경우, 블랙홀/giveup/인턴/단순히 피드백 작성 안한채로 방치 등 여러 사유가 있음. 따로 관리가 필요해보임.
   - 당시 team의 status를 보는게 도움이 될 듯?
@@ -9,18 +8,15 @@
 
 ---
 
-## teams (updated_at)
+## teams
 
-- 'https://api.intra.42.fr/v2/cursus/21/teams?page[size]=100&filter[campus]=29&range[created_at]=2015-03-31T15:00:00.000Z,2023-04-10T14:59:59.999Z'
+- in_progess 상태의 팀을 unregister 하면 팀이 삭제가 되어버림.
+- waiting_for_correction 상태의 팀이 giveup 하면 팀이 updated_at 갱신 없이 status 가 finished 로 바뀜
 
 ---
 
-## coalitions_users (created_at)
+## coalitions_users
 
-- https://api.intra.42.fr/v2/coalitions/85/coalitions_users?range[created_at]=2015-03-31T15:00:00.000Z,2023-04-11T14:59:59.999Z
-- https://api.intra.42.fr/v2/coalitions/86/coalitions_users?range[created_at]=2015-03-31T15:00:00.000Z,2023-04-11T14:59:59.999Z
-- https://api.intra.42.fr/v2/coalitions/87/coalitions_users?range[created_at]=2015-03-31T15:00:00.000Z,2023-04-11T14:59:59.999Z
-- https://api.intra.42.fr/v2/coalitions/88/coalitions_users?range[created_at]=2015-03-31T15:00:00.000Z,2023-04-11T14:59:59.999Z
 - 99962,99754,99982,98364,98274,98003,98321 해당 user_id를 갖고 있는 사람들만 중복으로 coalitions_users가 생성되어 있음.
   - 이것을 42에서 삭제하는 방식으로 해결을 했는데, 이로 인해 score endpoint 에서 예전 score 들이 없어지는 문제가 발생함. 하단 참조.
 
@@ -45,10 +41,9 @@
 
 ---
 
-## projects (created_at)
+## projects
 
-- 'https://api.intra.42.fr/v2/cursus/21/projects?range[created_at]=2010-03-31T15:00:00.000Z,2023-04-11T14:59:59.999Z&page[size]=30'
-- 너무 느려서 그런지 타임아웃 에러가 자주 발생. page size를 30으로 줄여서 했음. hint는 3.
+- 너무 느려서 그런지 타임아웃 에러가 자주 발생. page size를 30으로 줄여서 했음.
 
 ---
 

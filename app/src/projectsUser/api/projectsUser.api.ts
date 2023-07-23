@@ -19,8 +19,14 @@ const UPDATED = (start: Date, end: Date): URL =>
     `https://api.intra.42.fr/v2/projects_users?filter[campus]=29&filter[cursus]=${FT_CURSUS_ID}&range[updated_at]=${start.toISOString()},${end.toISOString()}`,
   );
 
+const BY_IDS = (ids: number[]): URL =>
+  new URL(
+    `https://api.intra.42.fr/v2/projects_users?filter[id]=${ids.join(',')}`,
+  );
+
 export const PROJECTS_USER_EP = {
   UPDATED,
+  BY_IDS,
 } as const;
 
 export const parseProjectsUsers = (dtos: object[]): ProjectsUser[] =>

@@ -65,4 +65,43 @@ export class ProjectsUserUpdator {
 
     return parseProjectsUsers(projectsUserDtos);
   }
+
+  @UpdateAction
+  @LogAsyncEstimatedTime
+  public static async updateGiveUpsByTeamIds(
+    mongo: LambdaMongo,
+    teamIds: number[],
+  ): Promise<void> {
+    const projectsUserIds = await mongo
+      .db()
+      .collection(PROJECTS_USER_COLLECTION)
+      .find<ProjectsUser>({
+        'teams.id': { $in: teamIds },
+      })
+      .map((doc) => doc.id)
+      .toArray();
+
+    const updatedProjectsUsers: ProjectsUser[] = [];
+
+    for (let i = 0; i < projectsUserIds.length; i += 100) {
+      const currIds = projectsUserIds.slice(
+        i,
+        Math.min(projectsUserIds.length, i + 100),
+      );
+      const projectsUsers = await this.fetchProjectsUsersByIds(currIds);
+
+      updatedProjectsUsers.push(...projectsUsers);
+    }
+
+    await mongo.upsertManyById(PROJECTS_USER_COLLECTION, updatedProjectsUsers);
+  }
+
+  @FetchApiAction
+  private static async fetchProjectsUsersByIds(
+    ids: number[],
+  ): Promise<ProjectsUser[]> {
+    const projectsUserDtos = await fetchAllPages(PROJECTS_USER_EP.BY_IDS(ids));
+
+    return parseProjectsUsers(projectsUserDtos);
+  }
 }

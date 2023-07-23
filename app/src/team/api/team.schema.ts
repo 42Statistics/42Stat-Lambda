@@ -34,7 +34,12 @@ export const teamBaseSchema = z.object({
   projectId: z.number(),
   createdAt: z.coerce.date(),
   updatedAt: z.coerce.date(),
-  status: z.string(),
+  status: z.union([
+    z.literal('creating_group'),
+    z.literal('in_progress'),
+    z.literal('waiting_for_correction'),
+    z.literal('finished'),
+  ]),
   terminatingAt: z.coerce.date().nullable(),
   'locked?': z.boolean(),
   'validated?': z.boolean().nullable(),
