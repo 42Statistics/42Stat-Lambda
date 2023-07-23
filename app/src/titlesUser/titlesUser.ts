@@ -6,10 +6,12 @@ import {
   parseTitlesUsers,
 } from '#lambda/titlesUser/api/titlesUser.api.js';
 import {
+  At_00_Action,
   FetchApiAction,
   LogAsyncEstimatedTime,
   UpdateAction,
 } from '#lambda/util/decorator.js';
+
 export const TITLES_USER_COLLECTION = 'titles_users';
 
 // eslint-disable-next-line
@@ -31,6 +33,7 @@ export class TitlesUserUpdator {
     await TitlesUserUpdator.updateAll(mongo);
   }
 
+  @At_00_Action
   @UpdateAction
   @LogAsyncEstimatedTime
   private static async updateAll(mongo: LambdaMongo): Promise<void> {

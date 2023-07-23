@@ -7,6 +7,7 @@ import { LambdaMongo } from '#lambda/mongodb/mongodb.js';
 import { fetchAllPages } from '#lambda/request/fetchAllPages.js';
 import { TEAM_EP, Team, parseTeams } from '#lambda/team/api/team.api.js';
 import {
+  At_10_Action,
   FetchApiAction,
   LogAsyncEstimatedTime,
   UpdateAction,
@@ -23,14 +24,18 @@ export class TeamUpdator {
    * @see pruneDeleted    D: 삭제 된 팀
    *
    * 2023-05 기준
-   * 필요 요청 수: U(1), D(18 ~)
+   * 필요 요청 수:
+   *  - 매 실행: U(1)
+   *  - 한시간에 한번: D(18 ~)
    * 예상 소요 시간: 3초 + 60초 ~
    *
    * U: team 이 100개 이상 생기거나 갱신될 때 마다 요청을 한번씩 더 보내야 함.
+   *
    * D: in_progress 인 team 이 증가할수록 선형적으로 증가함.
    */
   static async update(mongo: LambdaMongo, end: Date): Promise<void> {
     await TeamUpdator.updateUpdated(mongo, end);
+    await TeamUpdator.deleteUnregistered(mongo);
 
     await TeamUpdator.pruneNoCursusUser(mongo);
   }
@@ -93,9 +98,10 @@ export class TeamUpdator {
     await mongo.pruneMany(TEAM_COLLECTION, { id: { $in: teamIds } });
   }
 
+  @At_10_Action
   @UpdateAction
   @LogAsyncEstimatedTime
-  public static async pruneDeleted(mongo: LambdaMongo): Promise<void> {
+  private static async deleteUnregistered(mongo: LambdaMongo): Promise<void> {
     const teamIds = await mongo
       .db()
       .collection(TEAM_COLLECTION)

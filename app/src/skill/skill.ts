@@ -2,6 +2,7 @@ import { LambdaMongo } from '#lambda/mongodb/mongodb.js';
 import { fetchAllPages } from '#lambda/request/fetchAllPages.js';
 import { SKILL_EP, Skill, parseSkills } from '#lambda/skill/api/skill.api.js';
 import {
+  At_00_Action,
   FetchApiAction,
   LogAsyncEstimatedTime,
   UpdateAction,
@@ -24,6 +25,7 @@ export class SkillUpdator {
     await SkillUpdator.updateUpdated(mongo);
   }
 
+  @At_00_Action
   @UpdateAction
   @LogAsyncEstimatedTime
   private static async updateUpdated(mongo: LambdaMongo): Promise<void> {

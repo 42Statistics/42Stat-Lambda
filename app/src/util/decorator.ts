@@ -92,6 +92,106 @@ export function UpdateAction<This, Args extends any[], Return>(
   return replacementMethod;
 }
 
+export function At_00_Action<
+  This,
+  Args extends any[],
+  Return extends Promise<any>,
+>(
+  target: (this: This, ...args: Args) => Return,
+  context: ClassMethodDecoratorContext<
+    This,
+    (this: This, ...args: Args) => Return
+  >,
+): typeof target | ((this: This, ...args: Args) => Promise<void>) {
+  return function replacementMethod(
+    this: This,
+    ...args: Args
+  ): Return | Promise<void> {
+    const minutes = new Date().getUTCMinutes();
+
+    if (Math.floor(minutes / 10) === 0) {
+      return target.call(this, ...args);
+    }
+
+    return Promise.resolve();
+  };
+}
+
+export function At_10_Action<
+  This,
+  Args extends any[],
+  Return extends Promise<any>,
+>(
+  target: (this: This, ...args: Args) => Return,
+  context: ClassMethodDecoratorContext<
+    This,
+    (this: This, ...args: Args) => Return
+  >,
+): typeof target | ((this: This, ...args: Args) => Promise<void>) {
+  return function replacementMethod(
+    this: This,
+    ...args: Args
+  ): Return | Promise<void> {
+    const minutes = new Date().getUTCMinutes();
+
+    if (Math.floor(minutes / 10) === 1) {
+      return target.call(this, ...args);
+    }
+
+    return Promise.resolve();
+  };
+}
+
+export function At_20_Action<
+  This,
+  Args extends any[],
+  Return extends Promise<any>,
+>(
+  target: (this: This, ...args: Args) => Return,
+  context: ClassMethodDecoratorContext<
+    This,
+    (this: This, ...args: Args) => Return
+  >,
+): typeof target | ((this: This, ...args: Args) => Promise<void>) {
+  return function replacementMethod(
+    this: This,
+    ...args: Args
+  ): Return | Promise<void> {
+    const miniutes = new Date().getUTCMinutes();
+
+    if (Math.floor(miniutes / 10) === 2) {
+      return target.call(this, ...args);
+    }
+
+    return Promise.resolve();
+  };
+}
+
+export function At_30_Action<
+  This,
+  Args extends any[],
+  Return extends Promise<any>,
+>(
+  target: (this: This, ...args: Args) => Return,
+  context: ClassMethodDecoratorContext<
+    This,
+    (this: This, ...args: Args) => Return
+  >,
+): typeof target | ((this: This, ...args: Args) => Promise<void>) {
+  return function replacementMethod(
+    this: This,
+    ...args: Args
+  ): Return | Promise<void> {
+    const miniutes = new Date().getUTCMinutes();
+
+    if (Math.floor(miniutes / 10) === 3) {
+      return target.call(this, ...args);
+    }
+
+    return Promise.resolve();
+  };
+}
+
 /**
  *
  * @description

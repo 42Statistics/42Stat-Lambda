@@ -4,6 +4,7 @@ import { TITLE_EP, Title, parseTitles } from '#lambda/title/api/title.api.js';
 // eslint-disable-next-line
 import type { TitlesUserUpdator } from '#lambda/titlesUser/titlesUser.js';
 import {
+  At_00_Action,
   FetchApiAction,
   LogAsyncEstimatedTime,
   UpdateAction,
@@ -31,6 +32,7 @@ export class TitleUpdator {
     await TitleUpdator.updateAll(mongo);
   }
 
+  @At_00_Action
   @UpdateAction
   @LogAsyncEstimatedTime
   private static async updateAll(mongo: LambdaMongo): Promise<void> {

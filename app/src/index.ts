@@ -27,10 +27,6 @@ type LambdaUpdator = {
   update: (mongo: LambdaMongo, end: Date) => Promise<void>;
 };
 
-type LambdaDeletor = {
-  pruneDeleted: (mongo: LambdaMongo) => Promise<void>;
-};
-
 const execUpdators = async (
   updators: LambdaUpdator[],
   mongo: LambdaMongo,
@@ -38,15 +34,6 @@ const execUpdators = async (
 ): Promise<void> => {
   for (const updator of updators) {
     await updator.update(mongo, end);
-  }
-};
-
-const execDeletors = async (
-  deletors: LambdaDeletor[],
-  mongo: LambdaMongo,
-): Promise<void> => {
-  for (const deletor of deletors) {
-    await deletor.pruneDeleted(mongo);
   }
 };
 
@@ -59,7 +46,7 @@ const main = async (): Promise<void> => {
   await withMongo(mongoUrl, async (mongo) => {
     const end = new Date();
 
-    const defaultUpdators: LambdaUpdator[] = [
+    const updators: LambdaUpdator[] = [
       CampusUserUpdator,
       ProjectsUserUpdator,
       TeamUpdator,
@@ -75,29 +62,12 @@ const main = async (): Promise<void> => {
       ProjectSessionUpdator,
       ProjectSessionsSkillUpdator,
       CoalitionsUserUpdator,
+      TitleUpdator,
+      TitlesUserUpdator,
+      SkillUpdator,
     ];
 
-    await execUpdators(defaultUpdators, mongo, end);
-
-    {
-      const conditionalUpdators: LambdaUpdator[] = [
-        TitleUpdator,
-        TitlesUserUpdator,
-        SkillUpdator,
-      ];
-
-      const miniutes = new Date().getUTCMinutes();
-
-      if (Math.floor(miniutes / 10) === 0) {
-        await execUpdators(conditionalUpdators, mongo, end);
-      }
-
-      const conditionalDeletors: LambdaDeletor[] = [TeamUpdator];
-
-      if (Math.floor(miniutes / 10) === 1) {
-        await execDeletors(conditionalDeletors, mongo);
-      }
-    }
+    await execUpdators(updators, mongo, end);
 
     const statUrl = process.env.STAT_APP_URL;
     assertEnvExist(statUrl);
