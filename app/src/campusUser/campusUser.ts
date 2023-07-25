@@ -15,6 +15,8 @@ export const CAMPUS_USER_COLLECTION = 'campus_users';
 
 // eslint-disable-next-line
 export class CampusUserUpdator {
+  private static transferUserIds: number[] | null = null;
+
   /**
    *
    * @description
@@ -28,6 +30,15 @@ export class CampusUserUpdator {
    */
   static async update(mongo: LambdaMongo, end: Date): Promise<void> {
     await this.updateNotPrmiary(mongo, end);
+
+    this.transferUserIds = await mongo
+      .db()
+      .collection<CampusUser>(CAMPUS_USER_COLLECTION)
+      .find<{ userId: number }>({
+        isPrimary: false,
+      })
+      .map((doc) => doc.userId)
+      .toArray();
   }
 
   @UpdateAction
@@ -49,5 +60,13 @@ export class CampusUserUpdator {
     );
 
     return parseCampusUsers(campusUserDtos);
+  }
+
+  public static getTransferIds(): number[] {
+    if (!this.transferUserIds) {
+      throw Error('campus user not updated');
+    }
+
+    return this.transferUserIds;
   }
 }

@@ -1,3 +1,4 @@
+import { getStudentIds } from '#lambda/cursusUser/cursusUser.js';
 import type { Event } from '#lambda/event/api/event.api.js';
 import { EVENT_COLLECTION } from '#lambda/event/event.js';
 import {
@@ -12,6 +13,7 @@ import {
   LogAsyncEstimatedTime,
   UpdateAction,
 } from '#lambda/util/decorator.js';
+import { hasId } from '#lambda/util/hasId.js';
 
 export const EVENTS_USER_COLLECTION = 'events_users';
 
@@ -55,7 +57,14 @@ export class EventsUserUpdator {
       return;
     }
 
-    const byEvent = await EventsUserUpdator.fetchByEvent(eventIds);
+    const studentIds = await getStudentIds(mongo);
+
+    const byEvent = await EventsUserUpdator.fetchByEvent(eventIds).then(
+      (eventsUsers) =>
+        eventsUsers.filter((eventsUser) =>
+          hasId(studentIds, eventsUser.user.id),
+        ),
+    );
 
     await mongo.upsertManyById(EVENTS_USER_COLLECTION, byEvent);
     await mongo.setCollectionUpdatedAt(EVENTS_USER_COLLECTION, end);

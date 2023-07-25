@@ -1,5 +1,4 @@
-import type { CampusUser } from '#lambda/campusUser/api/campusUser.api.js';
-import { CAMPUS_USER_COLLECTION } from '#lambda/campusUser/campusUser.js';
+import { CampusUserUpdator } from '#lambda/campusUser/campusUser.js';
 import {
   CURSUS_USER_EP,
   CursusUser,
@@ -15,6 +14,7 @@ import {
   LogAsyncEstimatedTime,
   UpdateAction,
 } from '#lambda/util/decorator.js';
+import { hasId } from '#lambda/util/hasId.js';
 
 export const CURSUS_USER_COLLECTION = 'cursus_users';
 
@@ -54,9 +54,18 @@ export class CursusUserUpdator {
   ): Promise<void> {
     const start = await mongo.getCollectionUpdatedAt(CURSUS_USER_COLLECTION);
 
+    const transferIds = CampusUserUpdator.getTransferIds();
+
+    // 사실 cursus user 에선 transfer 한 유저들의 데이터가 나오진 않음.
+    // 만에하나 api 가 변경되는 경우를 대비하기 위함.
     const cursusChanged = await CursusUserUpdator.fetchCursusChanged(
       start,
       end,
+    ).then((cursusUsers) =>
+      cursusUsers.filter(
+        (cursusUser) =>
+          isStudent(cursusUser) && !hasId(transferIds, cursusUser.user.id),
+      ),
     );
 
     await mongo.upsertManyById(CURSUS_USER_COLLECTION, cursusChanged);
@@ -72,33 +81,23 @@ export class CursusUserUpdator {
       CURSUS_USER_EP.CURSUS_CHANGED(start, end),
     );
 
-    return parseCursusUsers(cursusUserDtos).filter(isStudent);
+    return parseCursusUsers(cursusUserDtos);
   }
 
   @UpdateAction
   @LogAsyncEstimatedTime
   private static async updateActivated(mongo: LambdaMongo): Promise<void> {
-    const transferedIds = await mongo
-      .db()
-      .collection(CAMPUS_USER_COLLECTION)
-      .aggregate<CampusUser & { cursus_users: CursusUser[] }>()
-      .lookup({
-        from: CURSUS_USER_COLLECTION,
-        localField: 'userId',
-        foreignField: 'user.id',
-        as: 'cursus_users',
-      })
-      .match({ cursus_users: { $not: { $size: 0 } } })
-      .map((doc) => doc.userId)
-      .toArray();
+    const transferIds = CampusUserUpdator.getTransferIds();
 
-    const activated = await CursusUserUpdator.fetchActivated();
-    const transfered = await CursusUserUpdator.fetchTransfered(transferedIds);
+    const activated = await CursusUserUpdator.fetchActivated().then(
+      (cursusUsers) =>
+        cursusUsers.filter(
+          (cursusUser) =>
+            isStudent(cursusUser) && !hasId(transferIds, cursusUser.user.id),
+        ),
+    );
 
-    await mongo.upsertManyById(CURSUS_USER_COLLECTION, [
-      ...activated,
-      ...transfered,
-    ]);
+    await mongo.upsertManyById(CURSUS_USER_COLLECTION, activated);
 
     // todo: 적당한 위치 찾아주기. 현재 시점에선 cursus user의 업데이트 성공을 알려주고 있지 않기
     // 때문에, 이런 조치가 필요합니다.
@@ -116,17 +115,6 @@ export class CursusUserUpdator {
     const cursusUserDtos = await fetchAllPages(CURSUS_USER_EP.ACTIVATED());
 
     return parseCursusUsers(cursusUserDtos).filter(isStudent);
-  }
-
-  @FetchApiAction
-  private static async fetchTransfered(
-    userIds: number[],
-  ): Promise<CursusUser[]> {
-    const cursusUserDtos = await fetchAllPages(
-      CURSUS_USER_EP.TRANSFERED(userIds),
-    );
-
-    return parseCursusUsers(cursusUserDtos);
   }
 }
 

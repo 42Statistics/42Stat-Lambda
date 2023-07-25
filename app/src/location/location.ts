@@ -1,4 +1,4 @@
-import { CURSUS_USER_COLLECTION } from '#lambda/cursusUser/cursusUser.js';
+import { getStudentIds } from '#lambda/cursusUser/cursusUser.js';
 import {
   LOCATION_EP,
   Location,
@@ -12,6 +12,7 @@ import {
   LogAsyncEstimatedTime,
   UpdateAction,
 } from '#lambda/util/decorator.js';
+import { hasId } from '#lambda/util/hasId.js';
 
 export const LOCATION_COLLECTION = 'locations';
 
@@ -41,8 +42,6 @@ export class LocationUpdator {
     await LocationUpdator.updateEnded(mongo, start, end);
 
     await mongo.setCollectionUpdatedAt(LOCATION_COLLECTION, end);
-
-    await LocationUpdator.pruneNoCursusUser(mongo);
   }
 
   @UpdateAction
@@ -52,10 +51,17 @@ export class LocationUpdator {
     start: Date,
     end: Date,
   ): Promise<void> {
-    const ongoing = await LocationUpdator.fetchOngoing(start, end);
-    const ongoingInCluster = ongoing.filter(isCluster);
+    const studentIds = await getStudentIds(mongo);
 
-    await mongo.upsertManyById(LOCATION_COLLECTION, ongoingInCluster);
+    const ongoing = await LocationUpdator.fetchOngoing(start, end).then(
+      (locations) =>
+        locations.filter(
+          (location) =>
+            isCluster(location) && hasId(studentIds, location.user.id),
+        ),
+    );
+
+    await mongo.upsertManyById(LOCATION_COLLECTION, ongoing);
   }
 
   @FetchApiAction
@@ -75,7 +81,16 @@ export class LocationUpdator {
     start: Date,
     end: Date,
   ): Promise<void> {
-    const ended = await LocationUpdator.fetchEnded(start, end);
+    const studentIds = await getStudentIds(mongo);
+
+    const ended = await LocationUpdator.fetchEnded(start, end).then(
+      (locations) =>
+        locations.filter(
+          (location) =>
+            isCluster(location) && hasId(studentIds, location.user.id),
+        ),
+    );
+
     const endedInCluster = ended.filter(isCluster);
 
     await mongo.upsertManyById(LOCATION_COLLECTION, endedInCluster);
@@ -86,30 +101,5 @@ export class LocationUpdator {
     const locationDtos = await fetchAllPages(LOCATION_EP.ENDED(start, end));
 
     return parseLocations(locationDtos);
-  }
-
-  @UpdateAction
-  private static async pruneNoCursusUser(mongo: LambdaMongo): Promise<void> {
-    const userIds = await mongo
-      .db()
-      .collection(LOCATION_COLLECTION)
-      .aggregate<{ id: number }>()
-      .group({ _id: '$user.id' })
-      .lookup({
-        from: CURSUS_USER_COLLECTION,
-        localField: '_id',
-        foreignField: 'user.id',
-        as: 'cursus_users',
-      })
-      .match({ cursus_users: { $size: 0 } })
-      .project<{ _id: number }>({ cursus_users: 0 })
-      .map((doc) => doc._id)
-      .toArray();
-
-    if (!userIds.length) {
-      return;
-    }
-
-    await mongo.pruneMany(LOCATION_COLLECTION, { 'user.id': { $in: userIds } });
   }
 }

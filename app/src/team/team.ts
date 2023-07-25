@@ -1,8 +1,6 @@
+import { CampusUserUpdator } from '#lambda/campusUser/campusUser.js';
 import { HYULIM } from '#lambda/cursusUser/api/cursusUser.api.js';
-import {
-  CURSUS_USER_COLLECTION,
-  getStudentIds,
-} from '#lambda/cursusUser/cursusUser.js';
+import { getStudentIds } from '#lambda/cursusUser/cursusUser.js';
 import { LambdaMongo } from '#lambda/mongodb/mongodb.js';
 import { ProjectsUserUpdator } from '#lambda/projectsUser/projectsUser.js';
 import { fetchAllPages } from '#lambda/request/fetchAllPages.js';
@@ -14,6 +12,7 @@ import {
   LogAsyncEstimatedTime,
   UpdateAction,
 } from '#lambda/util/decorator.js';
+import { hasId } from '#lambda/util/hasId.js';
 
 export const TEAM_COLLECTION = 'teams';
 
@@ -40,10 +39,9 @@ export class TeamUpdator {
    */
   static async update(mongo: LambdaMongo, end: Date): Promise<void> {
     await TeamUpdator.updateUpdated(mongo, end);
+
     await TeamUpdator.deleteUnregistered(mongo);
     await TeamUpdator.updateGiveUps(mongo);
-
-    await TeamUpdator.pruneNoCursusUser(mongo);
   }
 
   @UpdateAction
@@ -54,14 +52,18 @@ export class TeamUpdator {
   ): Promise<void> {
     const start = await mongo.getCollectionUpdatedAt(TEAM_COLLECTION);
 
-    const updated = await TeamUpdator.fetchUpdated(start, end);
     const studentIds = await getStudentIds(mongo);
+    const transferIds = CampusUserUpdator.getTransferIds();
 
-    const updatedStudentTeams = updated.filter((team) =>
-      studentIds.find((id) => id === team.users[0].id),
+    const updated = await TeamUpdator.fetchUpdated(start, end).then((teams) =>
+      teams.filter(
+        ({ users }) =>
+          users.find((user) => hasId([...studentIds, HYULIM], user.id)) &&
+          users.find((user) => hasId(transferIds, user.id)) === undefined,
+      ),
     );
 
-    await mongo.upsertManyById(TEAM_COLLECTION, updatedStudentTeams);
+    await mongo.upsertManyById(TEAM_COLLECTION, updated);
     await mongo.setCollectionUpdatedAt(TEAM_COLLECTION, end);
   }
 
@@ -70,38 +72,6 @@ export class TeamUpdator {
     const teamDtos = await fetchAllPages(TEAM_EP.UPDATED(start, end));
 
     return parseTeams(teamDtos);
-  }
-
-  @UpdateAction
-  private static async pruneNoCursusUser(mongo: LambdaMongo): Promise<void> {
-    const teamIds = await mongo
-      .db()
-      .collection(TEAM_COLLECTION)
-      .aggregate<{ id: number }>()
-      .lookup({
-        from: CURSUS_USER_COLLECTION,
-        localField: 'users.id',
-        foreignField: 'user.id',
-        as: 'cursus_users',
-      })
-      .match({
-        cursus_users: { $size: 0 },
-        $or: [
-          { users: { $not: { $size: 1 } } },
-          {
-            $and: [{ 'users.id': { $ne: HYULIM } }, { users: { $size: 1 } }],
-          },
-        ],
-      })
-      .project<{ id: number }>({ id: 1 })
-      .map((doc) => doc.id)
-      .toArray();
-
-    if (!teamIds.length) {
-      return;
-    }
-
-    await mongo.pruneMany(TEAM_COLLECTION, { id: { $in: teamIds } });
   }
 
   @At_10_Action

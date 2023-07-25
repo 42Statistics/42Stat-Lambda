@@ -47,6 +47,7 @@ const main = async (): Promise<void> => {
     const end = new Date();
 
     const updators: LambdaUpdator[] = [
+      // todo: 현재는 transfer 대응을 위해 무조건 campus user 부터 갱신해야 함.
       CampusUserUpdator,
       ProjectsUserUpdator,
       TeamUpdator,

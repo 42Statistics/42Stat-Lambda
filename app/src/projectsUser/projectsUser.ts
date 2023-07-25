@@ -1,3 +1,4 @@
+import { CampusUserUpdator } from '#lambda/campusUser/campusUser.js';
 import { FT_CURSUS_ID } from '#lambda/cursusUser/api/cursusUser.api.js';
 import { getStudentIds } from '#lambda/cursusUser/cursusUser.js';
 import { LambdaMongo } from '#lambda/mongodb/mongodb.js';
@@ -12,6 +13,7 @@ import {
   LogAsyncEstimatedTime,
   UpdateAction,
 } from '#lambda/util/decorator.js';
+import { hasId } from '#lambda/util/hasId.js';
 
 export const PROJECTS_USER_COLLECTION = 'projects_users';
 
@@ -41,16 +43,20 @@ export class ProjectsUserUpdator {
   ): Promise<void> {
     const start = await mongo.getCollectionUpdatedAt(PROJECTS_USER_COLLECTION);
 
-    const updated = await ProjectsUserUpdator.fetchUpdated(start, end);
     const studentIds = await getStudentIds(mongo);
+    const transferIds = CampusUserUpdator.getTransferIds();
 
-    const validUpdated = updated.filter(
-      (projectsUser) =>
-        studentIds.find((id) => id === projectsUser.user.id) &&
-        projectsUser.cursusIds[0] === FT_CURSUS_ID,
+    const updated = await ProjectsUserUpdator.fetchUpdated(start, end).then(
+      (projectsUsers) =>
+        projectsUsers.filter(
+          (projectsUser) =>
+            hasId(studentIds, projectsUser.user.id) &&
+            !hasId(transferIds, projectsUser.user.id) &&
+            projectsUser.cursusIds[0] === FT_CURSUS_ID,
+        ),
     );
 
-    await mongo.upsertManyById(PROJECTS_USER_COLLECTION, validUpdated);
+    await mongo.upsertManyById(PROJECTS_USER_COLLECTION, updated);
     await mongo.setCollectionUpdatedAt(PROJECTS_USER_COLLECTION, end);
   }
 
@@ -74,8 +80,8 @@ export class ProjectsUserUpdator {
   ): Promise<void> {
     const projectsUserIds = await mongo
       .db()
-      .collection(PROJECTS_USER_COLLECTION)
-      .find<ProjectsUser>({
+      .collection<ProjectsUser>(PROJECTS_USER_COLLECTION)
+      .find<{ id: number }>({
         'teams.id': { $in: teamIds },
       })
       .map((doc) => doc.id)
@@ -88,6 +94,7 @@ export class ProjectsUserUpdator {
         i,
         Math.min(projectsUserIds.length, i + 100),
       );
+
       const projectsUsers = await this.fetchProjectsUsersByIds(currIds);
 
       updatedProjectsUsers.push(...projectsUsers);

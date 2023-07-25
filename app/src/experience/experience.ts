@@ -230,40 +230,46 @@ export class ExperienceUpdator {
           projectPrevExperience,
         );
 
-        const levelWithoutBonus = calculateLevel(
-          totalPrevExpereince + expWithoutBonus,
-          levelTable,
-        );
+        try {
+          const levelWithoutBonus = calculateLevel(
+            totalPrevExpereince + expWithoutBonus,
+            levelTable,
+          );
 
-        const levelWithBonus = calculateLevel(
-          totalPrevExpereince + expWithBonus,
-          levelTable,
-        );
+          const levelWithBonus = calculateLevel(
+            totalPrevExpereince + expWithBonus,
+            levelTable,
+          );
 
-        // cursus user update
-        if (!projectsUser.cursusUser) {
-          throw new LambdaError('data consistency', projectsUser);
-        }
+          // cursus user update
+          if (!projectsUser.cursusUser) {
+            throw new LambdaError('data consistency', projectsUser);
+          }
 
-        const experience =
-          Math.abs(levelWithBonus - projectsUser.cursusUser.level) <
-          Math.abs(levelWithoutBonus - projectsUser.cursusUser.level)
-            ? expWithBonus
-            : expWithoutBonus;
+          const experience =
+            Math.abs(levelWithBonus - projectsUser.cursusUser.level) <
+            Math.abs(levelWithoutBonus - projectsUser.cursusUser.level)
+              ? expWithBonus
+              : expWithoutBonus;
 
-        if (!experience) {
+          if (!experience) {
+            return acc;
+          }
+
+          acc.push({
+            userId: projectsUser.user.id,
+            cursusId: projectsUser.cursusIds[0],
+            createdAt: projectsUser.markedAt,
+            experience,
+            project: projectsUser.project,
+          });
+
           return acc;
+        } catch (e) {
+          console.error(projectsUser.user.id);
+          console.log(currMark);
+          throw e;
         }
-
-        acc.push({
-          userId: projectsUser.user.id,
-          cursusId: projectsUser.cursusIds[0],
-          createdAt: projectsUser.markedAt,
-          experience,
-          project: projectsUser.project,
-        });
-
-        return acc;
       },
       [],
     );
