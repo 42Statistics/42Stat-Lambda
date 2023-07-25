@@ -12,6 +12,7 @@
 
 - in_progess 상태의 팀을 unregister 하면 팀이 삭제가 되어버림.
 - waiting_for_correction 상태의 팀이 giveup 하면 팀이 updated_at 갱신 없이 status 가 finished 로 바뀜
+  - 해당 경우의 갱신 처리가 api 서버에서도 상당히 늦게 이루어 지는 듯 함...
 
 ---
 
