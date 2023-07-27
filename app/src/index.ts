@@ -5,7 +5,7 @@ import { EventUpdator } from '#lambda/event/event.js';
 import { EventsUserUpdator } from '#lambda/eventsUser/eventsUser.js';
 import { ExamUpdator } from '#lambda/exam/exam.js';
 import { LocationUpdator } from '#lambda/location/location.js';
-import { LambdaMongo, withMongo } from '#lambda/mongodb/mongodb.js';
+import { LambdaMongo } from '#lambda/mongodb/mongodb.js';
 import { ProjectUpdator } from '#lambda/project/project.js';
 import { ProjectSessionUpdator } from '#lambda/projectSession/projectSession.js';
 import { ProjectSessionsSkillUpdator } from '#lambda/projectSessionsSkill/projectSessionsSkill.js';
@@ -44,7 +44,7 @@ const main = async (): Promise<void> => {
   const mongoUrl = process.env.MONGODB_URL;
   assertEnvExist(mongoUrl);
 
-  await withMongo(mongoUrl, async (mongo) => {
+  await LambdaMongo.withMongo(mongoUrl, async (mongo) => {
     const end = new Date();
 
     const updators: LambdaUpdator[] = [

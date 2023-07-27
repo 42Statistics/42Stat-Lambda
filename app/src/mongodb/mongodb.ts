@@ -47,28 +47,28 @@ type LogUpdatedAt =
   | typeof PROJECT_SESSIONS_SKILL_COLLECTION
   | typeof USER_COLLECTION;
 
-export const withMongo = async (
-  url: string,
-  callback: (mogno: LambdaMongo) => unknown,
-): Promise<void> => {
-  const mongo = await LambdaMongo.createInstance(url);
-
-  await callback(mongo);
-
-  await mongo.closeConnection();
-};
-
 export class LambdaMongo {
-  static createInstance = async (
+  private static async createInstance(
     url: string,
     mongoOptions?: MongoClientOptions,
-  ): Promise<LambdaMongo> => {
+  ): Promise<LambdaMongo> {
     const client = new MongoClient(url, mongoOptions);
 
     await client.connect();
 
     return new LambdaMongo(client);
-  };
+  }
+
+  static async withMongo(
+    url: string,
+    callback: (mogno: LambdaMongo) => unknown,
+  ): Promise<void> {
+    const mongo = await LambdaMongo.createInstance(url);
+
+    await callback(mongo);
+
+    await mongo.closeConnection();
+  }
 
   private readonly client: MongoClient;
   private readonly mode: 'prod' | 'dev';
