@@ -13,15 +13,16 @@ import type { QUESTS_USER_COLLECTION } from '#lambda/questsUser/questsUser.js';
 import type { SCALE_TEAM_COLLECTION } from '#lambda/scaleTeam/scaleTeam.js';
 import type { SKILL_COLLECTION } from '#lambda/skill/skill.js';
 import type { TEAM_COLLECTION } from '#lambda/team/team.js';
+import type { USER_COLLECTION } from '#lambda/user/user.js';
 import { Bound } from '#lambda/util/decorator.js';
 import { LambdaError } from '#lambda/util/error.js';
 import {
+  MongoClient,
   type Db,
   type DbOptions,
   type DeleteResult,
   type Document,
   type Filter,
-  MongoClient,
   type MongoClientOptions,
 } from 'mongodb';
 
@@ -43,7 +44,8 @@ type LogUpdatedAt =
   | typeof COALITIONS_USER_COLLECTION
   | typeof PROJECT_SESSION_COLLECTION
   | typeof SKILL_COLLECTION
-  | typeof PROJECT_SESSIONS_SKILL_COLLECTION;
+  | typeof PROJECT_SESSIONS_SKILL_COLLECTION
+  | typeof USER_COLLECTION;
 
 export const withMongo = async (
   url: string,
@@ -80,6 +82,27 @@ export class LambdaMongo {
   @Bound
   db(dbName?: string, options?: DbOptions): Db {
     return this.client.db(dbName, options);
+  }
+
+  /**
+   *
+   * @description
+   * collection 의 updatedAt 기록을 기반으로 callback 을 실행시킨 후, 인자로 제공된 end 로
+   * updatedAt 의 값을 갱신합니다.
+   */
+  @Bound
+  @MongoAction
+  withCollectionUpdatedAt(
+    collection: LogUpdatedAt,
+    callback: (start: Date, end: Date) => Promise<void>,
+  ): (end: Date) => Promise<void> {
+    return async (end: Date): Promise<void> => {
+      const start = await this.getCollectionUpdatedAt(collection);
+
+      await callback(start, end);
+
+      await this.setCollectionUpdatedAt(collection, end);
+    };
   }
 
   @Bound
