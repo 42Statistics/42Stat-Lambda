@@ -1,5 +1,5 @@
-import { userSchema } from '#lambda/cursusUser/api/cursusUser.schema.js';
 import { eventSchema, eventSchema_ } from '#lambda/event/api/event.schema.js';
+import { userSchema } from '#lambda/user/api/user.schema.js';
 import { z } from 'zod';
 
 export const eventsUserSchema = z.object({

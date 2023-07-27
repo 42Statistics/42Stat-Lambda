@@ -1,8 +1,8 @@
-import { userSchema } from '#lambda/cursusUser/api/cursusUser.schema.js';
 import {
   scaleTeamBaseSchema,
   scaleTeamBaseSchema_,
 } from '#lambda/scaleTeam/api/scaleTeam.schema.base.js';
+import { userSchema } from '#lambda/user/api/user.schema.js';
 import { z } from 'zod';
 
 const teamUserSchema = userSchema

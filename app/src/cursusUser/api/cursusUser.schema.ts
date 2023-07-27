@@ -1,45 +1,5 @@
+import { userSchema } from '#lambda/user/api/user.schema.js';
 import { z } from 'zod';
-
-const userImageSchema = z.object({
-  link: z.string().nullable(),
-  versions: z.object({
-    large: z.string().nullable(),
-    medium: z.string().nullable(),
-    small: z.string().nullable(),
-    micro: z.string().nullable(),
-  }),
-});
-
-/**
- *
- * @description
- * passthrough 로 처리했어야 하는데, 실수로 누락된 부분이 있습니다만, 웬만해선 필요 없지 싶습니다.
- * usual_first_name, usual_last_name
- */
-export const userSchema = z.object({
-  id: z.number(),
-  email: z.string(),
-  login: z.string(),
-  firstName: z.string(),
-  lastName: z.string(),
-  url: z.string(),
-  displayname: z.string(),
-  kind: z.string(),
-  image: userImageSchema.nullable(),
-  'staff?': z.boolean(),
-  correctionPoint: z.number(),
-  poolMonth: z.string().nullable(),
-  poolYear: z.string().nullable(),
-  location: z.string().nullable(),
-  wallet: z.number(),
-  anonymizeDate: z.coerce.date().nullable(),
-  dataErasureDate: z.coerce.date().nullable(),
-  createdAt: z.coerce.date(),
-  updatedAt: z.coerce.date(),
-  alumnizedAt: z.coerce.date().nullable(),
-  'alumni?': z.boolean(),
-  'active?': z.boolean(),
-});
 
 export const cursusSchema = z.object({
   id: z.number(),

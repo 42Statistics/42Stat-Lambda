@@ -1,4 +1,3 @@
-import { userSchema } from '#lambda/cursusUser/api/cursusUser.schema.js';
 import { languageSchema } from '#lambda/language/api/language.schema.js';
 import {
   flagSchema,
@@ -8,6 +7,7 @@ import {
   teamBaseSchema,
   teamBaseSchema_,
 } from '#lambda/team/api/team.schema.js';
+import { userSchema } from '#lambda/user/api/user.schema.js';
 import { z } from 'zod';
 
 const scaleSchema = z.object({
