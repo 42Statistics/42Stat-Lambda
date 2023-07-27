@@ -7,7 +7,7 @@ import {
   UpdateAction,
 } from '#lambda/util/decorator.js';
 
-export const EXAMS_COLLECTION = 'exams';
+export const EXAM_COLLECTION = 'exams';
 
 // eslint-disable-next-line
 export class ExamUpdator {
@@ -32,22 +32,25 @@ export class ExamUpdator {
     mongo: LambdaMongo,
     end: Date,
   ): Promise<void> {
-    const start = await mongo.getCollectionUpdatedAt(EXAMS_COLLECTION);
+    await mongo.withCollectionUpdatedAt({
+      end,
+      collection: EXAM_COLLECTION,
+      callback: async (start, end) => {
+        const created = await ExamUpdator.fetchCreated(start, end);
 
-    const created = await ExamUpdator.fetchCreated(start, end);
+        // bug resolving start
 
-    // bug resolving start
+        const createdMap = new Map<number, Exam>();
 
-    const createdMap = new Map<number, Exam>();
+        created.forEach((exam) => createdMap.set(exam.id, exam));
 
-    created.forEach((exam) => createdMap.set(exam.id, exam));
+        const createdFixed = [...createdMap.values()];
 
-    const createdFixed = [...createdMap.values()];
+        // bug resolving end
 
-    // bug resolving end
-
-    await mongo.upsertManyById(EXAMS_COLLECTION, createdFixed);
-    await mongo.setCollectionUpdatedAt(EXAMS_COLLECTION, end);
+        await mongo.upsertManyById(EXAM_COLLECTION, createdFixed);
+      },
+    });
   }
 
   @FetchApiAction

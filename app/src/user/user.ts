@@ -33,11 +33,15 @@ export class UserUpdator {
     mongo: LambdaMongo,
     end: Date,
   ): Promise<void> {
-    await mongo.withCollectionUpdatedAt(USER_COLLECTION, async (start, end) => {
-      const updated = await UserUpdator.fetchUpdated(start, end);
+    await mongo.withCollectionUpdatedAt({
+      end,
+      collection: USER_COLLECTION,
+      callback: async (start, end) => {
+        const updated = await UserUpdator.fetchUpdated(start, end);
 
-      await mongo.upsertManyById(USER_COLLECTION, updated);
-    })(end);
+        await mongo.upsertManyById(USER_COLLECTION, updated);
+      },
+    });
   }
 
   @FetchApiAction

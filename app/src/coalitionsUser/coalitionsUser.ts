@@ -36,14 +36,15 @@ export class CoalitionsUserUpdator {
     mongo: LambdaMongo,
     end: Date,
   ): Promise<void> {
-    const start = await mongo.getCollectionUpdatedAt(
-      COALITIONS_USER_COLLECTION,
-    );
+    await mongo.withCollectionUpdatedAt({
+      end,
+      collection: COALITIONS_USER_COLLECTION,
+      callback: async (start, end) => {
+        const created = await CoalitionsUserUpdator.fetchCreated(start, end);
 
-    const created = await CoalitionsUserUpdator.fetchCreated(start, end);
-
-    await mongo.upsertManyById(COALITIONS_USER_COLLECTION, created);
-    await mongo.setCollectionUpdatedAt(COALITIONS_USER_COLLECTION, end);
+        await mongo.upsertManyById(COALITIONS_USER_COLLECTION, created);
+      },
+    });
   }
 
   @FetchApiAction

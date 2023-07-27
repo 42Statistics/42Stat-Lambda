@@ -44,30 +44,33 @@ export class EventsUserUpdator {
     mongo: LambdaMongo,
     end: Date,
   ): Promise<void> {
-    const start = await mongo.getCollectionUpdatedAt(EVENTS_USER_COLLECTION);
+    await mongo.withCollectionUpdatedAt({
+      end,
+      collection: EVENTS_USER_COLLECTION,
+      callback: async (start, end) => {
+        const eventIds = await mongo
+          .db()
+          .collection<Event>(EVENT_COLLECTION)
+          .find({ endAt: { $gte: start, $lt: end } })
+          .map((event) => event.id)
+          .toArray();
 
-    const eventIds = await mongo
-      .db()
-      .collection<Event>(EVENT_COLLECTION)
-      .find({ endAt: { $gte: start, $lt: end } })
-      .map((event) => event.id)
-      .toArray();
+        if (!eventIds.length) {
+          return;
+        }
 
-    if (!eventIds.length) {
-      return;
-    }
+        const studentIds = await getStudentIds(mongo);
 
-    const studentIds = await getStudentIds(mongo);
+        const byEvent = await EventsUserUpdator.fetchByEvent(eventIds).then(
+          (eventsUsers) =>
+            eventsUsers.filter((eventsUser) =>
+              hasId(studentIds, eventsUser.user.id),
+            ),
+        );
 
-    const byEvent = await EventsUserUpdator.fetchByEvent(eventIds).then(
-      (eventsUsers) =>
-        eventsUsers.filter((eventsUser) =>
-          hasId(studentIds, eventsUser.user.id),
-        ),
-    );
-
-    await mongo.upsertManyById(EVENTS_USER_COLLECTION, byEvent);
-    await mongo.setCollectionUpdatedAt(EVENTS_USER_COLLECTION, end);
+        await mongo.upsertManyById(EVENTS_USER_COLLECTION, byEvent);
+      },
+    });
   }
 
   @FetchApiAction

@@ -34,14 +34,15 @@ export class ProjectSessionUpdator {
     mongo: LambdaMongo,
     end: Date,
   ): Promise<void> {
-    const start = await mongo.getCollectionUpdatedAt(
-      PROJECT_SESSION_COLLECTION,
-    );
+    await mongo.withCollectionUpdatedAt({
+      end,
+      collection: PROJECT_SESSION_COLLECTION,
+      callback: async (start, end) => {
+        const updated = await ProjectSessionUpdator.fetchUpdated(start, end);
 
-    const updated = await ProjectSessionUpdator.fetchUpdated(start, end);
-
-    await mongo.upsertManyById(PROJECT_SESSION_COLLECTION, updated);
-    await mongo.setCollectionUpdatedAt(PROJECT_SESSION_COLLECTION, end);
+        await mongo.upsertManyById(PROJECT_SESSION_COLLECTION, updated);
+      },
+    });
   }
 
   @FetchApiAction

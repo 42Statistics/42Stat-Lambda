@@ -36,14 +36,17 @@ export class ProjectUpdator {
     mongo: LambdaMongo,
     end: Date,
   ): Promise<void> {
-    const start = await mongo.getCollectionUpdatedAt(PROJECT_COLLECTION);
+    await mongo.withCollectionUpdatedAt({
+      end,
+      collection: PROJECT_COLLECTION,
+      callback: async (start, end) => {
+        await ProjectUpdator.fetchUpdated(start, end);
 
-    await ProjectUpdator.fetchUpdated(start, end);
+        const updated = await ProjectUpdator.fetchUpdated(start, end);
 
-    const updated = await ProjectUpdator.fetchUpdated(start, end);
-
-    await mongo.upsertManyById(PROJECT_COLLECTION, updated);
-    await mongo.setCollectionUpdatedAt(PROJECT_COLLECTION, end);
+        await mongo.upsertManyById(PROJECT_COLLECTION, updated);
+      },
+    });
   }
 
   @FetchApiAction

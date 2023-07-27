@@ -36,12 +36,15 @@ export class ScaleTeamUpdator {
     mongo: LambdaMongo,
     end: Date,
   ): Promise<void> {
-    const start = await mongo.getCollectionUpdatedAt(SCALE_TEAM_COLLECTION);
+    await mongo.withCollectionUpdatedAt({
+      end,
+      collection: SCALE_TEAM_COLLECTION,
+      callback: async (start, end) => {
+        const filled = await ScaleTeamUpdator.fetchFilled(start, end);
 
-    const filled = await ScaleTeamUpdator.fetchFilled(start, end);
-
-    await mongo.upsertManyById(SCALE_TEAM_COLLECTION, filled);
-    await mongo.setCollectionUpdatedAt(SCALE_TEAM_COLLECTION, end);
+        await mongo.upsertManyById(SCALE_TEAM_COLLECTION, filled);
+      },
+    });
   }
 
   @FetchApiAction

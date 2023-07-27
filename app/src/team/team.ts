@@ -50,21 +50,25 @@ export class TeamUpdator {
     mongo: LambdaMongo,
     end: Date,
   ): Promise<void> {
-    const start = await mongo.getCollectionUpdatedAt(TEAM_COLLECTION);
+    await mongo.withCollectionUpdatedAt({
+      end,
+      collection: TEAM_COLLECTION,
+      callback: async (start, end) => {
+        const studentIds = await getStudentIds(mongo);
+        const transferIds = CampusUserUpdator.getTransferIds();
 
-    const studentIds = await getStudentIds(mongo);
-    const transferIds = CampusUserUpdator.getTransferIds();
+        const updated = await TeamUpdator.fetchUpdated(start, end).then(
+          (teams) =>
+            teams.filter(
+              ({ users }) =>
+                users.find((user) => hasId([...studentIds, HYULIM], user.id)) &&
+                users.find((user) => hasId(transferIds, user.id)) === undefined,
+            ),
+        );
 
-    const updated = await TeamUpdator.fetchUpdated(start, end).then((teams) =>
-      teams.filter(
-        ({ users }) =>
-          users.find((user) => hasId([...studentIds, HYULIM], user.id)) &&
-          users.find((user) => hasId(transferIds, user.id)) === undefined,
-      ),
-    );
-
-    await mongo.upsertManyById(TEAM_COLLECTION, updated);
-    await mongo.setCollectionUpdatedAt(TEAM_COLLECTION, end);
+        await mongo.upsertManyById(TEAM_COLLECTION, updated);
+      },
+    });
   }
 
   @FetchApiAction

@@ -52,24 +52,27 @@ export class CursusUserUpdator {
     mongo: LambdaMongo,
     end: Date,
   ): Promise<void> {
-    const start = await mongo.getCollectionUpdatedAt(CURSUS_USER_COLLECTION);
-
-    const transferIds = CampusUserUpdator.getTransferIds();
-
-    // 사실 cursus user 에선 transfer 한 유저들의 데이터가 나오진 않음.
-    // 만에하나 api 가 변경되는 경우를 대비하기 위함.
-    const cursusChanged = await CursusUserUpdator.fetchCursusChanged(
-      start,
+    await mongo.withCollectionUpdatedAt({
       end,
-    ).then((cursusUsers) =>
-      cursusUsers.filter(
-        (cursusUser) =>
-          isStudent(cursusUser) && !hasId(transferIds, cursusUser.user.id),
-      ),
-    );
+      collection: CURSUS_USER_COLLECTION,
+      callback: async (start, end) => {
+        const transferIds = CampusUserUpdator.getTransferIds();
 
-    await mongo.upsertManyById(CURSUS_USER_COLLECTION, cursusChanged);
-    await mongo.setCollectionUpdatedAt(CURSUS_USER_COLLECTION, end);
+        // 사실 cursus user 에선 transfer 한 유저들의 데이터가 나오진 않음.
+        // 만에하나 api 가 변경되는 경우를 대비하기 위함.
+        const cursusChanged = await CursusUserUpdator.fetchCursusChanged(
+          start,
+          end,
+        ).then((cursusUsers) =>
+          cursusUsers.filter(
+            (cursusUser) =>
+              isStudent(cursusUser) && !hasId(transferIds, cursusUser.user.id),
+          ),
+        );
+
+        await mongo.upsertManyById(CURSUS_USER_COLLECTION, cursusChanged);
+      },
+    });
   }
 
   @FetchApiAction

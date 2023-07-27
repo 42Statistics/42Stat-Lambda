@@ -21,21 +21,26 @@ export class SkillUpdator {
    * 필요 요청 수: U(1)
    * 예상 소요 시간: 3초
    */
-  static async update(mongo: LambdaMongo): Promise<void> {
-    await SkillUpdator.updateUpdated(mongo);
+  static async update(mongo: LambdaMongo, end: Date): Promise<void> {
+    await SkillUpdator.updateUpdated(mongo, end);
   }
 
   @At_00_Action
   @UpdateAction
   @LogAsyncEstimatedTime
-  private static async updateUpdated(mongo: LambdaMongo): Promise<void> {
-    const start = await mongo.getCollectionUpdatedAt(SKILL_COLLECTION);
-    const end = new Date();
+  private static async updateUpdated(
+    mongo: LambdaMongo,
+    end: Date,
+  ): Promise<void> {
+    await mongo.withCollectionUpdatedAt({
+      end,
+      collection: SKILL_COLLECTION,
+      callback: async (start, end) => {
+        const updated = await SkillUpdator.fetchUpdated(start, end);
 
-    const updated = await SkillUpdator.fetchUpdated(start, end);
-
-    await mongo.upsertManyById(SKILL_COLLECTION, updated);
-    await mongo.setCollectionUpdatedAt(SKILL_COLLECTION, end);
+        await mongo.upsertManyById(SKILL_COLLECTION, updated);
+      },
+    });
   }
 
   @FetchApiAction

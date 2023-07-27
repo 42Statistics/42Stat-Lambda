@@ -32,12 +32,15 @@ export class EventUpdator {
     mongo: LambdaMongo,
     end: Date,
   ): Promise<void> {
-    const start = await mongo.getCollectionUpdatedAt(EVENT_COLLECTION);
+    await mongo.withCollectionUpdatedAt({
+      end,
+      collection: EVENT_COLLECTION,
+      callback: async (start, end) => {
+        const updated = await EventUpdator.fetchUpdated(start, end);
 
-    const updated = await EventUpdator.fetchUpdated(start, end);
-
-    await mongo.upsertManyById(EVENT_COLLECTION, updated);
-    await mongo.setCollectionUpdatedAt(EVENT_COLLECTION, end);
+        await mongo.upsertManyById(EVENT_COLLECTION, updated);
+      },
+    });
   }
 
   @FetchApiAction

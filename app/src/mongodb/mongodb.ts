@@ -2,7 +2,7 @@ import type { COALITIONS_USER_COLLECTION } from '#lambda/coalitionsUser/coalitio
 import type { CURSUS_USER_COLLECTION } from '#lambda/cursusUser/cursusUser.js';
 import type { EVENT_COLLECTION } from '#lambda/event/event.js';
 import type { EVENTS_USER_COLLECTION } from '#lambda/eventsUser/eventsUser.js';
-import type { EXAMS_COLLECTION } from '#lambda/exam/exam.js';
+import type { EXAM_COLLECTION } from '#lambda/exam/exam.js';
 import type { EXPERIENCE_USER_COLLECTION } from '#lambda/experience/experience.js';
 import type { LOCATION_COLLECTION } from '#lambda/location/location.js';
 import type { PROJECT_COLLECTION } from '#lambda/project/project.js';
@@ -31,7 +31,7 @@ export const PRUNE_COLLECTION = 'prunes';
 
 type LogUpdatedAt =
   | typeof CURSUS_USER_COLLECTION
-  | typeof EXAMS_COLLECTION
+  | typeof EXAM_COLLECTION
   | typeof EXPERIENCE_USER_COLLECTION
   | typeof PROJECTS_USER_COLLECTION
   | typeof TEAM_COLLECTION
@@ -92,17 +92,20 @@ export class LambdaMongo {
    */
   @Bound
   @MongoAction
-  withCollectionUpdatedAt(
-    collection: LogUpdatedAt,
-    callback: (start: Date, end: Date) => Promise<void>,
-  ): (end: Date) => Promise<void> {
-    return async (end: Date): Promise<void> => {
-      const start = await this.getCollectionUpdatedAt(collection);
+  async withCollectionUpdatedAt({
+    end,
+    collection,
+    callback,
+  }: {
+    end: Date;
+    collection: LogUpdatedAt;
+    callback: (start: Date, end: Date) => Promise<void>;
+  }): Promise<void> {
+    const start = await this.getCollectionUpdatedAt(collection);
 
-      await callback(start, end);
+    await callback(start, end);
 
-      await this.setCollectionUpdatedAt(collection, end);
-    };
+    await this.setCollectionUpdatedAt(collection, end);
   }
 
   @Bound

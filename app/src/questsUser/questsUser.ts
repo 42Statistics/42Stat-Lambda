@@ -37,17 +37,19 @@ export class QuestsUserUpdator {
     mongo: LambdaMongo,
     end: Date,
   ): Promise<void> {
-    const start = await mongo.getCollectionUpdatedAt(QUESTS_USER_COLLECTION);
+    await mongo.withCollectionUpdatedAt({
+      end,
+      collection: QUESTS_USER_COLLECTION,
+      callback: async (start, end) => {
+        const updated = await QuestsUserUpdator.fetchUpdated(start, end);
+        const wildcard = await QuestsUserUpdator.fetchWildcard(start, end);
 
-    const updated = await QuestsUserUpdator.fetchUpdated(start, end);
-    const wildcard = await QuestsUserUpdator.fetchWildcard(start, end);
-
-    await mongo.upsertManyById(QUESTS_USER_COLLECTION, [
-      ...updated,
-      ...wildcard,
-    ]);
-
-    await mongo.setCollectionUpdatedAt(QUESTS_USER_COLLECTION, end);
+        await mongo.upsertManyById(QUESTS_USER_COLLECTION, [
+          ...updated,
+          ...wildcard,
+        ]);
+      },
+    });
   }
 
   @FetchApiAction

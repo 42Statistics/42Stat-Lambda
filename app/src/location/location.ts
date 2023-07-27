@@ -36,12 +36,14 @@ export class LocationUpdator {
    * 평소엔 1 ~ 2번으로 충분함.
    */
   static async update(mongo: LambdaMongo, end: Date): Promise<void> {
-    const start = await mongo.getCollectionUpdatedAt(LOCATION_COLLECTION);
-
-    await LocationUpdator.updateOngoing(mongo, start, end);
-    await LocationUpdator.updateEnded(mongo, start, end);
-
-    await mongo.setCollectionUpdatedAt(LOCATION_COLLECTION, end);
+    await mongo.withCollectionUpdatedAt({
+      end,
+      collection: LOCATION_COLLECTION,
+      callback: async (start, end) => {
+        await LocationUpdator.updateOngoing(mongo, start, end);
+        await LocationUpdator.updateEnded(mongo, start, end);
+      },
+    });
   }
 
   @UpdateAction

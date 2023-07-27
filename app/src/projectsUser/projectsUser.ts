@@ -41,23 +41,26 @@ export class ProjectsUserUpdator {
     mongo: LambdaMongo,
     end: Date,
   ): Promise<void> {
-    const start = await mongo.getCollectionUpdatedAt(PROJECTS_USER_COLLECTION);
+    await mongo.withCollectionUpdatedAt({
+      end,
+      collection: PROJECTS_USER_COLLECTION,
+      callback: async (start, end) => {
+        const studentIds = await getStudentIds(mongo);
+        const transferIds = CampusUserUpdator.getTransferIds();
 
-    const studentIds = await getStudentIds(mongo);
-    const transferIds = CampusUserUpdator.getTransferIds();
+        const updated = await ProjectsUserUpdator.fetchUpdated(start, end).then(
+          (projectsUsers) =>
+            projectsUsers.filter(
+              (projectsUser) =>
+                hasId(studentIds, projectsUser.user.id) &&
+                !hasId(transferIds, projectsUser.user.id) &&
+                projectsUser.cursusIds[0] === FT_CURSUS_ID,
+            ),
+        );
 
-    const updated = await ProjectsUserUpdator.fetchUpdated(start, end).then(
-      (projectsUsers) =>
-        projectsUsers.filter(
-          (projectsUser) =>
-            hasId(studentIds, projectsUser.user.id) &&
-            !hasId(transferIds, projectsUser.user.id) &&
-            projectsUser.cursusIds[0] === FT_CURSUS_ID,
-        ),
-    );
-
-    await mongo.upsertManyById(PROJECTS_USER_COLLECTION, updated);
-    await mongo.setCollectionUpdatedAt(PROJECTS_USER_COLLECTION, end);
+        await mongo.upsertManyById(PROJECTS_USER_COLLECTION, updated);
+      },
+    });
   }
 
   @FetchApiAction

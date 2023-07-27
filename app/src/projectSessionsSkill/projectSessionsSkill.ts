@@ -34,14 +34,18 @@ export class ProjectSessionsSkillUpdator {
     mongo: LambdaMongo,
     end: Date,
   ): Promise<void> {
-    const start = await mongo.getCollectionUpdatedAt(
-      PROJECT_SESSIONS_SKILL_COLLECTION,
-    );
+    await mongo.withCollectionUpdatedAt({
+      end,
+      collection: PROJECT_SESSIONS_SKILL_COLLECTION,
+      callback: async (start, end) => {
+        const updated = await ProjectSessionsSkillUpdator.fetchUpdated(
+          start,
+          end,
+        );
 
-    const updated = await ProjectSessionsSkillUpdator.fetchUpdated(start, end);
-
-    await mongo.upsertManyById(PROJECT_SESSIONS_SKILL_COLLECTION, updated);
-    await mongo.setCollectionUpdatedAt(PROJECT_SESSIONS_SKILL_COLLECTION, end);
+        await mongo.upsertManyById(PROJECT_SESSIONS_SKILL_COLLECTION, updated);
+      },
+    });
   }
 
   @FetchApiAction
