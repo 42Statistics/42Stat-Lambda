@@ -18,6 +18,7 @@ export const projectSchema = projectBaseSchema.extend({
   exam: z.boolean(),
   // gitId: z.,
   // repository: null,
+  // circle?: number // custom field
 });
 
 export const projectSchema_ = projectSchema.passthrough();

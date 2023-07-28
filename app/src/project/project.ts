@@ -11,6 +11,7 @@ import {
   UpdateAction,
 } from '#lambda/util/decorator.js';
 
+export const ORIGINAL_PROJECT_COLLECTION = 'original_projects';
 export const PROJECT_COLLECTION = 'projects';
 
 // eslint-disable-next-line
@@ -44,6 +45,7 @@ export class ProjectUpdator {
 
         const updated = await ProjectUpdator.fetchUpdated(start, end);
 
+        await mongo.upsertManyById(ORIGINAL_PROJECT_COLLECTION, updated);
         await mongo.upsertManyById(PROJECT_COLLECTION, updated);
       },
     });
