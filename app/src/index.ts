@@ -5,7 +5,7 @@ import { EventUpdator } from '#lambda/event/event.js';
 import { EventsUserUpdator } from '#lambda/eventsUser/eventsUser.js';
 import { ExamUpdator } from '#lambda/exam/exam.js';
 import { LocationUpdator } from '#lambda/location/location.js';
-import { LambdaMongo } from '#lambda/mongodb/mongodb.js';
+import { LOG_COLLECTION, LambdaMongo } from '#lambda/mongodb/mongodb.js';
 import { ProjectUpdator } from '#lambda/project/project.js';
 import { ProjectSessionUpdator } from '#lambda/projectSession/projectSession.js';
 import { ProjectSessionsSkillUpdator } from '#lambda/projectSessionsSkill/projectSessionsSkill.js';
@@ -75,12 +75,23 @@ const main = async (): Promise<void> => {
     const statUrl = process.env.STAT_APP_URL;
     assertEnvExist(statUrl);
 
+    const minUpdatedAt = await mongo
+      .db()
+      .collection<{ updatedAt: Date }>(LOG_COLLECTION)
+      .find({}, { projection: { updatedAt: 1 } })
+      .toArray()
+      .then((logs) =>
+        logs.reduce((min, { updatedAt }) => {
+          return min < updatedAt ? min : updatedAt;
+        }, new Date()),
+      );
+
     const response = await fetch(statUrl, {
       method: 'post',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ timestamp: end.getTime() }),
+      body: JSON.stringify({ timestamp: minUpdatedAt.getTime() }),
     });
 
     if (response.ok) {
