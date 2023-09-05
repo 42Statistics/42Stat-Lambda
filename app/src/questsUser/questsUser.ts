@@ -42,12 +42,8 @@ export class QuestsUserUpdator {
       collection: QUESTS_USER_COLLECTION,
       callback: async (start, end) => {
         const updated = await QuestsUserUpdator.fetchUpdated(start, end);
-        const wildcard = await QuestsUserUpdator.fetchWildcard(start, end);
 
-        await mongo.upsertManyById(QUESTS_USER_COLLECTION, [
-          ...updated,
-          ...wildcard,
-        ]);
+        await mongo.upsertManyById(QUESTS_USER_COLLECTION, updated);
       },
     });
   }
@@ -59,18 +55,6 @@ export class QuestsUserUpdator {
   ): Promise<QuestsUser[]> {
     const questsUserDtos = await fetchAllPages(
       QUESTS_USER_EP.UPDATED(start, end),
-    );
-
-    return parseQuestsUsers(questsUserDtos);
-  }
-
-  @FetchApiAction
-  private static async fetchWildcard(
-    start: Date,
-    end: Date,
-  ): Promise<QuestsUser[]> {
-    const questsUserDtos = await fetchAllPages(
-      QUESTS_USER_EP.WILDCARD(start, end),
     );
 
     return parseQuestsUsers(questsUserDtos);

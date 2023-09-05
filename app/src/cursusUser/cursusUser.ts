@@ -4,7 +4,6 @@ import {
   CursusUser,
   isStudent,
   parseCursusUsers,
-  wildcardUserIds,
 } from '#lambda/cursusUser/api/cursusUser.api.js';
 import { ExperienceUpdator } from '#lambda/experience/experience.js';
 import type { LambdaMongo } from '#lambda/mongodb/mongodb.js';
@@ -129,8 +128,6 @@ export const getStudentIds = async (mongo: LambdaMongo): Promise<number[]> => {
     .project<{ id: number }>({ _id: 0, id: '$user.id' })
     .map((docs) => docs.id)
     .toArray();
-
-  ids.push(...wildcardUserIds);
 
   return ids;
 };

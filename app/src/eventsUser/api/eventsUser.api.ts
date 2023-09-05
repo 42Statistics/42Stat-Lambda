@@ -3,14 +3,15 @@ import {
   eventsUserSchema_,
 } from '#lambda/eventsUser/api/eventsUser.schema.js';
 import { parseFromDtoMany } from '#lambda/util/parseFromDto.js';
+import { urlFilterJoin } from '#lambda/util/urlFilterJoin.js';
 import { z } from 'zod';
 
 export type EventsUser = z.infer<typeof eventsUserSchema>;
 
 const BY_EVENT = (eventIds: number[]): URL =>
   new URL(
-    `https://api.intra.42.fr/v2/events_users?filter[event_id]=${eventIds.join(
-      ',',
+    `https://api.intra.42.fr/v2/events_users?filter[event_id]=${urlFilterJoin(
+      eventIds,
     )}`,
   );
 

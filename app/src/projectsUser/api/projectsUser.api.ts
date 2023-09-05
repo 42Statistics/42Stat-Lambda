@@ -4,6 +4,7 @@ import {
   projectsUserSchema_,
 } from '#lambda/projectsUser/api/projectsUser.schema.js';
 import { parseFromDtoMany } from '#lambda/util/parseFromDto.js';
+import { urlFilterJoin } from '#lambda/util/urlFilterJoin.js';
 import { z } from 'zod';
 
 export type ProjectsUser = z.infer<typeof projectsUserSchema>;
@@ -21,7 +22,9 @@ const UPDATED = (start: Date, end: Date): URL =>
 
 const BY_IDS = (ids: number[]): URL =>
   new URL(
-    `https://api.intra.42.fr/v2/projects_users?filter[id]=${ids.join(',')}`,
+    `https://api.intra.42.fr/v2/projects_users?filter[id]=${urlFilterJoin(
+      ids,
+    )}`,
   );
 
 export const PROJECTS_USER_EP = {

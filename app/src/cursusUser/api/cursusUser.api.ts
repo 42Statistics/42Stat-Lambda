@@ -4,6 +4,7 @@ import {
 } from '#lambda/cursusUser/api/cursusUser.schema.js';
 import type { CursusUserCache } from '#lambda/cursusUser/dto/cursusUser.redis.js';
 import { parseFromDtoMany } from '#lambda/util/parseFromDto.js';
+import { urlFilterJoin } from '#lambda/util/urlFilterJoin.js';
 import { z } from 'zod';
 
 export type CursusUser = z.infer<typeof cursusUserSchema>;
@@ -22,8 +23,8 @@ const ACTIVATED = (): URL =>
 
 const TRANSFERED = (userIds: number[]): URL =>
   new URL(
-    `https://api.intra.42.fr/v2/cursus/${FT_CURSUS_ID}/cursus_users?filter[user_id]=${userIds.join(
-      ',',
+    `https://api.intra.42.fr/v2/cursus/${FT_CURSUS_ID}/cursus_users?filter[user_id]=${urlFilterJoin(
+      userIds,
     )}`,
   );
 
@@ -46,11 +47,11 @@ const weirdUserIds = [
 
 // 무조건 포함해야하지만 제외된 user.
 // 더이상 이를 강제로 보낼 필요는 없지만, 예외를 기록해두는 의도로 보존.
-export const wildcardUserIds = [
-  // 68891, // 1기 중 버그 있어보이지만 피신 평가 내역은 존재함.
-  // 68857, // 파리로 transfer, login: sucho
-  // 69000, // hyulim
-] as const;
+// export const wildcardUserIds = [
+// 68891, // 1기 중 버그 있어보이지만 피신 평가 내역은 존재함.
+// 68857, // 파리로 transfer, login: sucho
+// 69000, // hyulim
+// ] as const;
 
 export const HYULIM = 69000;
 

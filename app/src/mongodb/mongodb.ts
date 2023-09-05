@@ -172,6 +172,10 @@ export class LambdaMongo {
       return;
     }
 
+    if (!datas.length) {
+      return;
+    }
+
     await Promise.all(
       datas.map((data) =>
         this.client

@@ -5,6 +5,7 @@ import {
   teamSchema_,
 } from '#lambda/team/api/team.schema.js';
 import { parseFromDtoMany } from '#lambda/util/parseFromDto.js';
+import { urlFilterJoin } from '#lambda/util/urlFilterJoin.js';
 import { z } from 'zod';
 
 export type TeamBase = z.infer<typeof teamBaseSchema>;
@@ -35,7 +36,7 @@ const UPDATED = (start: Date, end: Date): URL =>
   );
 
 const BY_IDS = (ids: number[]): URL =>
-  new URL(`https://api.intra.42.fr/v2/teams?filter[id]=${ids.join(',')}`);
+  new URL(`https://api.intra.42.fr/v2/teams?filter[id]=${urlFilterJoin(ids)}`);
 
 export const TEAM_EP = {
   UPDATED,
