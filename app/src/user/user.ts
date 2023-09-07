@@ -5,7 +5,7 @@ import {
   LogAsyncEstimatedTime,
   UpdateAction,
 } from '#lambda/util/decorator.js';
-import { USER_EP, parseUsers, type User } from './api/user.api.js';
+import { USER_API, parseUsers, type User } from './api/user.api.js';
 
 export const USER_COLLECTION = 'users';
 
@@ -46,7 +46,7 @@ export class UserUpdator {
 
   @FetchApiAction
   private static async fetchUpdated(start: Date, end: Date): Promise<User[]> {
-    const userDtos = await fetchAllPages(USER_EP.IS_SEOUL(start, end));
+    const userDtos = await fetchAllPages(USER_API.IS_SEOUL(start, end));
 
     return parseUsers(userDtos);
   }

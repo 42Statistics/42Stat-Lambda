@@ -1,6 +1,6 @@
 import { getStudentIds } from '#lambda/cursusUser/cursusUser.js';
 import {
-  LOCATION_EP,
+  LOCATION_API,
   Location,
   isCluster,
   parseLocations,
@@ -71,7 +71,7 @@ export class LocationUpdator {
     start: Date,
     end: Date,
   ): Promise<Location[]> {
-    const locationDtos = await fetchAllPages(LOCATION_EP.ONGOING(start, end));
+    const locationDtos = await fetchAllPages(LOCATION_API.ONGOING(start, end));
 
     return parseLocations(locationDtos);
   }
@@ -100,7 +100,7 @@ export class LocationUpdator {
 
   @FetchApiAction
   private static async fetchEnded(start: Date, end: Date): Promise<Location[]> {
-    const locationDtos = await fetchAllPages(LOCATION_EP.ENDED(start, end));
+    const locationDtos = await fetchAllPages(LOCATION_API.ENDED(start, end));
 
     return parseLocations(locationDtos);
   }

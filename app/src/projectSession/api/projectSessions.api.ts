@@ -2,19 +2,23 @@ import {
   projectSessionSchema,
   projectSessionSchema_,
 } from '#lambda/projectSession/api/projectSessions.schema.js';
+import { FtApiURLBuilder } from '#lambda/util/FtApiURLBuilder.js';
 import { parseFromDtoMany } from '#lambda/util/parseFromDto.js';
 import { z } from 'zod';
 
 export type ProjectSession = z.infer<typeof projectSessionSchema>;
 
-export const parseProjectSessions = (dtos: object[]): ProjectSession[] =>
-  parseFromDtoMany(dtos, projectSessionSchema_, 'project_sessions');
+export const PROJECT_SESSION_EP = 'project_sessions';
 
 const UPDATED = (start: Date, end: Date): URL =>
-  new URL(
-    `https://api.intra.42.fr/v2/project_sessions?sort=updated_at&range[updated_at]=${start.toISOString()},${end.toISOString()}`,
-  );
+  new FtApiURLBuilder(PROJECT_SESSION_EP)
+    .addSort('updated_at', FtApiURLBuilder.SortOrder.ASC)
+    .addRange('updated_at', start, end)
+    .toURL();
 
-export const PROJECT_SESSION_EP = {
+export const PROJECT_SESSION_API = {
   UPDATED,
 } as const;
+
+export const parseProjectSessions = (dtos: object[]): ProjectSession[] =>
+  parseFromDtoMany(dtos, projectSessionSchema_, 'project_sessions');

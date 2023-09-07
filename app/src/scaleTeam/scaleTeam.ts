@@ -1,7 +1,7 @@
 import { LambdaMongo } from '#lambda/mongodb/mongodb.js';
 import { fetchAllPages } from '#lambda/request/fetchAllPages.js';
 import {
-  SCALE_TEAM_EP,
+  SCALE_TEAM_API,
   ScaleTeam,
   parseScaleTeams,
 } from '#lambda/scaleTeam/api/scaleTeam.api.js';
@@ -52,7 +52,9 @@ export class ScaleTeamUpdator {
     start: Date,
     end: Date,
   ): Promise<ScaleTeam[]> {
-    const scaleTeamDtos = await fetchAllPages(SCALE_TEAM_EP.FILLED(start, end));
+    const scaleTeamDtos = await fetchAllPages(
+      SCALE_TEAM_API.FILLED(start, end),
+    );
 
     return parseScaleTeams(scaleTeamDtos);
   }

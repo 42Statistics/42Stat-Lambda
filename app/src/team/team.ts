@@ -4,7 +4,7 @@ import { getStudentIds } from '#lambda/cursusUser/cursusUser.js';
 import { LambdaMongo } from '#lambda/mongodb/mongodb.js';
 import { ProjectsUserUpdator } from '#lambda/projectsUser/projectsUser.js';
 import { fetchAllPages } from '#lambda/request/fetchAllPages.js';
-import { TEAM_EP, Team, parseTeams } from '#lambda/team/api/team.api.js';
+import { TEAM_API, Team, parseTeams } from '#lambda/team/api/team.api.js';
 import {
   At_10_Action,
   At_20_Action,
@@ -73,7 +73,7 @@ export class TeamUpdator {
 
   @FetchApiAction
   private static async fetchUpdated(start: Date, end: Date): Promise<Team[]> {
-    const teamDtos = await fetchAllPages(TEAM_EP.UPDATED(start, end));
+    const teamDtos = await fetchAllPages(TEAM_API.UPDATED(start, end));
 
     return parseTeams(teamDtos);
   }
@@ -141,7 +141,7 @@ export class TeamUpdator {
 
   @FetchApiAction
   private static async fetchTeamsByIds(ids: number[]): Promise<Team[]> {
-    const teamDtos = await fetchAllPages(TEAM_EP.BY_IDS(ids));
+    const teamDtos = await fetchAllPages(TEAM_API.BY_IDS(ids));
 
     return parseTeams(teamDtos);
   }

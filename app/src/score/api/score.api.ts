@@ -1,14 +1,19 @@
 import { scoreSchema, scoreSchema_ } from '#lambda/score/api/score.schema.js';
+import { FtApiURLBuilder } from '#lambda/util/FtApiURLBuilder.js';
 import { parseFromDtoMany } from '#lambda/util/parseFromDto.js';
 import { z } from 'zod';
 
 export type Score = z.infer<typeof scoreSchema>;
 
-const BY_COALITION = (coalitionId: number): string =>
-  `https://api.intra.42.fr/v2/coalitions/${coalitionId}/scores?sort=updated_at`;
+export const SCORE_EP = (coalitionId: number): string =>
+  `coalitions/${coalitionId}/scores`;
 
-// todo: coalition id 정의하기
-export const SCORE_EP = {
+const BY_COALITION = (coalitionId: number): URL =>
+  new FtApiURLBuilder(SCORE_EP(coalitionId))
+    .addSort('updated_at', FtApiURLBuilder.SortOrder.ASC)
+    .toURL();
+
+export const SCORE_API = {
   BY_COALITION,
 } as const;
 

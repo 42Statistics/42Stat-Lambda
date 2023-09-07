@@ -1,6 +1,6 @@
 import { LambdaMongo } from '#lambda/mongodb/mongodb.js';
 import {
-  PROJECT_SESSIONS_SKILL_EP,
+  PROJECT_SESSIONS_SKILL_API,
   ProjectSessionsSkill,
   parseProjectSessionsSkills,
 } from '#lambda/projectSessionsSkill/api/projectSessionsSkill.api.js';
@@ -54,7 +54,7 @@ export class ProjectSessionsSkillUpdator {
     end: Date,
   ): Promise<ProjectSessionsSkill[]> {
     const projectSessionsSkillDtos = await fetchAllPages(
-      PROJECT_SESSIONS_SKILL_EP.UPDATED(start, end),
+      PROJECT_SESSIONS_SKILL_API.UPDATED(start, end),
     );
 
     return parseProjectSessionsSkills(projectSessionsSkillDtos);

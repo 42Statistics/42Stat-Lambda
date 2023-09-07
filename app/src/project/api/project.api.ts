@@ -3,17 +3,21 @@ import {
   projectSchema,
   projectSchema_,
 } from '#lambda/project/api/project.schema.js';
+import { FtApiURLBuilder } from '#lambda/util/FtApiURLBuilder.js';
 import { parseFromDtoMany } from '#lambda/util/parseFromDto.js';
 import { z } from 'zod';
 
 export type Project = z.infer<typeof projectSchema>;
 
-const UPDATED = (start: Date, end: Date): URL =>
-  new URL(
-    `https://api.intra.42.fr/v2/cursus/${FT_CURSUS_ID}/projects?sort=created_at&range[updated_at]=${start.toISOString()},${end.toISOString()}`,
-  );
+export const PROJECT_EP = `cursus/${FT_CURSUS_ID}/projects`;
 
-export const PROJECT_EP = {
+const UPDATED = (start: Date, end: Date): URL =>
+  new FtApiURLBuilder(PROJECT_EP)
+    .addSort('created_at', FtApiURLBuilder.SortOrder.ASC)
+    .addRange('updated_at', start, end)
+    .toURL();
+
+export const PROJECT_API = {
   UPDATED,
 } as const;
 

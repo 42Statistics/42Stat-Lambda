@@ -2,15 +2,20 @@ import { z } from 'zod';
 import { campusUserSchema, campusUserSchema_ } from './campusUser.schema.js';
 import { parseFromDtoMany } from '#lambda/util/parseFromDto.js';
 import { SEOUL_CAMPUS_ID } from '#lambda/campus/api/campus.api.js';
+import { FtApiURLBuilder } from '#lambda/util/FtApiURLBuilder.js';
 
 export type CampusUser = z.infer<typeof campusUserSchema>;
 
-const UPDATED_NOT_PRIMARY = (start: Date, end: Date): URL =>
-  new URL(
-    `https://api.intra.42.fr/v2/campus_users?filter[is_primary]=false&filter[campus_id]=${SEOUL_CAMPUS_ID}&range[updated_at]=${start.toISOString()},${end.toISOString()}`,
-  );
+export const CAMPUS_USER_EP = 'campus_users';
 
-export const CAMPUS_USER_EP = {
+const UPDATED_NOT_PRIMARY = (start: Date, end: Date): URL =>
+  new FtApiURLBuilder(CAMPUS_USER_EP)
+    .addFilter('is_primary', 'false')
+    .addFilter('campus_id', SEOUL_CAMPUS_ID.toString())
+    .addRange('updated_at', start, end)
+    .toURL();
+
+export const CAMPUS_USER_API = {
   UPDATED_NOT_PRIMARY,
 } as const;
 

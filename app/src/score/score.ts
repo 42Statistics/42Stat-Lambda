@@ -1,9 +1,9 @@
-import { SEOUL_COALITION_ID } from '#lambda/coalition/api/coalition.api.js';
+import { SEOUL_COALITION_IDS } from '#lambda/coalition/api/coalition.api.js';
 import { LambdaMongo } from '#lambda/mongodb/mongodb.js';
 import { fetchAllPages } from '#lambda/request/fetchAllPages.js';
 import {
   SCORE_EDGE_CASE,
-  SCORE_EP,
+  SCORE_API,
   Score,
   parseScores,
 } from '#lambda/score/api/score.api.js';
@@ -50,7 +50,7 @@ export class ScoreUpdator {
       .aggregate<CountByCoalitionId>([
         {
           $match: {
-            coalitionId: { $in: SEOUL_COALITION_ID },
+            coalitionId: { $in: SEOUL_COALITION_IDS },
             ...SCORE_EDGE_CASE.COUNT_FILTER,
           },
         },
@@ -74,7 +74,7 @@ export class ScoreUpdator {
       .toArray();
 
     const byCoalition = await ScoreUpdator.fetchScoreByCoalition(
-      SEOUL_COALITION_ID.map((coalitionId) => ({
+      SEOUL_COALITION_IDS.map((coalitionId) => ({
         coalitionId: coalitionId,
         count:
           (coalitionScoreCounts.find(
@@ -97,7 +97,7 @@ export class ScoreUpdator {
 
     for (const { coalitionId, count } of coalitionScoreCounts) {
       const currDtos = await fetchAllPages(
-        new URL(SCORE_EP.BY_COALITION(coalitionId)),
+        new URL(SCORE_API.BY_COALITION(coalitionId)),
         Math.floor(count / 100) + 1,
       );
 

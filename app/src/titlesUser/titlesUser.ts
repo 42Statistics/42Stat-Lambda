@@ -1,7 +1,7 @@
 import { LambdaMongo } from '#lambda/mongodb/mongodb.js';
 import { fetchAllPages } from '#lambda/request/fetchAllPages.js';
 import {
-  TITLES_USER_EP,
+  TITLES_USER_API,
   TitlesUser,
   parseTitlesUsers,
 } from '#lambda/titlesUser/api/titlesUser.api.js';
@@ -44,7 +44,7 @@ export class TitlesUserUpdator {
 
   @FetchApiAction
   private static async fetchAll(): Promise<TitlesUser[]> {
-    const titlesUserDtos = await fetchAllPages(TITLES_USER_EP.ALL(), 1, 100);
+    const titlesUserDtos = await fetchAllPages(TITLES_USER_API.ALL(), 1, 100);
 
     return parseTitlesUsers(titlesUserDtos);
   }

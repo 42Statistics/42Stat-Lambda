@@ -1,6 +1,6 @@
 import { LambdaMongo } from '#lambda/mongodb/mongodb.js';
 import { fetchAllPages } from '#lambda/request/fetchAllPages.js';
-import { TITLE_EP, Title, parseTitles } from '#lambda/title/api/title.api.js';
+import { TITLE_API, Title, parseTitles } from '#lambda/title/api/title.api.js';
 // eslint-disable-next-line
 import type { TitlesUserUpdator } from '#lambda/titlesUser/titlesUser.js';
 import {
@@ -43,7 +43,7 @@ export class TitleUpdator {
 
   @FetchApiAction
   private static async fetchAll(): Promise<Title[]> {
-    const titlesUserDtos = await fetchAllPages(TITLE_EP.ALL(), 1, 100);
+    const titlesUserDtos = await fetchAllPages(TITLE_API.ALL(), 1, 100);
 
     return parseTitles(titlesUserDtos);
   }

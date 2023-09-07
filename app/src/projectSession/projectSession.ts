@@ -1,6 +1,6 @@
 import type { LambdaMongo } from '#lambda/mongodb/mongodb.js';
 import {
-  PROJECT_SESSION_EP,
+  PROJECT_SESSION_API,
   ProjectSession,
   parseProjectSessions,
 } from '#lambda/projectSession/api/projectSessions.api.js';
@@ -51,7 +51,7 @@ export class ProjectSessionUpdator {
     end: Date,
   ): Promise<ProjectSession[]> {
     const projectSessionDtos = await fetchAllPages(
-      PROJECT_SESSION_EP.UPDATED(start, end),
+      PROJECT_SESSION_API.UPDATED(start, end),
     );
 
     return parseProjectSessions(projectSessionDtos);

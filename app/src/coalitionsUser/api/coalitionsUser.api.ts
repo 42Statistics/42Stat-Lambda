@@ -1,22 +1,24 @@
-import { SEOUL_COALITION_ID } from '#lambda/coalition/api/coalition.api.js';
+import { SEOUL_COALITION_IDS } from '#lambda/coalition/api/coalition.api.js';
 import {
   coalitionsUserSchema,
   coalitionsUserSchema_,
 } from '#lambda/coalitionsUser/api/coalitionsUser.schema.js';
+import { FtApiURLBuilder } from '#lambda/util/FtApiURLBuilder.js';
 import { parseFromDtoMany } from '#lambda/util/parseFromDto.js';
-import { urlFilterJoin } from '#lambda/util/urlFilterJoin.js';
 import { z } from 'zod';
 
 export type CoalitionsUser = z.infer<typeof coalitionsUserSchema>;
 
-const CREATED = (start: Date, end: Date): URL =>
-  new URL(
-    `https://api.intra.42.fr/v2/coalitions_users?filter[coalition_id]=${urlFilterJoin(
-      SEOUL_COALITION_ID,
-    )}&sort=created_at&range[created_at]=${start.toISOString()},${end.toISOString()}`,
-  );
+export const COALITIONS_USER_EP = 'coalitions_users';
 
-export const COALITIONS_USER_EP = {
+const CREATED = (start: Date, end: Date): URL =>
+  new FtApiURLBuilder(COALITIONS_USER_EP)
+    .addFilter('coalition_id', SEOUL_COALITION_IDS.join(','))
+    .addSort('created_at', FtApiURLBuilder.SortOrder.ASC)
+    .addRange('created_at', start, end)
+    .toURL();
+
+export const COALITIONS_USER_API = {
   CREATED,
 } as const;
 

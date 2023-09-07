@@ -1,5 +1,5 @@
 import {
-  COALITIONS_USER_EP,
+  COALITIONS_USER_API,
   CoalitionsUser,
   parseCoalitionsUsers,
 } from '#lambda/coalitionsUser/api/coalitionsUser.api.js';
@@ -53,7 +53,7 @@ export class CoalitionsUserUpdator {
     end: Date,
   ): Promise<CoalitionsUser[]> {
     const coalitionsUserDtos = await fetchAllPages(
-      COALITIONS_USER_EP.CREATED(start, end),
+      COALITIONS_USER_API.CREATED(start, end),
     );
 
     return parseCoalitionsUsers(coalitionsUserDtos);

@@ -1,11 +1,12 @@
+import { SEOUL_CAMPUS_ID } from '#lambda/campus/api/campus.api.js';
 import { FT_CURSUS_ID } from '#lambda/cursusUser/api/cursusUser.api.js';
 import {
   teamBaseSchema,
   teamSchema,
   teamSchema_,
 } from '#lambda/team/api/team.schema.js';
+import { FtApiURLBuilder } from '#lambda/util/FtApiURLBuilder.js';
 import { parseFromDtoMany } from '#lambda/util/parseFromDto.js';
-import { urlFilterJoin } from '#lambda/util/urlFilterJoin.js';
 import { z } from 'zod';
 
 export type TeamBase = z.infer<typeof teamBaseSchema>;
@@ -30,15 +31,21 @@ export type PassedTeam = Omit<
   lockedAt: Date;
 };
 
+// todo: 다른 곳에도 이런 이름 적용
+export const FT_CURSUS_TEAM_EP = `cursus/${FT_CURSUS_ID}/teams`;
+export const TEAM_EP = 'teams';
+
 const UPDATED = (start: Date, end: Date): URL =>
-  new URL(
-    `https://api.intra.42.fr/v2/cursus/${FT_CURSUS_ID}/teams?filter[campus]=29&range[updated_at]=${start.toISOString()},${end.toISOString()}&sort=created_at`,
-  );
+  new FtApiURLBuilder(FT_CURSUS_TEAM_EP)
+    .addFilter('campus', SEOUL_CAMPUS_ID.toString())
+    .addRange('updated_at', start, end)
+    .addSort('created_at', FtApiURLBuilder.SortOrder.ASC)
+    .toURL();
 
 const BY_IDS = (ids: number[]): URL =>
-  new URL(`https://api.intra.42.fr/v2/teams?filter[id]=${urlFilterJoin(ids)}`);
+  new FtApiURLBuilder(TEAM_EP).addFilter('id', ids.join(',')).toURL();
 
-export const TEAM_EP = {
+export const TEAM_API = {
   UPDATED,
   BY_IDS,
 } as const;

@@ -2,20 +2,20 @@ import {
   eventsUserSchema,
   eventsUserSchema_,
 } from '#lambda/eventsUser/api/eventsUser.schema.js';
+import { FtApiURLBuilder } from '#lambda/util/FtApiURLBuilder.js';
 import { parseFromDtoMany } from '#lambda/util/parseFromDto.js';
-import { urlFilterJoin } from '#lambda/util/urlFilterJoin.js';
 import { z } from 'zod';
 
 export type EventsUser = z.infer<typeof eventsUserSchema>;
 
-const BY_EVENT = (eventIds: number[]): URL =>
-  new URL(
-    `https://api.intra.42.fr/v2/events_users?filter[event_id]=${urlFilterJoin(
-      eventIds,
-    )}`,
-  );
+export const EVENTS_USER_EP = 'events_users';
 
-export const EVENTS_USER_EP = {
+const BY_EVENT = (eventIds: number[]): URL =>
+  new FtApiURLBuilder(EVENTS_USER_EP)
+    .addFilter('event_id', eventIds.join(','))
+    .toURL();
+
+export const EVENTS_USER_API = {
   BY_EVENT,
 } as const;
 

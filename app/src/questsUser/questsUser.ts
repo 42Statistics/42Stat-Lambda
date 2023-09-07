@@ -1,6 +1,6 @@
 import { LambdaMongo } from '#lambda/mongodb/mongodb.js';
 import {
-  QUESTS_USER_EP,
+  QUESTS_USER_API,
   QuestsUser,
   parseQuestsUsers,
 } from '#lambda/questsUser/api/questsUser.api.js';
@@ -54,7 +54,7 @@ export class QuestsUserUpdator {
     end: Date,
   ): Promise<QuestsUser[]> {
     const questsUserDtos = await fetchAllPages(
-      QUESTS_USER_EP.UPDATED(start, end),
+      QUESTS_USER_API.UPDATED(start, end),
     );
 
     return parseQuestsUsers(questsUserDtos);

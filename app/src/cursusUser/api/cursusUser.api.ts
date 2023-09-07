@@ -1,37 +1,38 @@
+import { SEOUL_CAMPUS_ID } from '#lambda/campus/api/campus.api.js';
 import {
   cursusUserSchema,
   cursusUserSchema_,
 } from '#lambda/cursusUser/api/cursusUser.schema.js';
 import type { CursusUserCache } from '#lambda/cursusUser/dto/cursusUser.redis.js';
+import { FtApiURLBuilder } from '#lambda/util/FtApiURLBuilder.js';
 import { parseFromDtoMany } from '#lambda/util/parseFromDto.js';
-import { urlFilterJoin } from '#lambda/util/urlFilterJoin.js';
 import { z } from 'zod';
 
 export type CursusUser = z.infer<typeof cursusUserSchema>;
 
 export const FT_CURSUS_ID = 21;
 
+export const CURSUS_USER_EP = `cursus/${FT_CURSUS_ID}/cursus_users`;
+
 const CURSUS_CHANGED = (start: Date, end: Date): URL =>
-  new URL(
-    `https://api.intra.42.fr/v2/cursus/${FT_CURSUS_ID}/cursus_users?filter[campus_id]=29&filter[has_coalition]=true&range[updated_at]=${start.toISOString()},${end.toISOString()}&sort=created_at`,
-  );
+  new FtApiURLBuilder(CURSUS_USER_EP)
+    .addFilter('campus_id', SEOUL_CAMPUS_ID.toString())
+    .addFilter('has_coalition', 'true')
+    .addRange('updated_at', start, end)
+    .addSort('created_at', FtApiURLBuilder.SortOrder.ASC)
+    .toURL();
 
 const ACTIVATED = (): URL =>
-  new URL(
-    `https://api.intra.42.fr/v2/cursus/${FT_CURSUS_ID}/cursus_users?filter[campus_id]=29&filter[has_coalition]=true&filter[end]=false&sort=created_at`,
-  );
+  new FtApiURLBuilder(CURSUS_USER_EP)
+    .addFilter('campus_id', SEOUL_CAMPUS_ID.toString())
+    .addFilter('has_coalition', 'true')
+    .addFilter('end', 'false')
+    .addSort('created_at', FtApiURLBuilder.SortOrder.ASC)
+    .toURL();
 
-const TRANSFERED = (userIds: number[]): URL =>
-  new URL(
-    `https://api.intra.42.fr/v2/cursus/${FT_CURSUS_ID}/cursus_users?filter[user_id]=${urlFilterJoin(
-      userIds,
-    )}`,
-  );
-
-export const CURSUS_USER_EP = {
+export const CURSUS_USER_API = {
   CURSUS_CHANGED,
   ACTIVATED,
-  TRANSFERED,
 } as const;
 
 export const parseCursusUsers = (dtos: object[]): CursusUser[] =>

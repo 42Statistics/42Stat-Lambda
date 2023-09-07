@@ -1,6 +1,6 @@
 import { CampusUserUpdator } from '#lambda/campusUser/campusUser.js';
 import {
-  CURSUS_USER_EP,
+  CURSUS_USER_API,
   CursusUser,
   isStudent,
   parseCursusUsers,
@@ -80,7 +80,7 @@ export class CursusUserUpdator {
     end: Date,
   ): Promise<CursusUser[]> {
     const cursusUserDtos = await fetchAllPages(
-      CURSUS_USER_EP.CURSUS_CHANGED(start, end),
+      CURSUS_USER_API.CURSUS_CHANGED(start, end),
     );
 
     return parseCursusUsers(cursusUserDtos);
@@ -114,7 +114,7 @@ export class CursusUserUpdator {
    */
   @FetchApiAction
   private static async fetchActivated(): Promise<CursusUser[]> {
-    const cursusUserDtos = await fetchAllPages(CURSUS_USER_EP.ACTIVATED());
+    const cursusUserDtos = await fetchAllPages(CURSUS_USER_API.ACTIVATED());
 
     return parseCursusUsers(cursusUserDtos).filter(isStudent);
   }

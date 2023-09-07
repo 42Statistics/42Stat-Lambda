@@ -1,4 +1,4 @@
-import { EXAM_EP, Exam, parseExams } from '#lambda/exam/api/exam.api.js';
+import { EXAM_API, Exam, parseExams } from '#lambda/exam/api/exam.api.js';
 import { LambdaMongo } from '#lambda/mongodb/mongodb.js';
 import { fetchAllPages } from '#lambda/request/fetchAllPages.js';
 import {
@@ -55,7 +55,7 @@ export class ExamUpdator {
 
   @FetchApiAction
   private static async fetchCreated(start: Date, end: Date): Promise<Exam[]> {
-    const examDtos = await fetchAllPages(EXAM_EP.UPDATED(start, end));
+    const examDtos = await fetchAllPages(EXAM_API.UPDATED(start, end));
 
     return parseExams(examDtos);
   }

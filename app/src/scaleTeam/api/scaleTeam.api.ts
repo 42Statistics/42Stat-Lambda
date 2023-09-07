@@ -4,17 +4,24 @@ import {
   scaleTeamSchema,
   scaleTeamSchema_,
 } from '#lambda/scaleTeam/api/scaleTeam.schema.js';
+import { FtApiURLBuilder } from '#lambda/util/FtApiURLBuilder.js';
 import { parseFromDtoMany } from '#lambda/util/parseFromDto.js';
 import { z } from 'zod';
 
 export type ScaleTeam = z.infer<typeof scaleTeamSchema>;
 
-const FILLED = (start: Date, end: Date): URL =>
-  new URL(
-    `https://api.intra.42.fr/v2/scale_teams?filter[campus_id]=${SEOUL_CAMPUS_ID}&filter[cursus_id]=${FT_CURSUS_ID}&filter[filled]=true&sort=created_at&range[updated_at]=${start.toISOString()},${end.toISOString()}`,
-  );
+export const SCALE_TEAM_EP = 'scale_teams';
 
-export const SCALE_TEAM_EP = {
+const FILLED = (start: Date, end: Date): URL =>
+  new FtApiURLBuilder(SCALE_TEAM_EP)
+    .addFilter('campus_id', SEOUL_CAMPUS_ID.toString())
+    .addFilter('cursus_id', FT_CURSUS_ID.toString())
+    .addFilter('filled', 'true')
+    .addSort('created_at', FtApiURLBuilder.SortOrder.ASC)
+    .addRange('updated_at', start, end)
+    .toURL();
+
+export const SCALE_TEAM_API = {
   FILLED,
 } as const;
 

@@ -3,7 +3,7 @@ import { FT_CURSUS_ID } from '#lambda/cursusUser/api/cursusUser.api.js';
 import { getStudentIds } from '#lambda/cursusUser/cursusUser.js';
 import { LambdaMongo } from '#lambda/mongodb/mongodb.js';
 import {
-  PROJECTS_USER_EP,
+  PROJECTS_USER_API,
   ProjectsUser,
   parseProjectsUsers,
 } from '#lambda/projectsUser/api/projectsUser.api.js';
@@ -69,7 +69,7 @@ export class ProjectsUserUpdator {
     end: Date,
   ): Promise<ProjectsUser[]> {
     const projectsUserDtos = await fetchAllPages(
-      PROJECTS_USER_EP.UPDATED(start, end),
+      PROJECTS_USER_API.UPDATED(start, end),
     );
 
     return parseProjectsUsers(projectsUserDtos);
@@ -110,7 +110,7 @@ export class ProjectsUserUpdator {
   private static async fetchProjectsUsersByIds(
     ids: number[],
   ): Promise<ProjectsUser[]> {
-    const projectsUserDtos = await fetchAllPages(PROJECTS_USER_EP.BY_IDS(ids));
+    const projectsUserDtos = await fetchAllPages(PROJECTS_USER_API.BY_IDS(ids));
 
     return parseProjectsUsers(projectsUserDtos);
   }

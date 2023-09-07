@@ -6,7 +6,7 @@ import {
   UpdateAction,
 } from '#lambda/util/decorator.js';
 import {
-  CAMPUS_USER_EP,
+  CAMPUS_USER_API,
   parseCampusUsers,
   type CampusUser,
 } from './api/campusUser.api.js';
@@ -56,7 +56,7 @@ export class CampusUserUpdator {
   @FetchApiAction
   private static async fetchNotPrimary(end: Date): Promise<CampusUser[]> {
     const campusUserDtos = await fetchAllPages(
-      CAMPUS_USER_EP.UPDATED_NOT_PRIMARY(new Date(0), end),
+      CAMPUS_USER_API.UPDATED_NOT_PRIMARY(new Date(0), end),
     );
 
     return parseCampusUsers(campusUserDtos);

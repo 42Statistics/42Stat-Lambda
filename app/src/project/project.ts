@@ -1,6 +1,6 @@
 import { LambdaMongo } from '#lambda/mongodb/mongodb.js';
 import {
-  PROJECT_EP,
+  PROJECT_API,
   Project,
   parseProjects,
 } from '#lambda/project/api/project.api.js';
@@ -57,7 +57,7 @@ export class ProjectUpdator {
     end: Date,
   ): Promise<Project[]> {
     const projectDtos = await fetchAllPages(
-      PROJECT_EP.UPDATED(start, end),
+      PROJECT_API.UPDATED(start, end),
       1,
       30,
     );

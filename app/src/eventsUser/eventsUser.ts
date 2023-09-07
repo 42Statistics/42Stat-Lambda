@@ -2,7 +2,7 @@ import { getStudentIds } from '#lambda/cursusUser/cursusUser.js';
 import type { Event } from '#lambda/event/api/event.api.js';
 import { EVENT_COLLECTION } from '#lambda/event/event.js';
 import {
-  EVENTS_USER_EP,
+  EVENTS_USER_API,
   EventsUser,
   parseEventsUsers,
 } from '#lambda/eventsUser/api/eventsUser.api.js';
@@ -76,7 +76,7 @@ export class EventsUserUpdator {
   @FetchApiAction
   private static async fetchByEvent(eventIds: number[]): Promise<EventsUser[]> {
     const eventsUserDtos = await fetchAllPages(
-      EVENTS_USER_EP.BY_EVENT(eventIds),
+      EVENTS_USER_API.BY_EVENT(eventIds),
     );
 
     return parseEventsUsers(eventsUserDtos);

@@ -1,6 +1,6 @@
 import { LambdaMongo } from '#lambda/mongodb/mongodb.js';
 import { fetchAllPages } from '#lambda/request/fetchAllPages.js';
-import { SKILL_EP, Skill, parseSkills } from '#lambda/skill/api/skill.api.js';
+import { SKILL_API, Skill, parseSkills } from '#lambda/skill/api/skill.api.js';
 import {
   At_00_Action,
   FetchApiAction,
@@ -45,7 +45,7 @@ export class SkillUpdator {
 
   @FetchApiAction
   private static async fetchUpdated(start: Date, end: Date): Promise<Skill[]> {
-    const skillDtos = await fetchAllPages(SKILL_EP.UPDATED(start, end));
+    const skillDtos = await fetchAllPages(SKILL_API.UPDATED(start, end));
 
     return parseSkills(skillDtos);
   }
