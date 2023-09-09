@@ -21,6 +21,14 @@ type LevelTableElem = {
   xp: number;
 };
 
+type UpdatedProjectsUser = Omit<ProjectsUser, 'project' | 'markedAt'> & {
+  project: Project;
+  markedAt: Date;
+  cursusUser?: CursusUser;
+  currTeam: PassedTeam;
+  experienceUsers: Experience[];
+};
+
 /**
  *
  *
@@ -76,15 +84,7 @@ export class ExperienceUpdator {
     const projectsUsersUpdated = await mongo
       .db()
       .collection<ProjectsUser>(PROJECTS_USER_COLLECTION)
-      .aggregate<
-        Omit<ProjectsUser, 'project' | 'markedAt'> & {
-          project: Project;
-          markedAt: Date;
-          cursusUser?: CursusUser;
-          currTeam: PassedTeam;
-          experienceUsers: Experience[];
-        }
-      >(
+      .aggregate<UpdatedProjectsUser>(
         //#region aggregation pipeline
         [
           {
@@ -187,29 +187,7 @@ export class ExperienceUpdator {
 
     const newExperiences = projectsUsersUpdated.reduce(
       (acc: Experience[], projectsUser) => {
-        const scaleTeams = projectsUser.currTeam.scaleTeams.filter(
-          (
-            scaleTeam,
-          ): scaleTeam is Omit<ScaleTeam, 'finalMark'> & {
-            finalMark: number;
-          } => scaleTeam.finalMark !== null,
-        );
-
-        // todo: scale team 없이 통과하는 경우 NaN 발생
-        const scaleTeamMark =
-          scaleTeams.reduce(
-            (mark, scaleTeam) => mark + scaleTeam.finalMark,
-            0,
-          ) / scaleTeams.length;
-
-        const teamUploadMark = projectsUser.currTeam.teamsUploads[0]?.finalMark;
-
-        const currMark =
-          Math.floor(
-            (teamUploadMark
-              ? (scaleTeamMark + teamUploadMark) / 2
-              : scaleTeamMark) * 100,
-          ) / 100;
+        const currMark = calculateMark(projectsUser);
 
         const projectPrevExperience = projectsUser.experienceUsers
           .filter(
@@ -291,6 +269,33 @@ export class ExperienceUpdator {
     await mongo.setCollectionUpdatedAt(EXPERIENCE_USER_COLLECTION, end);
   }
 }
+
+const calculateMark = (projectsUser: UpdatedProjectsUser) => {
+  const scaleTeams = projectsUser.currTeam.scaleTeams.filter(
+    (
+      scaleTeam,
+    ): scaleTeam is Omit<ScaleTeam, 'finalMark'> & {
+      finalMark: number;
+    } => scaleTeam.finalMark !== null,
+  );
+
+  if (!scaleTeams.length) {
+    return projectsUser.currTeam.finalMark;
+  }
+
+  const scaleTeamMark =
+    scaleTeams.reduce((mark, scaleTeam) => mark + scaleTeam.finalMark, 0) /
+    scaleTeams.length;
+
+  const teamUploadMark = projectsUser.currTeam.teamsUploads[0]?.finalMark;
+
+  return (
+    Math.floor(
+      (teamUploadMark ? (scaleTeamMark + teamUploadMark) / 2 : scaleTeamMark) *
+        100,
+    ) / 100
+  );
+};
 
 /**
  *
