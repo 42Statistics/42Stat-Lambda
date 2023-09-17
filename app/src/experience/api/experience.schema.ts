@@ -11,7 +11,7 @@ import { z } from 'zod';
  *
  * @see ProjectsUserUpdator
  */
-export const experienceSchema = z.object({
+export const experienceUserSchema = z.object({
   // id: z.number(),
   userId: z.number(),
   experience: z.number(),

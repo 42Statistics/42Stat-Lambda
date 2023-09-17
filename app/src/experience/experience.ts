@@ -1,6 +1,6 @@
 import type { CursusUser } from '#lambda/cursusUser/api/cursusUser.api.js';
 import {
-  Experience,
+  type ExperienceUser,
   examExperienceErrorUserIds,
 } from '#lambda/experience/api/experience.api.js';
 import { LambdaMongo } from '#lambda/mongodb/mongodb.js';
@@ -15,6 +15,9 @@ import { LambdaError } from '#lambda/util/error.js';
 
 export const EXPERIENCE_USER_COLLECTION = 'experience_users';
 const LEVEL_COLLECTION = 'levels';
+const IS_INTERNSHIP_PROJECT = ({ name }: Pick<Project, 'name'>): boolean => {
+  return name.toLowerCase().startsWith('internship');
+};
 
 type LevelTableElem = {
   lvl: number;
@@ -26,7 +29,7 @@ type UpdatedProjectsUser = Omit<ProjectsUser, 'project' | 'markedAt'> & {
   markedAt: Date;
   cursusUser?: CursusUser;
   currTeam: PassedTeam;
-  experienceUsers: Experience[];
+  experienceUsers: ExperienceUser[];
 };
 
 /**
@@ -77,103 +80,7 @@ export class ExperienceUpdator {
       return;
     }
 
-    const start = await mongo.getCollectionUpdatedAt(
-      EXPERIENCE_USER_COLLECTION,
-    );
-
-    const projectsUsersUpdated = await mongo
-      .db()
-      .collection<ProjectsUser>(PROJECTS_USER_COLLECTION)
-      .aggregate<UpdatedProjectsUser>(
-        //#region aggregation pipeline
-        [
-          {
-            $match: {
-              // todo: $gte
-              markedAt: { $gt: start },
-              'project.name': { $not: { $regex: 'Exam' } },
-              'validated?': true,
-            },
-          },
-          {
-            $addFields: {
-              teams: {
-                $sortArray: { input: '$teams', sortBy: { createdAt: 1 } },
-              },
-            },
-          },
-          {
-            $addFields: {
-              currTeam: { $last: '$teams' },
-            },
-          },
-          {
-            $match: {
-              'currTeam.validated?': true,
-            },
-          },
-          {
-            $lookup: {
-              from: 'projects',
-              localField: 'project.id',
-              foreignField: 'id',
-              as: 'project',
-            },
-          },
-          {
-            $addFields: {
-              project: { $first: '$project' },
-            },
-          },
-          {
-            $match: {
-              'project.difficulty': { $ne: 0 },
-            },
-          },
-          {
-            $lookup: {
-              from: 'cursus_users',
-              localField: 'user.id',
-              foreignField: 'user.id',
-              as: 'cursusUser',
-            },
-          },
-          {
-            $addFields: {
-              cursusUser: { $first: '$cursusUser' },
-            },
-          },
-          {
-            $match: {
-              'cursusUser.user.alumni?': false,
-            },
-          },
-          {
-            $lookup: {
-              from: EXPERIENCE_USER_COLLECTION,
-              localField: 'user.id',
-              foreignField: 'userId',
-              as: 'experienceUsers',
-            },
-          },
-          {
-            $lookup: {
-              from: TEAM_COLLECTION,
-              localField: 'currTeam.id',
-              foreignField: 'id',
-              as: 'currTeam',
-            },
-          },
-          {
-            $addFields: {
-              currTeam: { $first: '$currTeam' },
-            },
-          },
-        ],
-        //#endregion
-      )
-      .toArray();
-
+    const projectsUsersUpdated = await findProjectsUserUpdated(mongo);
     if (!projectsUsersUpdated.length) {
       return;
     }
@@ -185,52 +92,17 @@ export class ExperienceUpdator {
       .sort({ lvl: 1 })
       .toArray();
 
-    const newExperiences = projectsUsersUpdated.reduce(
-      (acc: Experience[], projectsUser) => {
-        const currMark = calculateMark(projectsUser);
-
-        const projectPrevExperience = projectsUser.experienceUsers
-          .filter(
-            (experience) => experience.project.id === projectsUser.project.id,
-          )
-          .reduce((expSum, { experience }) => {
-            return expSum + experience;
-          }, 0);
-
-        const totalPrevExpereince = projectsUser.experienceUsers.reduce(
-          (experienceSum, { experience }) => experienceSum + experience,
-          0,
-        );
-
-        const [expWithoutBonus, expWithBonus] = calculateExperienceByMark(
-          currMark,
-          projectsUser.project,
-          projectPrevExperience,
-        );
-
+    const newExperiencesUsers = projectsUsersUpdated.reduce(
+      (acc: ExperienceUser[], projectsUser) => {
         try {
-          const levelWithoutBonus = calculateLevel(
-            totalPrevExpereince + expWithoutBonus,
+          assertsDataConsistency(projectsUser);
+
+          const newExperience = calculateNewExperience({
+            projectsUser,
             levelTable,
-          );
+          });
 
-          const levelWithBonus = calculateLevel(
-            totalPrevExpereince + expWithBonus,
-            levelTable,
-          );
-
-          // cursus user update
-          if (!projectsUser.cursusUser) {
-            throw new LambdaError('data consistency', projectsUser);
-          }
-
-          const experience =
-            Math.abs(levelWithBonus - projectsUser.cursusUser.level) <
-            Math.abs(levelWithoutBonus - projectsUser.cursusUser.level)
-              ? expWithBonus
-              : expWithoutBonus;
-
-          if (!experience) {
+          if (!newExperience) {
             return acc;
           }
 
@@ -238,25 +110,24 @@ export class ExperienceUpdator {
             userId: projectsUser.user.id,
             cursusId: projectsUser.cursusIds[0],
             createdAt: projectsUser.markedAt,
-            experience,
+            experience: newExperience,
             project: projectsUser.project,
           });
 
           return acc;
         } catch (e) {
           console.error(projectsUser.user.id);
-          console.log(currMark);
           throw e;
         }
       },
       [],
     );
 
-    if (newExperiences.length === 0) {
+    if (newExperiencesUsers.length === 0) {
       return;
     }
 
-    const end = newExperiences.reduce(
+    const end = newExperiencesUsers.reduce(
       (prev, { createdAt }) => (prev > createdAt ? prev : createdAt),
       new Date(0),
     );
@@ -264,13 +135,225 @@ export class ExperienceUpdator {
     await mongo
       .db()
       .collection(EXPERIENCE_USER_COLLECTION)
-      .insertMany(newExperiences);
+      .insertMany(newExperiencesUsers);
 
     await mongo.setCollectionUpdatedAt(EXPERIENCE_USER_COLLECTION, end);
   }
 }
 
-const calculateMark = (projectsUser: UpdatedProjectsUser) => {
+const findProjectsUserUpdated = async (
+  mongo: LambdaMongo,
+): Promise<UpdatedProjectsUser[]> => {
+  const start = await mongo.getCollectionUpdatedAt(EXPERIENCE_USER_COLLECTION);
+
+  return await mongo
+    .db()
+    .collection<ProjectsUser>(PROJECTS_USER_COLLECTION)
+    .aggregate<UpdatedProjectsUser>(
+      //#region aggregation pipeline
+      [
+        {
+          $match: {
+            // todo: $gte
+            markedAt: { $gt: start },
+            'project.name': { $not: { $regex: 'Exam' } },
+            'validated?': true,
+          },
+        },
+        {
+          $addFields: {
+            teams: {
+              $sortArray: { input: '$teams', sortBy: { createdAt: 1 } },
+            },
+          },
+        },
+        {
+          $addFields: {
+            currTeam: { $last: '$teams' },
+          },
+        },
+        {
+          $match: {
+            'currTeam.validated?': true,
+          },
+        },
+        {
+          $lookup: {
+            from: 'projects',
+            localField: 'project.id',
+            foreignField: 'id',
+            as: 'project',
+          },
+        },
+        {
+          $addFields: {
+            project: { $first: '$project' },
+          },
+        },
+        {
+          $match: {
+            'project.difficulty': { $ne: 0 },
+          },
+        },
+        {
+          $lookup: {
+            from: 'cursus_users',
+            localField: 'user.id',
+            foreignField: 'user.id',
+            as: 'cursusUser',
+          },
+        },
+        {
+          $addFields: {
+            cursusUser: { $first: '$cursusUser' },
+          },
+        },
+        {
+          $match: {
+            'cursusUser.user.alumni?': false,
+          },
+        },
+        {
+          $lookup: {
+            from: EXPERIENCE_USER_COLLECTION,
+            localField: 'user.id',
+            foreignField: 'userId',
+            as: 'experienceUsers',
+          },
+        },
+        {
+          $lookup: {
+            from: TEAM_COLLECTION,
+            localField: 'currTeam.id',
+            foreignField: 'id',
+            as: 'currTeam',
+          },
+        },
+        {
+          $addFields: {
+            currTeam: { $first: '$currTeam' },
+          },
+        },
+      ],
+      //#endregion
+    )
+    .toArray();
+};
+
+function assertsDataConsistency(
+  projectsUser: UpdatedProjectsUser,
+): asserts projectsUser is Required<UpdatedProjectsUser> {
+  if (!projectsUser.cursusUser) {
+    throw new LambdaError('data consistency', projectsUser);
+  }
+}
+
+const calculateNewExperience = ({
+  projectsUser,
+  levelTable,
+}: {
+  projectsUser: Required<UpdatedProjectsUser>;
+  levelTable: LevelTableElem[];
+}): number => {
+  if (IS_INTERNSHIP_PROJECT(projectsUser.project)) {
+    return calculateExperienceByLevel({ projectsUser, levelTable });
+  }
+
+  return calculateExperienceByMark({ projectsUser, levelTable });
+};
+
+const calculateExperienceByMark = ({
+  projectsUser,
+  levelTable,
+}: {
+  projectsUser: Required<UpdatedProjectsUser>;
+  levelTable: LevelTableElem[];
+}): number => {
+  const { projectPrevExperience, totalPrevExperience } =
+    calculatePrevExperience(projectsUser);
+
+  const currMark = calculateMark(projectsUser);
+  const { expWithoutCoalition, expWithCoalition } =
+    calculateCoalitionExperience({
+      mark: currMark,
+      project: projectsUser.project,
+      projectPrevExperience,
+    });
+
+  const levelWithoutCoalition = calculateLevel(
+    totalPrevExperience + expWithoutCoalition,
+    levelTable,
+  );
+
+  const levelWithCoalition = calculateLevel(
+    totalPrevExperience + expWithCoalition,
+    levelTable,
+  );
+
+  const experience =
+    Math.abs(levelWithCoalition - projectsUser.cursusUser.level) <
+    Math.abs(levelWithoutCoalition - projectsUser.cursusUser.level)
+      ? expWithCoalition
+      : expWithoutCoalition;
+
+  return experience;
+};
+
+/**
+ *
+ * @description
+ * Internship 과제 같은 경우, final mark 기반으로 경험치가 지급되는 것이 아닌,
+ * Internship 근무 시간에 비례해서 지급이 되기 때문에, 변경된 레벨을 통해 계산할 수 밖에 없습니다.
+ */
+const calculateExperienceByLevel = ({
+  projectsUser,
+  levelTable,
+}: {
+  projectsUser: Required<UpdatedProjectsUser>;
+  levelTable: LevelTableElem[];
+}): number => {
+  const { totalPrevExperience } = calculatePrevExperience(projectsUser);
+
+  const targetLevel = projectsUser.cursusUser.level;
+  const targetLevelInt = Math.floor(targetLevel);
+  const targetLevelFloat = targetLevel - targetLevelInt;
+
+  const upper = levelTable.find((levelElem) => levelElem.lvl > targetLevel);
+  const lower = levelTable.find(
+    (levelElem) => levelElem.lvl === targetLevelInt,
+  );
+
+  assertsLevelFound(upper);
+  assertsLevelFound(lower);
+
+  const targetExperience =
+    lower.xp + Math.floor((upper.xp - lower.xp) * targetLevelFloat);
+
+  // Internship 과제는 시간에 비례해서 경험치가 지급되기 때문에, 끝이 0으로 떨어지게 되는 상황이라 추측하는 중 입니다.
+  return Math.round((targetExperience - totalPrevExperience) / 10) * 10;
+};
+
+const calculatePrevExperience = (
+  projectsUser: UpdatedProjectsUser,
+): { projectPrevExperience: number; totalPrevExperience: number } => {
+  const projectPrevExperience = projectsUser.experienceUsers
+    .filter((experience) => experience.project.id === projectsUser.project.id)
+    .reduce((expSum, { experience }) => {
+      return expSum + experience;
+    }, 0);
+
+  const totalPrevExperience = projectsUser.experienceUsers.reduce(
+    (experienceSum, { experience }) => experienceSum + experience,
+    0,
+  );
+
+  return {
+    projectPrevExperience,
+    totalPrevExperience,
+  };
+};
+
+const calculateMark = (projectsUser: UpdatedProjectsUser): number => {
   const scaleTeams = projectsUser.currTeam.scaleTeams.filter(
     (
       scaleTeam,
@@ -301,27 +384,29 @@ const calculateMark = (projectsUser: UpdatedProjectsUser) => {
  *
  * @description
  * 점수와 프로젝트에 기반하여, 얻는 예상 경험치를 코알리숑 보너스가 있을 때와 없을 때로 나누어 반환합니다.
- *
- * @returns
- * [ 코알리숑 보너스 없는 경험치, 코알리숑 보너스 있는 경험치 ]
  */
-const calculateExperienceByMark = (
-  mark: number,
-  project: Project,
-  projectPrevExperience: number,
-): [number, number] => {
-  return [
-    Math.max(
-      Math.floor((project.difficulty ?? 0) * (mark / 100.0)) -
-        projectPrevExperience,
-      0,
-    ),
-    Math.max(
-      Math.floor((project.difficulty ?? 0) * (mark / 100.0) * 1.042) -
-        projectPrevExperience,
-      0,
-    ),
-  ];
+const calculateCoalitionExperience = ({
+  mark,
+  project,
+  projectPrevExperience,
+}: {
+  mark: number;
+  project: Project;
+  projectPrevExperience: number;
+}): { expWithoutCoalition: number; expWithCoalition: number } => {
+  const expWithoutCoalition = Math.max(
+    Math.floor((project.difficulty ?? 0) * (mark / 100.0)) -
+      projectPrevExperience,
+    0,
+  );
+
+  const expWithCoalition = Math.max(
+    Math.floor((project.difficulty ?? 0) * (mark / 100.0) * 1.042) -
+      projectPrevExperience,
+    0,
+  );
+
+  return { expWithoutCoalition, expWithCoalition };
 };
 
 const calculateLevel = (
