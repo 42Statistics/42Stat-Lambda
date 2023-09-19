@@ -1,0 +1,64 @@
+name: Lambda deploy
+
+on:
+  # 현재 lambda 는 단독 개발 중이라 push 로 처리. 이후 pull request 나 release 등 변경 가능.
+  # 변경 할 경우, 42Stat-Crawler 와 연동하기 위해 workflow_dispatch 를 따로 활성화시켜야 함.
+  push:
+    branches:
+      - main
+
+jobs:
+  Deploy-to-aws:
+    name: Deploy
+    runs-on: ubuntu-latest
+
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      READ_PRIVATE_SUBMODULE_TOKEN: ${{ secrets.READ_PRIVATE_SUBMODULE_TOKEN }}
+
+      LAMBDA_FUNCTION_NAME: ${{ vars.LAMBDA_FUNCTION_NAME }}
+      LAMBDA_EVENT_RULENAME: ${{ vars.LAMBDA_EVENT_RULENAME }}
+      LAMBDA_REGION: ${{ vars.LAMBDA_REGION }}
+      WORKING_DIRECTORY: ${{ vars.WORKING_DIRECTORY }}
+
+    # todo: node 20 으로 업데이트 후 node 설치 부분 지워도 됨.
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          submodules: true
+          token: ${{ env.READ_PRIVATE_SUBMODULE_TOKEN }}
+
+      - name: Install Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - name: Build
+        # todo: prepare 말고 다른 이름으로 바꿀 것
+        run: |
+          pnpm i
+          pnpm prepare
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+
+      - name: Install aws cli
+        run: |
+          sudo apt-get update
+          sudo apt-get install awscli
+
+      - name: Update function code
+        run: |
+          aws lambda update-function-code --function-name ${{ env.LAMBDA_FUNCTION_NAME }} --zip-file fileb://./deploy/index.zip --region ${{ env.LAMBDA_REGION }}
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+
+      # dispatch 로 실행되는 경우, event rule 이 비활성 상태임.
+      - name: Enable event rule
+        run: |
+          aws events enable-rule --name ${{ env.LAMBDA_EVENT_RULENAME }} --region ${{ env.LAMBDA_REGION }}
