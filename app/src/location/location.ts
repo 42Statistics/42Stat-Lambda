@@ -21,11 +21,12 @@ export class LocationUpdator {
   /**
    *
    * @description
-   * @see updateOngoing   O: 아직 자리에 접속해 있는 유저
-   * @see updateEnded     E: 접속을 종료한 유저
+   * @see updatePrevOngoing   P: 이전에 end_at 이 null 인 유저
+   * @see updateOngoing       O: 아직 자리에 접속해 있는 유저
+   * @see updateEnded         E: 접속을 종료한 유저
    *
    * 2023-05 기준
-   * 필요 요청 수: U(1 ~ 3 + n) + E(1 ~ 2)
+   * 필요 요청 수: P (1 ~ 5) + U(1 ~ 3 + n) + E(1 ~ 2)
    * 에상 소요 시간: 5 ~ 10초 + n
    *
    * !! 피신이 구분되지 않음 !!
@@ -40,6 +41,7 @@ export class LocationUpdator {
       end,
       collection: LOCATION_COLLECTION,
       callback: async (start, end) => {
+        await LocationUpdator.updatePrevOngoing(mongo);
         await LocationUpdator.updateOngoing(mongo, start, end);
         await LocationUpdator.updateEnded(mongo, start, end);
       },
@@ -101,6 +103,43 @@ export class LocationUpdator {
   @FetchApiAction
   private static async fetchEnded(start: Date, end: Date): Promise<Location[]> {
     const locationDtos = await fetchAllPages(LOCATION_API.ENDED(start, end));
+
+    return parseLocations(locationDtos);
+  }
+
+  @UpdateAction
+  @LogAsyncEstimatedTime
+  private static async updatePrevOngoing(mongo: LambdaMongo): Promise<void> {
+    const prevOngoingIds = await mongo
+      .db()
+      .collection(LOCATION_COLLECTION)
+      .find<{ id: number }>({ endAt: null }, { projection: { _id: 0, id: 1 } })
+      .map((doc) => doc.id)
+      .toArray();
+
+    if (!prevOngoingIds.length) {
+      return;
+    }
+
+    const updatedLocations = await LocationUpdator.fetchByIds(prevOngoingIds);
+
+    const deleted = updatedLocations.filter(
+      (location) =>
+        prevOngoingIds.find((id) => id === location.id) === undefined,
+    );
+
+    if (deleted.length) {
+      await mongo.pruneMany(LOCATION_COLLECTION, {
+        id: { $in: deleted },
+      });
+    }
+
+    await mongo.upsertManyById(LOCATION_COLLECTION, updatedLocations);
+  }
+
+  @FetchApiAction
+  private static async fetchByIds(ids: number[]): Promise<Location[]> {
+    const locationDtos = await fetchAllPages(LOCATION_API.BY_IDS(ids));
 
     return parseLocations(locationDtos);
   }
