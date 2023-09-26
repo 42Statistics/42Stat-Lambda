@@ -54,10 +54,17 @@ export const fetchAllPages = async (
     ),
   );
 
-  return docs.reduce((acc, doc) => {
-    acc.push(...doc);
-    return acc;
-  }, startPageInfo.dtos);
+  try {
+    return docs.reduce((acc, doc) => {
+      acc.push(...doc);
+      return acc;
+    }, startPageInfo.dtos);
+  } catch (e) {
+    console.error('startPage', JSON.stringify(startPageInfo.dtos, null, '  '));
+    console.error('doc', JSON.stringify(docs, null, '  '));
+
+    throw e;
+  }
 };
 
 const fetchStartPage = async (
