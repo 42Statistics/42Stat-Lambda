@@ -25,12 +25,8 @@ const UPDATED = (start: Date, end: Date): URL =>
     .addRange('updated_at', start, end)
     .toURL();
 
-const BY_IDS = (ids: number[]): URL =>
-  new FtApiURLBuilder(PROJECTS_USER_EP).addFilter('id', ids.join(',')).toURL();
-
 export const PROJECTS_USER_API = {
   UPDATED,
-  BY_IDS,
 } as const;
 
 export const parseProjectsUsers = (dtos: object[]): ProjectsUser[] =>

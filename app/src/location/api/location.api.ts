@@ -24,7 +24,8 @@ const ONGOING = (start: Date, end: Date): URL =>
 /**
  *
  * @description
- * 갱신 주기보다 짧게 로그가 남을 수 있기 때문에 하단의 `BY_IDS` 와 관계없이 사용해야 함
+ * 갱신 주기보다 짧게 로그가 남을 수 있기 때문에 id 로 endAt null 인 데이터들 받아오는 것과
+ * 관계없이 사용해야 함
  */
 const ENDED = (start: Date, end: Date): URL =>
   new FtApiURLBuilder(LOCATION_EP)
@@ -34,19 +35,9 @@ const ENDED = (start: Date, end: Date): URL =>
     .addSort('begin_at', FtApiURLBuilder.SortOrder.ASC)
     .toURL();
 
-/**
- *
- * @description
- * location api 에 버그가 생기면 end_at 이 null 인 상태로 존재하기 때문에,
- * 기존에 있던 location 들의 점검이 필요함.
- */
-const BY_IDS = (ids: number[]): URL =>
-  new FtApiURLBuilder(LOCATION_EP).addFilter('id', ids.join(',')).toURL();
-
 export const LOCATION_API = {
   ONGOING,
   ENDED,
-  BY_IDS,
 } as const;
 
 export const parseLocations = (dtos: object[]): Location[] =>

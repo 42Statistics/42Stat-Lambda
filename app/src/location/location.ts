@@ -1,12 +1,14 @@
 import { getStudentIds } from '#lambda/cursusUser/cursusUser.js';
 import {
   LOCATION_API,
+  LOCATION_EP,
   Location,
   isCluster,
   parseLocations,
 } from '#lambda/location/api/location.api.js';
 import { LambdaMongo } from '#lambda/mongodb/mongodb.js';
 import { fetchAllPages } from '#lambda/request/fetchAllPages.js';
+import { fetchByIds } from '#lambda/request/fetchByIds.js';
 import {
   FetchApiAction,
   LogAsyncEstimatedTime,
@@ -107,6 +109,12 @@ export class LocationUpdator {
     return parseLocations(locationDtos);
   }
 
+  /**
+   *
+   * @description
+   * location api 에 버그가 생기면 end_at 이 null 인 상태로 존재하기 때문에,
+   * 기존에 있던 location 들의 점검이 필요함.
+   */
   @UpdateAction
   @LogAsyncEstimatedTime
   private static async updatePrevOngoing(mongo: LambdaMongo): Promise<void> {
@@ -139,7 +147,7 @@ export class LocationUpdator {
 
   @FetchApiAction
   private static async fetchByIds(ids: number[]): Promise<Location[]> {
-    const locationDtos = await fetchAllPages(LOCATION_API.BY_IDS(ids));
+    const locationDtos = await fetchByIds(LOCATION_EP, ids);
 
     return parseLocations(locationDtos);
   }

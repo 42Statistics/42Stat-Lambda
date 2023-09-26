@@ -4,10 +4,12 @@ import { getStudentIds } from '#lambda/cursusUser/cursusUser.js';
 import { LambdaMongo } from '#lambda/mongodb/mongodb.js';
 import {
   PROJECTS_USER_API,
+  PROJECTS_USER_EP,
   ProjectsUser,
   parseProjectsUsers,
 } from '#lambda/projectsUser/api/projectsUser.api.js';
 import { fetchAllPages } from '#lambda/request/fetchAllPages.js';
+import { fetchByIds } from '#lambda/request/fetchByIds.js';
 import {
   FetchApiAction,
   LogAsyncEstimatedTime,
@@ -90,18 +92,13 @@ export class ProjectsUserUpdator {
       .map((doc) => doc.id)
       .toArray();
 
-    const updatedProjectsUsers: ProjectsUser[] = [];
-
-    for (let i = 0; i < projectsUserIds.length; i += 100) {
-      const currIds = projectsUserIds.slice(
-        i,
-        Math.min(projectsUserIds.length, i + 100),
-      );
-
-      const projectsUsers = await this.fetchProjectsUsersByIds(currIds);
-
-      updatedProjectsUsers.push(...projectsUsers);
+    if (!projectsUserIds.length) {
+      return;
     }
+
+    const updatedProjectsUsers = await this.fetchProjectsUsersByIds(
+      projectsUserIds,
+    );
 
     await mongo.upsertManyById(PROJECTS_USER_COLLECTION, updatedProjectsUsers);
   }
@@ -110,7 +107,7 @@ export class ProjectsUserUpdator {
   private static async fetchProjectsUsersByIds(
     ids: number[],
   ): Promise<ProjectsUser[]> {
-    const projectsUserDtos = await fetchAllPages(PROJECTS_USER_API.BY_IDS(ids));
+    const projectsUserDtos = await fetchByIds(PROJECTS_USER_EP, ids);
 
     return parseProjectsUsers(projectsUserDtos);
   }

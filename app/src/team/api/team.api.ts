@@ -42,12 +42,8 @@ const UPDATED = (start: Date, end: Date): URL =>
     .addSort('created_at', FtApiURLBuilder.SortOrder.ASC)
     .toURL();
 
-const BY_IDS = (ids: number[]): URL =>
-  new FtApiURLBuilder(TEAM_EP).addFilter('id', ids.join(',')).toURL();
-
 export const TEAM_API = {
   UPDATED,
-  BY_IDS,
 } as const;
 
 export const parseTeams = (dtos: object[]): Team[] =>

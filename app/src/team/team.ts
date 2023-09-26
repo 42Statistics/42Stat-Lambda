@@ -4,7 +4,13 @@ import { getStudentIds } from '#lambda/cursusUser/cursusUser.js';
 import { LambdaMongo } from '#lambda/mongodb/mongodb.js';
 import { ProjectsUserUpdator } from '#lambda/projectsUser/projectsUser.js';
 import { fetchAllPages } from '#lambda/request/fetchAllPages.js';
-import { TEAM_API, Team, parseTeams } from '#lambda/team/api/team.api.js';
+import { fetchByIds } from '#lambda/request/fetchByIds.js';
+import {
+  TEAM_API,
+  TEAM_EP,
+  Team,
+  parseTeams,
+} from '#lambda/team/api/team.api.js';
 import {
   At_10_Action,
   At_20_Action,
@@ -89,18 +95,10 @@ export class TeamUpdator {
       .map((doc) => doc.id)
       .toArray();
 
-    const targetTeamIds: number[] = [];
-
-    for (let i = 0; i < teamIds.length; i += 100) {
-      const currIds = teamIds.slice(i, Math.min(teamIds.length, i + 100));
-      const teams = await this.fetchTeamsByIds(currIds);
-
-      currIds.forEach((id) => {
-        if (teams.find((team) => team.id === id) === undefined) {
-          targetTeamIds.push(id);
-        }
-      });
-    }
+    const targetTeams = await this.fetchTeamsByIds(teamIds);
+    const targetTeamIds = teamIds.filter(
+      (id) => targetTeams.find((team) => team.id === id) === undefined,
+    );
 
     if (!targetTeamIds.length) {
       return;
@@ -113,35 +111,31 @@ export class TeamUpdator {
   @UpdateAction
   @LogAsyncEstimatedTime
   private static async updateGiveUps(mongo: LambdaMongo): Promise<void> {
+    const prevState: Team['status'] = 'waiting_for_correction';
+
     const teamIds = await mongo
       .db()
       .collection(TEAM_COLLECTION)
-      .find<Team>({ status: 'waiting_for_correction' })
+      .find<Team>({ status: prevState })
       .map((doc) => doc.id)
       .toArray();
 
-    const updatedTeams: Team[] = [];
+    const updatedTeams = await this.fetchTeamsByIds(teamIds);
+    const statusChangedTeams = updatedTeams.filter(
+      (team) => team.status !== prevState,
+    );
 
-    for (let i = 0; i < teamIds.length; i += 100) {
-      const currIds = teamIds.slice(i, Math.min(teamIds.length, i + 100));
-      const teams = await this.fetchTeamsByIds(currIds);
-
-      updatedTeams.push(
-        ...teams.filter((team) => team.status !== 'waiting_for_correction'),
-      );
-    }
-
-    await mongo.upsertManyById(TEAM_COLLECTION, updatedTeams);
+    await mongo.upsertManyById(TEAM_COLLECTION, statusChangedTeams);
 
     await ProjectsUserUpdator.updateGiveUpsByTeamIds(
       mongo,
-      updatedTeams.map(({ id }) => id),
+      statusChangedTeams.map(({ id }) => id),
     );
   }
 
   @FetchApiAction
   private static async fetchTeamsByIds(ids: number[]): Promise<Team[]> {
-    const teamDtos = await fetchAllPages(TEAM_API.BY_IDS(ids));
+    const teamDtos = await fetchByIds(TEAM_EP, ids);
 
     return parseTeams(teamDtos);
   }
