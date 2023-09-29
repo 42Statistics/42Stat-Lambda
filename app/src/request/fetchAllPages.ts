@@ -86,6 +86,11 @@ const fetchStartPage = async (
 
   const xTotalHeader = response.headers.get('X-Total');
   if (!xTotalHeader) {
+    console.error(
+      'X-Total not exist response:',
+      JSON.stringify(response, null, '  '),
+    );
+
     throw new LambdaError('X-Total not exist in url: ' + String(endpoint));
   }
 
