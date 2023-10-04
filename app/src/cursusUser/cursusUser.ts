@@ -2,6 +2,7 @@ import { CampusUserUpdator } from '#lambda/campusUser/campusUser.js';
 import {
   CURSUS_USER_API,
   CursusUser,
+  HYULIM,
   isStudent,
   parseCursusUsers,
 } from '#lambda/cursusUser/api/cursusUser.api.js';
@@ -91,15 +92,27 @@ export class CursusUserUpdator {
   private static async updateActivated(mongo: LambdaMongo): Promise<void> {
     const transferIds = CampusUserUpdator.getTransferIds();
 
-    const activated = await CursusUserUpdator.fetchActivated().then(
-      (cursusUsers) =>
-        cursusUsers.filter(
-          (cursusUser) =>
-            isStudent(cursusUser) && !hasId(transferIds, cursusUser.user.id),
-        ),
-    );
+    const activated = await CursusUserUpdator.fetchActivated();
 
-    await mongo.upsertManyById(CURSUS_USER_COLLECTION, activated);
+    const filtered = activated
+      .filter(
+        (cursusUser) =>
+          isStudent(cursusUser) && !hasId(transferIds, cursusUser.user.id),
+      )
+      // #region hyulim 예외 처리
+      .map((cursusUser) => {
+        if (cursusUser.user.id === HYULIM) {
+          return {
+            ...cursusUser,
+            grade: 'Learner',
+          };
+        }
+
+        return cursusUser;
+      });
+    // #endregion
+
+    await mongo.upsertManyById(CURSUS_USER_COLLECTION, filtered);
 
     // todo: 적당한 위치 찾아주기. 현재 시점에선 cursus user의 업데이트 성공을 알려주고 있지 않기
     // 때문에, 이런 조치가 필요합니다.

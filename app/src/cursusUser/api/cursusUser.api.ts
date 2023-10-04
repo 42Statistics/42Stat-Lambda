@@ -64,7 +64,9 @@ export const isStudent = (cursusUser: CursusUser): boolean =>
   !cursusUser.user['staff?'] &&
   cursusUser.user.kind === 'student' &&
   cursusUser.hasCoalition &&
-  cursusUser.user.firstName !== 'Hyundong' &&
+  !(
+    cursusUser.user.id !== HYULIM && cursusUser.user.firstName === 'Hyundong'
+  ) &&
   !isWeirdUserId(cursusUser.user.id);
 
 // active? 는 다른 의미의 값이라는게 문제...
