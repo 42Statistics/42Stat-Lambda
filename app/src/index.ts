@@ -86,18 +86,22 @@ const main = async (): Promise<void> => {
         }, new Date()),
       );
 
-    const response = await fetch(statUrl, {
-      method: 'post',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ timestamp: minUpdatedAt.getTime() }),
-    });
+    try {
+      const response = await fetch(statUrl, {
+        method: 'post',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ timestamp: minUpdatedAt.getTime() }),
+      });
 
-    if (response.ok) {
-      console.log('lambda update success');
-    } else {
-      console.error('lambda update failed');
+      if (response.ok) {
+        console.log('lambda update success');
+      } else {
+        console.error('lambda update failed');
+      }
+    } catch (e) {
+      console.error('lambda POST to application failed.', e);
     }
   });
 };

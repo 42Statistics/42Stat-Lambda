@@ -478,7 +478,7 @@ const testLevelCalculation = async (mongo: LambdaMongo): Promise<void> => {
       Math.abs(calcLevel - curr.level) >= 0.01 &&
       !examExperienceErrorUserIds.find((uid) => uid === curr.user.id)
     ) {
-      console.error(calcLevel, curr.level, curr.user.id);
+      console.warn(calcLevel, curr.level, curr.user.id);
       return prevSuccessCount;
     }
 
