@@ -41,8 +41,6 @@ export class ProjectUpdator {
       end,
       collection: PROJECT_COLLECTION,
       callback: async (start, end) => {
-        await ProjectUpdator.fetchUpdated(start, end);
-
         const updated = await ProjectUpdator.fetchUpdated(start, end);
 
         await mongo.upsertManyById(ORIGINAL_PROJECT_COLLECTION, updated);
