@@ -87,10 +87,16 @@ const main = async (): Promise<void> => {
       );
 
     try {
+      const headerName = process.env.STAT_APP_AUTH_HEADER_NAME;
+      const headerValue = process.env.STAT_APP_AUTH_HEADER_VALUE;
+      assertEnvExist(headerName);
+      assertEnvExist(headerValue);
+
       const response = await fetch(statUrl, {
         method: 'post',
         headers: {
           'Content-Type': 'application/json',
+          [headerName]: headerValue,
         },
         body: JSON.stringify({ timestamp: minUpdatedAt.getTime() }),
       });
