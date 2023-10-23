@@ -1,8 +1,6 @@
 name: Lambda deploy
 
 on:
-  # 현재 lambda 는 단독 개발 중이라 push 로 처리. 이후 pull request 나 release 등 변경 가능.
-  # 변경 할 경우, 42Stat-Crawler 와 연동하기 위해 workflow_dispatch 를 따로 활성화시켜야 함.
   push:
     branches:
       - main
@@ -57,8 +55,3 @@ jobs:
         run: |
           aws lambda update-function-code --function-name ${{ env.LAMBDA_FUNCTION_NAME }} --zip-file fileb://./deploy/index.zip --region ${{ env.LAMBDA_REGION }}
         working-directory: ${{ env.WORKING_DIRECTORY }}
-
-      # dispatch 로 실행되는 경우, event rule 이 비활성 상태임.
-      - name: Enable event rule
-        run: |
-          aws events enable-rule --name ${{ env.LAMBDA_EVENT_RULENAME }} --region ${{ env.LAMBDA_REGION }}

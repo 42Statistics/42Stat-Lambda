@@ -36,6 +36,7 @@
     "typescript": "5.0.4"
   },
   "dependencies": {
+    "@aws-sdk/client-secrets-manager": "^3.433.0",
     "camelcase-keys": "^8.0.2",
     "dotenv": "^16.0.3",
     "la-seine": "^0.0.7",
