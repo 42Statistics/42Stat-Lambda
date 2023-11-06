@@ -17,6 +17,18 @@ import {
 import { hasId } from '#lambda/util/hasId.js';
 
 export const LOCATION_COLLECTION = 'locations';
+export const DAILY_LOGTIME_COLLECTION = 'daily_logtimes';
+
+type LocationsPerUser = {
+  userId: number;
+  locations: Pick<Location, 'beginAt' | 'endAt'>[];
+};
+
+type DailyLogtime = {
+  userId: number;
+  date: Date;
+  value: number;
+};
 
 // eslint-disable-next-line
 export class LocationUpdator {
@@ -46,6 +58,7 @@ export class LocationUpdator {
         await LocationUpdator.updatePrevOngoing(mongo);
         await LocationUpdator.updateOngoing(mongo, start, end);
         await LocationUpdator.updateEnded(mongo, start, end);
+        await LocationUpdator.updateDailyLogtime(mongo, end);
       },
     });
   }
@@ -150,5 +163,124 @@ export class LocationUpdator {
     const locationDtos = await fetchByIds(LOCATION_EP, ids);
 
     return parseLocations(locationDtos);
+  }
+
+  @UpdateAction
+  @LogAsyncEstimatedTime
+  private static async updateDailyLogtime(
+    mongo: LambdaMongo,
+    end: Date,
+  ): Promise<void> {
+    const start = new Date(end.getTime() - 1000 * 60 * 60 * 24 * 30);
+
+    const locations = await LocationUpdator.findLocationsPerUserByDate(
+      mongo,
+      start,
+      end,
+    );
+
+    const dailyLogtimes = locations.reduce(
+      (accLogtimes, location) => [
+        ...accLogtimes,
+        ...LocationUpdator.toDailyLogtime(location, start, end),
+      ],
+      new Array<DailyLogtime>(),
+    );
+
+    await Promise.all(
+      dailyLogtimes.map((dailyLogtime) =>
+        LocationUpdator.saveDailyLogtime(mongo, dailyLogtime),
+      ),
+    );
+  }
+
+  private static async findLocationsPerUserByDate(
+    mongo: LambdaMongo,
+    start: Date,
+    end: Date,
+  ): Promise<LocationsPerUser[]> {
+    return await mongo
+      .db()
+      .collection(LOCATION_COLLECTION)
+      .aggregate<LocationsPerUser>([
+        {
+          $match: {
+            beginAt: { $lt: end },
+            $or: [{ endAt: { $gte: start } }, { endAt: null }],
+          },
+        },
+        {
+          $group: {
+            _id: '$user.id',
+            locations: {
+              $push: {
+                beginAt: '$beginAt',
+                endAt: '$endAt',
+              },
+            },
+          },
+        },
+        {
+          $project: {
+            _id: 0,
+            userId: '$_id',
+            locations: 1,
+          },
+        },
+      ])
+      .toArray();
+  }
+
+  private static toDailyLogtime(
+    { userId, locations }: LocationsPerUser,
+    start: Date,
+    end: Date,
+  ): DailyLogtime[] {
+    const logtimeMap = locations.reduce((logtimeMap, curr) => {
+      const startDateTime = Math.max(curr.beginAt.getTime(), start.getTime());
+      const endDateTime = curr.endAt?.getTime() ?? end.getTime();
+
+      for (
+        let dateTime = startDateTime;
+        dateTime < endDateTime;
+        dateTime = new Date(dateTime).setHours(24, 0, 0, 0)
+      ) {
+        const beginOfDate = new Date(dateTime).setHours(0, 0, 0, 0);
+        const beginOfNextDate = new Date(dateTime).setHours(24, 0, 0, 0);
+
+        const prevLogtime = logtimeMap.get(beginOfDate) ?? 0;
+
+        logtimeMap.set(
+          beginOfDate,
+          prevLogtime + (Math.min(endDateTime, beginOfNextDate) - dateTime),
+        );
+      }
+
+      return logtimeMap;
+    }, new Map<number, number>());
+
+    return Array.from(logtimeMap.entries()).map(([date, value]) => ({
+      userId,
+      date: new Date(date),
+      value,
+    }));
+  }
+
+  private static async saveDailyLogtime(
+    mongo: LambdaMongo,
+    logtime: DailyLogtime,
+  ): Promise<void> {
+    await mongo.db().collection(DAILY_LOGTIME_COLLECTION).updateOne(
+      {
+        userId: logtime.userId,
+        date: logtime.date,
+      },
+      {
+        $set: logtime,
+      },
+      {
+        upsert: true,
+      },
+    );
   }
 }
