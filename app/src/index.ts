@@ -44,72 +44,72 @@ const main = async (): Promise<void> => {
   const mongoUrl = process.env.MONGODB_URL;
   assertEnvExist(mongoUrl);
 
-  await LambdaMongo.withMongo(mongoUrl, async (mongo) => {
-    const end = new Date();
+  await using mongo = await LambdaMongo.createInstance(mongoUrl);
 
-    const updators: LambdaUpdator[] = [
-      // todo: 현재는 transfer 대응을 위해 무조건 campus user 부터 갱신해야 함.
-      CampusUserUpdator,
-      ProjectsUserUpdator,
-      TeamUpdator,
-      CursusUserUpdator,
-      ExamUpdator,
-      LocationUpdator,
-      ScoreUpdator,
-      QuestsUserUpdator,
-      EventUpdator,
-      EventsUserUpdator,
-      ScaleTeamUpdator,
-      ProjectUpdator,
-      ProjectSessionUpdator,
-      ProjectSessionsSkillUpdator,
-      CoalitionsUserUpdator,
-      TitleUpdator,
-      TitlesUserUpdator,
-      SkillUpdator,
-      UserUpdator,
-    ];
+  const end = new Date();
 
-    await execUpdators(updators, mongo, end);
+  const updators: LambdaUpdator[] = [
+    // todo: 현재는 transfer 대응을 위해 무조건 campus user 부터 갱신해야 함.
+    CampusUserUpdator,
+    ProjectsUserUpdator,
+    TeamUpdator,
+    CursusUserUpdator,
+    ExamUpdator,
+    LocationUpdator,
+    ScoreUpdator,
+    QuestsUserUpdator,
+    EventUpdator,
+    EventsUserUpdator,
+    ScaleTeamUpdator,
+    ProjectUpdator,
+    ProjectSessionUpdator,
+    ProjectSessionsSkillUpdator,
+    CoalitionsUserUpdator,
+    TitleUpdator,
+    TitlesUserUpdator,
+    SkillUpdator,
+    UserUpdator,
+  ];
 
-    const statUrl = process.env.STAT_APP_URL;
-    assertEnvExist(statUrl);
+  await execUpdators(updators, mongo, end);
 
-    const minUpdatedAt = await mongo
-      .db()
-      .collection<{ updatedAt: Date }>(LOG_COLLECTION)
-      .find({}, { projection: { updatedAt: 1 } })
-      .toArray()
-      .then((logs) =>
-        logs.reduce((min, { updatedAt }) => {
-          return min < updatedAt ? min : updatedAt;
-        }, new Date()),
-      );
+  const statUrl = process.env.STAT_APP_URL;
+  assertEnvExist(statUrl);
 
-    try {
-      const headerName = process.env.STAT_APP_AUTH_HEADER_NAME;
-      const headerValue = process.env.STAT_APP_AUTH_HEADER_VALUE;
-      assertEnvExist(headerName);
-      assertEnvExist(headerValue);
+  const minUpdatedAt = await mongo
+    .db()
+    .collection<{ updatedAt: Date }>(LOG_COLLECTION)
+    .find({}, { projection: { updatedAt: 1 } })
+    .toArray()
+    .then((logs) =>
+      logs.reduce((min, { updatedAt }) => {
+        return min < updatedAt ? min : updatedAt;
+      }, new Date()),
+    );
 
-      const response = await fetch(statUrl, {
-        method: 'post',
-        headers: {
-          'Content-Type': 'application/json',
-          [headerName]: headerValue,
-        },
-        body: JSON.stringify({ timestamp: minUpdatedAt.getTime() }),
-      });
+  try {
+    const headerName = process.env.STAT_APP_AUTH_HEADER_NAME;
+    const headerValue = process.env.STAT_APP_AUTH_HEADER_VALUE;
+    assertEnvExist(headerName);
+    assertEnvExist(headerValue);
 
-      if (response.ok) {
-        console.log('lambda update success');
-      } else {
-        console.error('lambda update failed');
-      }
-    } catch (e) {
-      console.error('lambda POST to application failed.', e);
+    const response = await fetch(statUrl, {
+      method: 'post',
+      headers: {
+        'Content-Type': 'application/json',
+        [headerName]: headerValue,
+      },
+      body: JSON.stringify({ timestamp: minUpdatedAt.getTime() }),
+    });
+
+    if (response.ok) {
+      console.log('lambda update success');
+    } else {
+      console.error('lambda update failed');
     }
-  });
+  } catch (e) {
+    console.error('lambda POST to application failed.', e);
+  }
 };
 
 export const handler = main;

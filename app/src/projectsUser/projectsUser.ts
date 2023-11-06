@@ -96,9 +96,8 @@ export class ProjectsUserUpdator {
       return;
     }
 
-    const updatedProjectsUsers = await this.fetchProjectsUsersByIds(
-      projectsUserIds,
-    );
+    const updatedProjectsUsers =
+      await this.fetchProjectsUsersByIds(projectsUserIds);
 
     await mongo.upsertManyById(PROJECTS_USER_COLLECTION, updatedProjectsUsers);
   }

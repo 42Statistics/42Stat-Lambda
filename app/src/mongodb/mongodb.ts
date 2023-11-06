@@ -47,27 +47,21 @@ type LogUpdatedAt =
   | typeof PROJECT_SESSIONS_SKILL_COLLECTION
   | typeof USER_COLLECTION;
 
-export class LambdaMongo {
-  private static async createInstance(
+export class LambdaMongo implements AsyncDisposable {
+  static async createInstance(
     url: string,
     mongoOptions?: MongoClientOptions,
   ): Promise<LambdaMongo> {
-    const client = new MongoClient(url, mongoOptions);
+    const client = new MongoClient(url, {
+      maxPoolSize: 16,
+      minPoolSize: 16,
+      maxIdleTimeMS: 1000 * 5,
+      ...mongoOptions,
+    });
 
     await client.connect();
 
     return new LambdaMongo(client);
-  }
-
-  static async withMongo(
-    url: string,
-    callback: (mogno: LambdaMongo) => unknown,
-  ): Promise<void> {
-    const mongo = await LambdaMongo.createInstance(url);
-
-    await callback(mongo);
-
-    await mongo.closeConnection();
   }
 
   private readonly client: MongoClient;
@@ -77,6 +71,10 @@ export class LambdaMongo {
     this.client = mongo;
 
     this.mode = process.env.DEV ? 'dev' : 'prod';
+  }
+
+  async [Symbol.asyncDispose](): Promise<void> {
+    await this.client.close();
   }
 
   @Bound
