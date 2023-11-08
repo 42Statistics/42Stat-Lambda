@@ -1,9 +1,10 @@
 import { SEOUL_COALITION_IDS } from '#lambda/coalition/api/coalition.api.js';
+import { TIMEZONE } from '#lambda/index.js';
 import { LambdaMongo } from '#lambda/mongodb/mongodb.js';
 import { fetchAllPages } from '#lambda/request/fetchAllPages.js';
 import {
-  SCORE_EDGE_CASE,
   SCORE_API,
+  SCORE_EDGE_CASE,
   Score,
   parseScores,
 } from '#lambda/score/api/score.api.js';
@@ -14,6 +15,7 @@ import {
 } from '#lambda/util/decorator.js';
 
 export const SCORE_COLLECTION = 'scores';
+const DAILY_SCORE_VALUES_VIEW = 'mv_daily_score_values';
 
 type CountByCoalitionId = {
   coalitionId: number;
@@ -34,11 +36,18 @@ export class ScoreUpdator {
    * coalition 별로 한번씩 요청을 보내보아야 하지만, 체육대회 등의 행사가 있어 모든 coalition user
    * 에게 score 가 지급되는게 아니면, 각 한번으로 충분함.
    */
+  @UpdateAction
   static async update(mongo: LambdaMongo, end: Date): Promise<void> {
-    await ScoreUpdator.updateByCoalition(mongo, end);
+    await mongo.withCollectionUpdatedAt({
+      end,
+      collection: SCORE_COLLECTION,
+      callback: async (start, end) => {
+        await ScoreUpdator.updateByCoalition(mongo, end);
+        await ScoreUpdator.updateDailyScoreValuesView(mongo, start, end);
+      },
+    });
   }
 
-  @UpdateAction
   @LogAsyncEstimatedTime
   private static async updateByCoalition(
     mongo: LambdaMongo,
@@ -109,5 +118,89 @@ export class ScoreUpdator {
         SCORE_EDGE_CASE.IS_GOOD_IDS(score) &&
         score.createdAt.getTime() < end.getTime(),
     );
+  }
+
+  @LogAsyncEstimatedTime
+  private static async updateDailyScoreValuesView(
+    mongo: LambdaMongo,
+    start: Date,
+    end: Date,
+  ): Promise<void> {
+    await mongo
+      .db()
+      .collection(SCORE_COLLECTION)
+      .aggregate([
+        {
+          $match: {
+            createdAt: {
+              $gte: start,
+              $lt: end,
+            },
+            coalitionsUserId: { $ne: null },
+          },
+        },
+        {
+          $group: {
+            _id: {
+              coalitionId: '$coalitionId',
+              date: {
+                $dateFromParts: {
+                  year: {
+                    $year: {
+                      date: '$createdAt',
+                      timezone: TIMEZONE,
+                    },
+                  },
+                  month: {
+                    $month: {
+                      date: '$createdAt',
+                      timezone: TIMEZONE,
+                    },
+                  },
+                  day: {
+                    $dayOfMonth: {
+                      date: '$createdAt',
+                      timezone: TIMEZONE,
+                    },
+                  },
+                  timezone: TIMEZONE,
+                },
+              },
+            },
+            value: { $sum: '$value' },
+          },
+        },
+        {
+          $project: {
+            _id: 0,
+            coalitionId: '$_id.coalitionId',
+            date: '$_id.date',
+            value: 1,
+          },
+        },
+        {
+          $sort: {
+            date: 1,
+            coalitionId: 1,
+          },
+        },
+        {
+          $merge: {
+            into: DAILY_SCORE_VALUES_VIEW,
+            on: ['date', 'coalitionId'],
+            whenMatched: [
+              {
+                $set: {
+                  value: {
+                    $sum: ['$value', '$$new.value'],
+                  },
+                },
+              },
+            ],
+            whenNotMatched: 'insert',
+          },
+        },
+      ])
+      .toArray();
   }
 }

@@ -1,3 +1,4 @@
+import { TIMEZONE } from '#lambda/index.js';
 import { LambdaMongo } from '#lambda/mongodb/mongodb.js';
 import { fetchAllPages } from '#lambda/request/fetchAllPages.js';
 import {
@@ -12,6 +13,7 @@ import {
 } from '#lambda/util/decorator.js';
 
 export const SCALE_TEAM_COLLECTION = 'scale_teams';
+const DAILY_USER_SCALE_TEAM_COUNTS_VIEW = 'mv_daily_user_scale_team_counts';
 
 // eslint-disable-next-line
 export class ScaleTeamUpdator {
@@ -26,25 +28,31 @@ export class ScaleTeamUpdator {
    *
    * 끝난 평가가 100개를 넘을 때 마다 요청을 한번씩 더 보내야 함.
    */
-  static async update(mongo: LambdaMongo, end: Date): Promise<void> {
-    await ScaleTeamUpdator.updateFilled(mongo, end);
-  }
-
   @UpdateAction
-  @LogAsyncEstimatedTime
-  private static async updateFilled(
-    mongo: LambdaMongo,
-    end: Date,
-  ): Promise<void> {
+  static async update(mongo: LambdaMongo, end: Date): Promise<void> {
     await mongo.withCollectionUpdatedAt({
       end,
       collection: SCALE_TEAM_COLLECTION,
       callback: async (start, end) => {
-        const filled = await ScaleTeamUpdator.fetchFilled(start, end);
-
-        await mongo.upsertManyById(SCALE_TEAM_COLLECTION, filled);
+        await ScaleTeamUpdator.updateFilled(mongo, start, end);
+        await ScaleTeamUpdator.updateDailyScaleTeamCountsView(
+          mongo,
+          start,
+          end,
+        );
       },
     });
+  }
+
+  @LogAsyncEstimatedTime
+  private static async updateFilled(
+    mongo: LambdaMongo,
+    start: Date,
+    end: Date,
+  ): Promise<void> {
+    const filled = await ScaleTeamUpdator.fetchFilled(start, end);
+
+    await mongo.upsertManyById(SCALE_TEAM_COLLECTION, filled);
   }
 
   @FetchApiAction
@@ -57,5 +65,87 @@ export class ScaleTeamUpdator {
     );
 
     return parseScaleTeams(scaleTeamDtos);
+  }
+
+  @LogAsyncEstimatedTime
+  private static async updateDailyScaleTeamCountsView(
+    mongo: LambdaMongo,
+    start: Date,
+    end: Date,
+  ): Promise<void> {
+    await mongo
+      .db()
+      .collection(SCALE_TEAM_COLLECTION)
+      .aggregate([
+        {
+          $match: {
+            filledAt: { $gte: start, $lt: end },
+          },
+        },
+        {
+          $group: {
+            _id: {
+              date: {
+                $dateFromParts: {
+                  year: {
+                    $year: {
+                      date: '$filledAt',
+                      timezone: TIMEZONE,
+                    },
+                  },
+                  month: {
+                    $month: {
+                      date: '$filledAt',
+                      timezone: TIMEZONE,
+                    },
+                  },
+                  day: {
+                    $dayOfMonth: {
+                      date: '$filledAt',
+                      timezone: TIMEZONE,
+                    },
+                  },
+                  timezone: TIMEZONE,
+                },
+              },
+              userId: '$corrector.id',
+            },
+            count: {
+              $count: {},
+            },
+          },
+        },
+        {
+          $sort: {
+            _id: 1,
+            userId: 1,
+          },
+        },
+        {
+          $project: {
+            _id: 0,
+            date: '$_id.date',
+            userId: '$_id.userId',
+            count: 1,
+          },
+        },
+        {
+          $merge: {
+            into: DAILY_USER_SCALE_TEAM_COUNTS_VIEW,
+            on: ['date', 'userId'],
+            whenMatched: [
+              {
+                $set: {
+                  count: {
+                    $sum: ['$count', '$$new.count'],
+                  },
+                },
+              },
+            ],
+            whenNotMatched: 'insert',
+          },
+        },
+      ])
+      .toArray();
   }
 }

@@ -38,6 +38,9 @@ const execUpdators = async (
   }
 };
 
+export const TIMEZONE = process.env.TIMEZONE;
+assertEnvExist(TIMEZONE);
+
 const main = async (): Promise<void> => {
   await initSeine();
 

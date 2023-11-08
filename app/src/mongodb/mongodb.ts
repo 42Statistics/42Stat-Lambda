@@ -11,6 +11,7 @@ import type { PROJECT_SESSIONS_SKILL_COLLECTION } from '#lambda/projectSessionsS
 import type { PROJECTS_USER_COLLECTION } from '#lambda/projectsUser/projectsUser.js';
 import type { QUESTS_USER_COLLECTION } from '#lambda/questsUser/questsUser.js';
 import type { SCALE_TEAM_COLLECTION } from '#lambda/scaleTeam/scaleTeam.js';
+import type { SCORE_COLLECTION } from '#lambda/score/score.js';
 import type { SKILL_COLLECTION } from '#lambda/skill/skill.js';
 import type { TEAM_COLLECTION } from '#lambda/team/team.js';
 import type { USER_COLLECTION } from '#lambda/user/user.js';
@@ -44,6 +45,7 @@ type LogUpdatedAt =
   | typeof COALITIONS_USER_COLLECTION
   | typeof PROJECT_SESSION_COLLECTION
   | typeof SKILL_COLLECTION
+  | typeof SCORE_COLLECTION
   | typeof PROJECT_SESSIONS_SKILL_COLLECTION
   | typeof USER_COLLECTION;
 

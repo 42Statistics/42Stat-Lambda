@@ -50,12 +50,14 @@ export class LocationUpdator {
    * E 의 경우, 접속을 종료하는 사람들이 100명을 넘을 때 마다 한번씩 요청을 더 보내야함.
    * 평소엔 1 ~ 2번으로 충분함.
    */
+  @UpdateAction
   static async update(mongo: LambdaMongo, end: Date): Promise<void> {
+    await LocationUpdator.updatePrevOngoing(mongo);
+
     await mongo.withCollectionUpdatedAt({
       end,
       collection: LOCATION_COLLECTION,
       callback: async (start, end) => {
-        await LocationUpdator.updatePrevOngoing(mongo);
         await LocationUpdator.updateOngoing(mongo, start, end);
         await LocationUpdator.updateEnded(mongo, start, end);
         await LocationUpdator.updateDailyLogtime(mongo, end);
@@ -63,7 +65,6 @@ export class LocationUpdator {
     });
   }
 
-  @UpdateAction
   @LogAsyncEstimatedTime
   private static async updateOngoing(
     mongo: LambdaMongo,
@@ -93,7 +94,6 @@ export class LocationUpdator {
     return parseLocations(locationDtos);
   }
 
-  @UpdateAction
   @LogAsyncEstimatedTime
   private static async updateEnded(
     mongo: LambdaMongo,
@@ -128,7 +128,6 @@ export class LocationUpdator {
    * location api 에 버그가 생기면 end_at 이 null 인 상태로 존재하기 때문에,
    * 기존에 있던 location 들의 점검이 필요함.
    */
-  @UpdateAction
   @LogAsyncEstimatedTime
   private static async updatePrevOngoing(mongo: LambdaMongo): Promise<void> {
     const prevOngoingIds = await mongo
