@@ -239,13 +239,11 @@ export class LocationUpdator {
       const startDateTime = Math.max(curr.beginAt.getTime(), start.getTime());
       const endDateTime = curr.endAt?.getTime() ?? end.getTime();
 
-      for (
-        let dateTime = startDateTime;
-        dateTime < endDateTime;
-        dateTime = new Date(dateTime).setHours(24, 0, 0, 0)
-      ) {
-        const beginOfDate = new Date(dateTime).setHours(0, 0, 0, 0);
-        const beginOfNextDate = new Date(dateTime).setHours(24, 0, 0, 0);
+      for (let dateTime = startDateTime; dateTime < endDateTime; ) {
+        const beginOfDate =
+          new Date(dateTime).setUTCHours(-9, 0, 0, 0) +
+          (new Date(dateTime).getUTCHours() >= 15 ? 1000 * 60 * 60 * 24 : 0);
+        const beginOfNextDate = beginOfDate + 1000 * 60 * 60 * 24;
 
         const prevLogtime = logtimeMap.get(beginOfDate) ?? 0;
 
@@ -253,6 +251,8 @@ export class LocationUpdator {
           beginOfDate,
           prevLogtime + (Math.min(endDateTime, beginOfNextDate) - dateTime),
         );
+
+        dateTime = beginOfNextDate;
       }
 
       return logtimeMap;
