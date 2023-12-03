@@ -94,7 +94,7 @@ export class TeamUpdator {
     const teamIds = await mongo
       .db()
       .collection(TEAM_COLLECTION)
-      .find<Team>({ status: 'in_progress' })
+      .find<Team>({ status: { $in: ['in_progress', 'creating_group'] } })
       .map((doc) => doc.id)
       .toArray();
 
