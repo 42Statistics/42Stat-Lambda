@@ -170,7 +170,14 @@ export class LocationUpdator {
     mongo: LambdaMongo,
     end: Date,
   ): Promise<void> {
-    const start = new Date(end.getTime() - 1000 * 60 * 60 * 24 * 30);
+    const start = new Date(
+      new Date(end.getTime() - 1000 * 60 * 60 * 24 * 31).setUTCHours(
+        15,
+        0,
+        0,
+        0,
+      ),
+    );
 
     const locations = await LocationUpdator.findLocationsPerUserByDate(
       mongo,
