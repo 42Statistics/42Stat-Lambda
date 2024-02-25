@@ -35,13 +35,10 @@ export class ScaleTeamUpdator {
       collection: SCALE_TEAM_COLLECTION,
       callback: async (start, end) => {
         await ScaleTeamUpdator.updateFilled(mongo, start, end);
-        await ScaleTeamUpdator.updateDailyScaleTeamCountsView(
-          mongo,
-          start,
-          end,
-        );
       },
     });
+
+    await ScaleTeamUpdator.updateDailyScaleTeamCountsView(mongo);
   }
 
   @LogAsyncEstimatedTime
@@ -70,18 +67,11 @@ export class ScaleTeamUpdator {
   @LogAsyncEstimatedTime
   private static async updateDailyScaleTeamCountsView(
     mongo: LambdaMongo,
-    start: Date,
-    end: Date,
   ): Promise<void> {
     await mongo
       .db()
       .collection(SCALE_TEAM_COLLECTION)
       .aggregate([
-        {
-          $match: {
-            filledAt: { $gte: start, $lt: end },
-          },
-        },
         {
           $group: {
             _id: {
@@ -133,15 +123,7 @@ export class ScaleTeamUpdator {
           $merge: {
             into: DAILY_USER_SCALE_TEAM_COUNTS_VIEW,
             on: ['date', 'userId'],
-            whenMatched: [
-              {
-                $set: {
-                  count: {
-                    $sum: ['$count', '$$new.count'],
-                  },
-                },
-              },
-            ],
+            whenMatched: 'replace',
             whenNotMatched: 'insert',
           },
         },
