@@ -21,6 +21,7 @@ import { TitlesUserUpdator } from '#lambda/titlesUser/titlesUser.js';
 import { UserUpdator } from '#lambda/user/user.js';
 import { assertEnvExist } from '#lambda/util/envCheck.js';
 import dotenv from 'dotenv';
+import { ActiveUserUpdator } from './activeUser/activeUser.js';
 
 dotenv.config();
 
@@ -72,6 +73,7 @@ const main = async (): Promise<void> => {
     TitlesUserUpdator,
     SkillUpdator,
     UserUpdator,
+    ActiveUserUpdator,
   ];
 
   await execUpdators(updators, mongo, end);
