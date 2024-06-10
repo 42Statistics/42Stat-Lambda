@@ -170,7 +170,11 @@ export class ActiveUserUpdator {
       await mongo
         .db()
         .collection(MV_ACTIVE_USER_COLLECTION)
-        .updateOne(userIdByMonth, { $set: userIdByMonth }, { upsert: true });
+        .updateOne(
+          { date: userIdByMonth.date },
+          { $set: userIdByMonth },
+          { upsert: true },
+        );
     }
   }
 
