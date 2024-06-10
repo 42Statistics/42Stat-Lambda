@@ -3,6 +3,7 @@ import { DAILY_LOGTIME_COLLECTION } from '#lambda/location/location.js';
 import { LambdaMongo } from '#lambda/mongodb/mongodb.js';
 import { SCALE_TEAM_COLLECTION } from '#lambda/scaleTeam/scaleTeam.js';
 import { DateWrapper } from '#lambda/util/date.js';
+import { LogAsyncEstimatedTime, UpdateAction } from '#lambda/util/decorator.js';
 import { z } from 'zod';
 
 const MV_ACTIVE_USER_COLLECTION = 'mv_active_user_counts';
@@ -21,10 +22,12 @@ type ScaleTeamIdSetByMonth = {
 
 // eslint-disable-next-line
 export class ActiveUserUpdator {
+  @UpdateAction
   static async update(mongo: LambdaMongo, end: Date): Promise<void> {
     await ActiveUserUpdator.updateUpdated(mongo, end);
   }
 
+  @LogAsyncEstimatedTime
   private static async updateUpdated(
     mongo: LambdaMongo,
     end: Date,
