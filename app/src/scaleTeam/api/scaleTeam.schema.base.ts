@@ -17,7 +17,7 @@ export const scaleTeamUserSchema = userSchema.pick({
 });
 
 const correctedsSchema = z.union([scaleTeamUserSchema.array(), z.string()]);
-const correctorSchema = z.union([scaleTeamUserSchema, z.string()]);
+const correctorSchema = z.union([scaleTeamUserSchema, z.string(), z.object({}).transform(() => 'unknown')]);
 
 export const scaleTeamBaseSchema = z.object({
   id: z.number(),
