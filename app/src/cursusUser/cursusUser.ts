@@ -104,7 +104,7 @@ export class CursusUserUpdator {
         if (cursusUser.user.id === HYULIM) {
           return {
             ...cursusUser,
-            grade: 'Learner',
+            grade: 'Cadet',
           };
         }
 

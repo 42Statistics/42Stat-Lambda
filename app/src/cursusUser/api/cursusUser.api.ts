@@ -68,10 +68,3 @@ export const isStudent = (cursusUser: CursusUser): boolean =>
     cursusUser.user.id !== HYULIM && cursusUser.user.firstName === 'Hyundong'
   ) &&
   !isWeirdUserId(cursusUser.user.id);
-
-// active? 는 다른 의미의 값이라는게 문제...
-export const isActive = (cursusUser: CursusUser | CursusUserCache): boolean =>
-  !cursusUser.endAt &&
-  (!cursusUser.blackholedAt ||
-    new Date(cursusUser.blackholedAt).getTime() > new Date().getTime() ||
-    cursusUser.grade === 'Member');
