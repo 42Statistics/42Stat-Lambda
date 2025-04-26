@@ -48,8 +48,7 @@ jobs:
 
       - name: Install aws cli
         run: |
-          sudo apt-get update
-          sudo apt-get install awscli
+          sudo snap install aws-cli --classic
 
       - name: Update function code
         run: |
